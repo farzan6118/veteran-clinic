@@ -20,9 +20,7 @@ public class AuthController {
 
     private final LoginService loginService;
 
-    @Operation(
-            tags = {"1-login"}
-    )
+    @Operation(tags = {"1-login"})
     @GetMapping
     public ResponseEntity<AccessTokenResponse> adminLogin(
             @Schema(defaultValue = "admin@test.com",
