@@ -12,6 +12,7 @@ import java.time.LocalDate;
 public class Pet extends BaseEntity<Long> {
 
     private String name;
+    private String code;
     private LocalDate birthDate;
 
     @OneToOne(optional = false)

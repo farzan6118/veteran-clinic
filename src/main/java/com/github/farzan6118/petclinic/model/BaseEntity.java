@@ -27,16 +27,12 @@ import java.util.UUID;
 public class BaseEntity<ID extends Serializable> implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private ID id;
 
     @UuidGenerator
     @Column(nullable = false, updatable = false, unique = true)
     private UUID uuid;
-
-    private String title;
-
-    private String description;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

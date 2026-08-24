@@ -34,6 +34,7 @@ public class OwnerServiceImpl implements OwnerService {
                 owner.getFirstname(),
                 owner.getLastname(),
                 owner.getNationalCode(),
+                owner.getBirthDate(),
                 owner.getTelephone(),
                 owner.getEmail(),
                 owner.getCity(),
@@ -56,6 +57,8 @@ public class OwnerServiceImpl implements OwnerService {
         owner.setFirstname(request.firstname());
         owner.setLastname(request.lastname());
         owner.setAddress(request.address());
+        owner.setNationalCode(request.nationalCode());
+        owner.setBirthDate(request.birthDate());
         owner.setCity(request.city());
         owner.setTelephone(request.telephone());
         owner.setEmail(request.email());
@@ -76,8 +79,11 @@ public class OwnerServiceImpl implements OwnerService {
         owner.setFirstname(request.firstname());
         owner.setLastname(request.lastname());
         owner.setAddress(request.address());
+        owner.setEmail(request.email());
         owner.setCity(request.city());
+        owner.setBirthDate(request.birthDate());
         owner.setTelephone(request.telephone());
+        owner.setNationalCode(request.nationalCode());
 
         log.info("Owner updated successfully. ownerUuid={}", uuid);
 
