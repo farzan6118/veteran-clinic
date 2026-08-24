@@ -13,7 +13,10 @@ public class Owner extends BaseEntity<Long> {
     private UUID keycloakUserId;
     private String firstname;
     private String lastname;
-    private String phoneNumber;
+    private String nationalCode;
+    private String telephone;
     private String email;
+    private String city;
+    private String address;
 
 }

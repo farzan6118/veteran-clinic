@@ -15,6 +15,14 @@ import java.util.UUID;
 public class PetTypeServiceImpl implements PetTypeService {
 
 
+    @Override
+    public List<PetTypeResponse> getAll() {
+        return List.of();
+    }
 
+    @Override
+    public PetTypeResponse getByUuid(UUID uuid) {
+        return null;
+    }
 }
 

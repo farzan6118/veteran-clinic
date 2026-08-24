@@ -1,12 +1,10 @@
 package com.github.farzan6118.petclinic.model;
 
-import com.github.farzan6118.petclinic.model.constant.PetType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -14,10 +12,10 @@ import lombok.Setter;
 public class Pet extends BaseEntity<Long> {
 
     private String name;
-    private String birthDate;
+    private LocalDate birthDate;
 
-    @Enumerated(EnumType.STRING)
-    private PetType type;
+    @OneToOne(optional = false)
+    private PetType petType;
 
     @ManyToOne
     private Owner owner;
