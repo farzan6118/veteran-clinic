@@ -41,7 +41,7 @@ public class PetTypeServiceImpl implements PetTypeService {
     @Override
     public PetTypeResponseDto create(CreatePetTypeRequestDto request) {
         PetType petType = new PetType();
-        petType.setName(request.name());
+        mapToPetType(request, petType);
 
         PetType savedPetType = petTypeRepository.save(petType);
 
@@ -50,17 +50,29 @@ public class PetTypeServiceImpl implements PetTypeService {
         return mapToDto(savedPetType);
     }
 
+    private void mapToPetType(CreatePetTypeRequestDto request, PetType petType) {
+        petType.setName(request.name());
+        petType.setCode(request.code());
+        petType.setDescription(request.description());
+    }
+
     @Transactional
     @Override
     public PetTypeResponseDto update(UUID uuid, UpdatePetTypeRequestDto request) {
         PetType petType = petTypeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
 
-        petType.setName(request.name());
+        mapToPetType(request, petType);
 
         log.info("Pet type updated successfully. petTypeUuid={}", uuid);
 
         return mapToDto(petType);
+    }
+
+    private void mapToPetType(UpdatePetTypeRequestDto request, PetType petType) {
+        petType.setName(request.name());
+        petType.setCode(request.code());
+        petType.setDescription(request.description());
     }
 
     @Transactional

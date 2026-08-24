@@ -54,15 +54,19 @@ public class PetServiceImpl implements PetService {
     public PetResponseDto create(CreatePetRequestDto request) {
         PetType petType = getPetType(request.petType());
         Pet pet = new Pet();
-        pet.setName(request.name());
-        pet.setBirthDate(request.birthDate());
-        pet.setPetType(petType);
+        mapToPet(request, pet, petType);
 
         Pet savedPet = petRepository.save(pet);
 
         log.info("Pet created successfully. petId={}", savedPet.getId());
 
         return mapToDto(savedPet);
+    }
+
+    private void mapToPet(CreatePetRequestDto request, Pet pet, PetType petType) {
+        pet.setName(request.name());
+        pet.setBirthDate(request.birthDate());
+        pet.setPetType(petType);
     }
 
     private PetType getPetType(String petType) {
@@ -79,13 +83,17 @@ public class PetServiceImpl implements PetService {
         Pet pet = petRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("pet.not.found"));
         PetType petType = getPetType(request.petType());
-        pet.setName(request.name());
-        pet.setBirthDate(request.birthDate());
-        pet.setPetType(petType);
+        mapToPet(request, pet, petType);
 
         log.info("Pet updated successfully. petUuid={}", uuid);
 
         return mapToDto(pet);
+    }
+
+    private static void mapToPet(UpdatePetRequestDto request, Pet pet, PetType petType) {
+        pet.setName(request.name());
+        pet.setBirthDate(request.birthDate());
+        pet.setPetType(petType);
     }
 
     @Transactional

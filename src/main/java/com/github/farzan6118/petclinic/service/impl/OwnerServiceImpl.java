@@ -8,6 +8,7 @@ import com.github.farzan6118.petclinic.repository.jpa.OwnerRepository;
 import com.github.farzan6118.petclinic.service.OwnerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,8 +53,14 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Transactional
     @Override
-    public OwnerResponseDto create(CreateOwnerRequestDto request) {
+    public void create(CreateOwnerRequestDto request) {
         Owner owner = new Owner();
+        mapToOwner(request, owner);
+        Owner savedOwner = ownerRepository.save(owner);
+        log.info("Owner created successfully. ownerId={}", savedOwner.getId());
+    }
+
+    private void mapToOwner(CreateOwnerRequestDto request, Owner owner) {
         owner.setFirstname(request.firstname());
         owner.setLastname(request.lastname());
         owner.setAddress(request.address());
@@ -62,12 +69,6 @@ public class OwnerServiceImpl implements OwnerService {
         owner.setCity(request.city());
         owner.setTelephone(request.telephone());
         owner.setEmail(request.email());
-
-        Owner savedOwner = ownerRepository.save(owner);
-
-        log.info("Owner created successfully. ownerId={}", savedOwner.getId());
-
-        return mapToDto(owner);
     }
 
     @Transactional
@@ -75,19 +76,22 @@ public class OwnerServiceImpl implements OwnerService {
     public OwnerResponseDto update(UUID uuid, UpdateOwnerRequestDto request) {
         Owner owner = ownerRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("owner.not.found"));
-
-        owner.setFirstname(request.firstname());
-        owner.setLastname(request.lastname());
-        owner.setAddress(request.address());
-        owner.setEmail(request.email());
-        owner.setCity(request.city());
-        owner.setBirthDate(request.birthDate());
-        owner.setTelephone(request.telephone());
-        owner.setNationalCode(request.nationalCode());
+        mapToOwner(request, owner);
 
         log.info("Owner updated successfully. ownerUuid={}", uuid);
 
         return mapToDto(owner);
+    }
+
+    private void mapToOwner(UpdateOwnerRequestDto request, Owner owner) {
+        owner.setFirstname(request.firstname());
+        owner.setLastname(request.lastname());
+        owner.setAddress(request.address());
+        owner.setNationalCode(request.nationalCode());
+        owner.setBirthDate(request.birthDate());
+        owner.setCity(request.city());
+        owner.setTelephone(request.telephone());
+        owner.setEmail(request.email());
     }
 
     @Transactional

@@ -16,7 +16,7 @@ public interface OwnerService {
 
     List<OwnerResponseDto> findAll();
 
-    OwnerResponseDto create(CreateOwnerRequestDto request);
+    void create(CreateOwnerRequestDto request);
 
     OwnerResponseDto update(UUID uuid, UpdateOwnerRequestDto request);
 

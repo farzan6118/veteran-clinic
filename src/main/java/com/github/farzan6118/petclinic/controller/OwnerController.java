@@ -34,9 +34,9 @@ public class OwnerController {
     }
 
     @PostMapping
-    public ResponseEntity<OwnerResponseDto> create(@Valid @RequestBody CreateOwnerRequestDto request) {
-        OwnerResponseDto response = ownerService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<Void> create(@Valid @RequestBody CreateOwnerRequestDto request) {
+        ownerService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
