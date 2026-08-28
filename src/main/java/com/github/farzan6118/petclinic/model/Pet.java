@@ -1,6 +1,8 @@
 package com.github.farzan6118.petclinic.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,7 +20,7 @@ public class Pet extends BaseEntity<Long> {
     @OneToOne(optional = false)
     private PetType petType;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Owner owner;
 
 }

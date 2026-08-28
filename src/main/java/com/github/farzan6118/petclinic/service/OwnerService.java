@@ -1,11 +1,9 @@
 package com.github.farzan6118.petclinic.service;
 
-import com.github.farzan6118.petclinic.controller.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.request.UpdateOwnerRequest;
-import com.github.farzan6118.petclinic.controller.dto.request.UpdateOwnerRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.response.OwnerResponse;
-import com.github.farzan6118.petclinic.controller.dto.response.OwnerResponseDto;
-import org.springframework.transaction.annotation.Transactional;
+import com.github.farzan6118.petclinic.dto.request.CreateOwnerRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdateOwnerRequestDto;
+import com.github.farzan6118.petclinic.dto.response.OwnerResponseDto;
+import com.github.farzan6118.petclinic.model.Owner;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +16,9 @@ public interface OwnerService {
 
     void create(CreateOwnerRequestDto request);
 
-    OwnerResponseDto update(UUID uuid, UpdateOwnerRequestDto request);
+    void update(UUID uuid, UpdateOwnerRequestDto request);
 
     void delete(UUID uuid);
+
+    Owner getByUuid(UUID uuid);
 }

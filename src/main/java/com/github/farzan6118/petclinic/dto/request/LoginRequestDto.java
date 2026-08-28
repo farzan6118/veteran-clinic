@@ -1,10 +1,10 @@
-package com.github.farzan6118.petclinic.controller.dto.request;
+package com.github.farzan6118.petclinic.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
-public record LoginRequest(
+public record LoginRequestDto(
 
         @NotBlank(message = "username is required")
         @Schema(example = "user-one@test.com", format = "email")

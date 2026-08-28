@@ -1,4 +1,4 @@
-package com.github.farzan6118.petclinic.controller.dto.request;
+package com.github.farzan6118.petclinic.dto.request;
 
 import java.time.LocalDate;
 

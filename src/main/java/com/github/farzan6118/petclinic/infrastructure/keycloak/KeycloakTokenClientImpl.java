@@ -1,15 +1,13 @@
 package com.github.farzan6118.petclinic.infrastructure.keycloak;
+
 import com.github.farzan6118.petclinic.infrastructure.keycloak.config.KeycloakLoginProperties;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.AccessTokenResponse;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor

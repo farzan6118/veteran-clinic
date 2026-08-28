@@ -1,23 +1,23 @@
 package com.github.farzan6118.petclinic.service;
 
-import com.github.farzan6118.petclinic.controller.dto.request.CompleteVisitRequest;
-import com.github.farzan6118.petclinic.controller.dto.request.CreateVisitRequest;
-import com.github.farzan6118.petclinic.controller.dto.response.VisitResponse;
+import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
+import com.github.farzan6118.petclinic.dto.request.CreateVisitRequestDto;
+import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface VisitService {
 
-    VisitResponse bookVisit(CreateVisitRequest request);
+    VisitResponseDto bookVisit(CreateVisitRequestDto request);
 
-    List<VisitResponse> getMyVisits();
+    List<VisitResponseDto> getMyVisits();
 
-    VisitResponse getByUuid(UUID uuid);
+    VisitResponseDto getByUuid(UUID uuid);
 
     void cancelVisit(UUID uuid);
 
-    List<VisitResponse> getVetVisits();
+    List<VisitResponseDto> getVetVisits();
 
-    VisitResponse completeVisit(UUID uuid,CompleteVisitRequest request);
+    VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request);
 }

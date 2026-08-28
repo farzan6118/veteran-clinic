@@ -1,4 +1,4 @@
-package com.github.farzan6118.petclinic.controller.dto.response;
+package com.github.farzan6118.petclinic.dto.response;
 
 public record UserInfoResponseDto(
         String givenName,

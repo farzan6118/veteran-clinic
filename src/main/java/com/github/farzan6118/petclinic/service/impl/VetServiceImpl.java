@@ -1,8 +1,9 @@
 package com.github.farzan6118.petclinic.service.impl;
 
-import com.github.farzan6118.petclinic.controller.dto.request.CreateVetRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.request.UpdateVetRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.response.VetResponseDto;
+import com.github.farzan6118.petclinic.dto.request.CreateVetRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdateVetRequestDto;
+import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
+import com.github.farzan6118.petclinic.mapper.VetMapper;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.repository.jpa.VetRepository;
 import com.github.farzan6118.petclinic.service.VetService;
@@ -17,66 +18,47 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class VetServiceImpl implements VetService {
 
     private final VetRepository vetRepository;
+    private final VetMapper vetMapper;
 
     @Override
     public VetResponseDto getById(UUID uuid) {
         Vet vet = vetRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("vet.not.found"));
-
-        return mapToDto(vet);
+        return vetMapper.mapToDto(vet);
     }
 
     @Override
     public List<VetResponseDto> findAll() {
         return vetRepository.findAll()
                 .stream()
-                .map(this::mapToDto)
+                .map(vetMapper::mapToDto)
                 .toList();
     }
 
     @Transactional
     @Override
-    public VetResponseDto create(CreateVetRequestDto request) {
-        Vet vet = new Vet();
-        vet.setFirstname(request.firstname());
-        vet.setLastname(request.lastname());
-        vet.setNationalCode(request.nationalCode());
-        vet.setTelephone(request.telephone());
-        vet.setEmail(request.email());
-        vet.setSpecialty(request.specialty());
-        vet.setBirthDate(request.birthDate());
-        vet.setAddress(request.address());
-        vet.setCity(request.city());
+    public void create(CreateVetRequestDto request) {
+        Vet vet = vetMapper.mapToEntity(request);
 
         Vet savedVet = vetRepository.save(vet);
 
         log.info("Vet created successfully. vetId={}", savedVet.getId());
 
-        return mapToDto(savedVet);
     }
 
     @Transactional
     @Override
-    public VetResponseDto update(UUID uuid, UpdateVetRequestDto request) {
+    public void update(UUID uuid, UpdateVetRequestDto request) {
         Vet vet = vetRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("vet.not.found"));
 
-        vet.setFirstname(request.firstname());
-        vet.setLastname(request.lastname());
-        vet.setNationalCode(request.nationalCode());
-        vet.setTelephone(request.telephone());
-        vet.setEmail(request.email());
-        vet.setSpecialty(request.specialty());
-        vet.setBirthDate(request.birthDate());
-        vet.setAddress(request.address());
-        vet.setCity(request.city());
+        vetMapper.mapToEntity(request, vet);
 
         log.info("Vet updated successfully. vetUuid={}", uuid);
-
-        return mapToDto(vet);
     }
 
     @Transactional
@@ -90,18 +72,5 @@ public class VetServiceImpl implements VetService {
         log.info("Vet deleted successfully. vetUuid={}", uuid);
     }
 
-    private VetResponseDto mapToDto(Vet vet) {
-        return new VetResponseDto(
-        vet.getUuid(),
-        vet.getFirstname(),
-        vet.getLastname(),
-        vet.getNationalCode(),
-        vet.getTelephone(),
-        vet.getEmail(),
-        vet.getSpecialty(),
-        vet.getBirthDate(),
-        vet.getAddress(),
-        vet.getCity());
-    }
 }
 

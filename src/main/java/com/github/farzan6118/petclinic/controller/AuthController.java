@@ -1,8 +1,7 @@
 package com.github.farzan6118.petclinic.controller;
 
-import com.github.farzan6118.petclinic.controller.dto.request.LoginRequest;
+import com.github.farzan6118.petclinic.dto.request.LoginRequestDto;
 import com.github.farzan6118.petclinic.infrastructure.keycloak.LoginService;
-import com.github.farzan6118.petclinic.infrastructure.keycloak.UserIdentityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.AccessTokenResponse;
@@ -22,7 +21,7 @@ public class AuthController {
     private final LoginService loginService;
 
     @PostMapping
-    public ResponseEntity<AccessTokenResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AccessTokenResponse> login(@Valid @RequestBody LoginRequestDto request) {
         AccessTokenResponse response = loginService.getAccessToken(request.username(), request.password());
 
         return ResponseEntity.ok(response);

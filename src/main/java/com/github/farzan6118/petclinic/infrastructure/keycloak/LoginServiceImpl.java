@@ -1,7 +1,5 @@
 package com.github.farzan6118.petclinic.infrastructure.keycloak;
 
-import com.github.farzan6118.petclinic.infrastructure.keycloak.KeycloakTokenClient;
-import com.github.farzan6118.petclinic.infrastructure.keycloak.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.stereotype.Service;

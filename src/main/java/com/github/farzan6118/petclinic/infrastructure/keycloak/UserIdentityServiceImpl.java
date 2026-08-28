@@ -1,6 +1,6 @@
 package com.github.farzan6118.petclinic.infrastructure.keycloak;
 
-import com.github.farzan6118.petclinic.controller.dto.response.UserInfoResponseDto;
+import com.github.farzan6118.petclinic.dto.response.UserInfoResponseDto;
 import com.github.farzan6118.petclinic.infrastructure.keycloak.config.KeycloakLoginProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -17,11 +17,11 @@ public class UserIdentityServiceImpl implements UserIdentityService {
     @Override
     public UserInfoResponseDto getCurrentUserInfo(Jwt jwt) {
         return new UserInfoResponseDto(
-                        jwt.getClaimAsString("given_name"),
-                        jwt.getClaimAsString("family_name"),
-                        jwt.getClaimAsString("email"),
-                        jwt.getClaimAsString("phone_number"),
-                        jwt.getClaimAsString("national_code")
+                jwt.getClaimAsString("given_name"),
+                jwt.getClaimAsString("family_name"),
+                jwt.getClaimAsString("email"),
+                jwt.getClaimAsString("phone_number"),
+                jwt.getClaimAsString("national_code")
         );
 
     }

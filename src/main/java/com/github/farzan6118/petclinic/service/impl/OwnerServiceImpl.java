@@ -1,14 +1,13 @@
 package com.github.farzan6118.petclinic.service.impl;
 
-import com.github.farzan6118.petclinic.controller.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.request.UpdateOwnerRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.response.OwnerResponseDto;
+import com.github.farzan6118.petclinic.dto.request.CreateOwnerRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdateOwnerRequestDto;
+import com.github.farzan6118.petclinic.dto.response.OwnerResponseDto;
 import com.github.farzan6118.petclinic.model.Owner;
 import com.github.farzan6118.petclinic.repository.jpa.OwnerRepository;
 import com.github.farzan6118.petclinic.service.OwnerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +17,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerRepository ownerRepository;
@@ -73,14 +73,12 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Transactional
     @Override
-    public OwnerResponseDto update(UUID uuid, UpdateOwnerRequestDto request) {
+    public void update(UUID uuid, UpdateOwnerRequestDto request) {
         Owner owner = ownerRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("owner.not.found"));
         mapToOwner(request, owner);
 
         log.info("Owner updated successfully. ownerUuid={}", uuid);
-
-        return mapToDto(owner);
     }
 
     private void mapToOwner(UpdateOwnerRequestDto request, Owner owner) {
@@ -104,5 +102,12 @@ public class OwnerServiceImpl implements OwnerService {
 
         log.info("Owner deleted successfully. ownerUuid={}", uuid);
     }
+
+    @Override
+    public Owner getByUuid(UUID uuid) {
+        return ownerRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException("owner.not.found"));
+    }
+
 }
 

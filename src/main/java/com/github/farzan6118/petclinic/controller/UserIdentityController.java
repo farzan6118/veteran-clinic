@@ -1,9 +1,8 @@
 package com.github.farzan6118.petclinic.controller;
 
-import com.github.farzan6118.petclinic.controller.dto.response.UserInfoResponseDto;
+import com.github.farzan6118.petclinic.dto.response.UserInfoResponseDto;
 import com.github.farzan6118.petclinic.infrastructure.keycloak.UserIdentityService;
 import lombok.RequiredArgsConstructor;
-import org.keycloak.representations.UserInfo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;

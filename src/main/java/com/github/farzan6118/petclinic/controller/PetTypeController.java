@@ -1,8 +1,8 @@
 package com.github.farzan6118.petclinic.controller;
 
-import com.github.farzan6118.petclinic.controller.dto.request.CreatePetTypeRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.request.UpdatePetTypeRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.response.PetTypeResponseDto;
+import com.github.farzan6118.petclinic.dto.request.CreatePetTypeRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdatePetTypeRequestDto;
+import com.github.farzan6118.petclinic.dto.response.PetTypeResponseDto;
 import com.github.farzan6118.petclinic.service.PetTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,15 +33,16 @@ public class PetTypeController {
     }
 
     @PostMapping
-    public ResponseEntity<PetTypeResponseDto> create(@Valid @RequestBody CreatePetTypeRequestDto request) {
-        PetTypeResponseDto response = petTypeService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<Void> create(@Valid @RequestBody CreatePetTypeRequestDto request) {
+        petTypeService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<PetTypeResponseDto> update(@PathVariable UUID uuid,
-                                                     @Valid @RequestBody UpdatePetTypeRequestDto request) {
-        return ResponseEntity.ok(petTypeService.update(uuid, request));
+    public ResponseEntity<Void> update(@PathVariable UUID uuid,
+                                       @Valid @RequestBody UpdatePetTypeRequestDto request) {
+        petTypeService.update(uuid, request);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")

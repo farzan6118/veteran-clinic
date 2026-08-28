@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.model;
 
+import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
@@ -18,7 +19,9 @@ public class Visit extends BaseEntity<Long> {
     @ManyToOne(optional = false)
     private Vet vet;
 
-    private LocalDateTime visitDate;
+    private LocalDateTime visitDateTime;
     private String description;
     private String diagnosis;
+    private String notes;
+    private VisitStatus status;
 }

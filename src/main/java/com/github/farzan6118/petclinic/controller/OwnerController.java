@@ -1,8 +1,8 @@
 package com.github.farzan6118.petclinic.controller;
 
-import com.github.farzan6118.petclinic.controller.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.request.UpdateOwnerRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.response.OwnerResponseDto;
+import com.github.farzan6118.petclinic.dto.request.CreateOwnerRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdateOwnerRequestDto;
+import com.github.farzan6118.petclinic.dto.response.OwnerResponseDto;
 import com.github.farzan6118.petclinic.service.OwnerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,11 +40,11 @@ public class OwnerController {
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<OwnerResponseDto> update(
+    public ResponseEntity<Void> update(
             @PathVariable UUID uuid,
-            @Valid @RequestBody UpdateOwnerRequestDto request
-    ) {
-        return ResponseEntity.ok(ownerService.update(uuid, request));
+            @Valid @RequestBody UpdateOwnerRequestDto request) {
+        ownerService.update(uuid, request);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")

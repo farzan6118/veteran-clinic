@@ -1,8 +1,8 @@
 package com.github.farzan6118.petclinic.service.impl;
 
-import com.github.farzan6118.petclinic.controller.dto.request.CreatePetTypeRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.request.UpdatePetTypeRequestDto;
-import com.github.farzan6118.petclinic.controller.dto.response.PetTypeResponseDto;
+import com.github.farzan6118.petclinic.dto.request.CreatePetTypeRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdatePetTypeRequestDto;
+import com.github.farzan6118.petclinic.dto.response.PetTypeResponseDto;
 import com.github.farzan6118.petclinic.model.PetType;
 import com.github.farzan6118.petclinic.repository.jpa.PetTypeRepository;
 import com.github.farzan6118.petclinic.service.PetTypeService;
@@ -12,11 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PetTypeServiceImpl implements PetTypeService {
 
     private final PetTypeRepository petTypeRepository;
@@ -39,40 +41,40 @@ public class PetTypeServiceImpl implements PetTypeService {
 
     @Transactional
     @Override
-    public PetTypeResponseDto create(CreatePetTypeRequestDto request) {
+    public void create(CreatePetTypeRequestDto request) {
         PetType petType = new PetType();
         mapToPetType(request, petType);
 
         PetType savedPetType = petTypeRepository.save(petType);
 
         log.info("Pet type created successfully. petTypeId={}", savedPetType.getId());
-
-        return mapToDto(savedPetType);
     }
 
     private void mapToPetType(CreatePetTypeRequestDto request, PetType petType) {
-        petType.setName(request.name());
         petType.setCode(request.code());
+        petType.setName(normalizeName(request.name()));
         petType.setDescription(request.description());
     }
 
     @Transactional
     @Override
-    public PetTypeResponseDto update(UUID uuid, UpdatePetTypeRequestDto request) {
+    public void update(UUID uuid, UpdatePetTypeRequestDto request) {
         PetType petType = petTypeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
 
         mapToPetType(request, petType);
 
         log.info("Pet type updated successfully. petTypeUuid={}", uuid);
-
-        return mapToDto(petType);
     }
 
     private void mapToPetType(UpdatePetTypeRequestDto request, PetType petType) {
-        petType.setName(request.name());
         petType.setCode(request.code());
+        petType.setName(normalizeName(request.name()));
         petType.setDescription(request.description());
+    }
+
+    private String normalizeName(String name) {
+        return name.trim().toUpperCase(Locale.ROOT);
     }
 
     @Transactional
@@ -89,7 +91,15 @@ public class PetTypeServiceImpl implements PetTypeService {
     private PetTypeResponseDto mapToDto(PetType petType) {
         return new PetTypeResponseDto(
                 petType.getUuid(),
-                petType.getName()
+                petType.getName(),
+                petType.getCode(),
+                petType.getDescription()
         );
+    }
+
+    @Override
+    public PetType getByPetType(String petType) {
+        return petTypeRepository.findByName(petType)
+                .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
     }
 }

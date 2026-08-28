@@ -27,13 +27,13 @@ public class OpenAPIConfig {
                                 )
                 )
                 .info(new Info()
-                        .title("Farzan6118 Pet Clinic API")
-                        .version("1.0.0")
-                        .description("REST API for managing pets, owners, veterinarians, and clinic visits.")
-                        .contact(new Contact()
-                                .name("Farzan6118")
-                                .email("farzan6118@gmail.com")
-                        )
+//                        .title("Pet Clinic API")
+                                .version("1.0.0")
+                                .description("REST API for managing pets, owners, veterinarians, and clinic visits.")
+                                .contact(new Contact()
+                                        .name("Farzan6118")
+                                        .email("farzan6118@gmail.com")
+                                )
                 );
     }
 
