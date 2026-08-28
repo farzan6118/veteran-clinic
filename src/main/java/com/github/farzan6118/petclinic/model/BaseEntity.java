@@ -49,8 +49,9 @@ public class BaseEntity<ID extends Serializable> implements Serializable {
     private UUID lastModifiedBy;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private RecordStatus recordStatus = RecordStatus.ACTIVE_NOT_DELETED;
+    private RecordStatus recordStatus = RecordStatus.ACTIVE;
 
 }
 
