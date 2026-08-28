@@ -22,7 +22,6 @@ import java.util.UUID;
 @MappedSuperclass
 @AllArgsConstructor
 @NoArgsConstructor
-@Audited
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity<ID extends Serializable> implements Serializable {
 

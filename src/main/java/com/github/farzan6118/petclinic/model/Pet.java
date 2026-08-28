@@ -17,7 +17,7 @@ public class Pet extends BaseEntity<Long> {
     private String code;
     private LocalDate birthDate;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     private PetType petType;
 
     @ManyToOne(optional = false)

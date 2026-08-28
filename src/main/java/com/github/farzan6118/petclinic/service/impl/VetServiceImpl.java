@@ -25,10 +25,15 @@ public class VetServiceImpl implements VetService {
     private final VetMapper vetMapper;
 
     @Override
-    public VetResponseDto getById(UUID uuid) {
-        Vet vet = vetRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("vet.not.found"));
+    public VetResponseDto getByUuid(UUID uuid) {
+        Vet vet = getVetByUuid(uuid);
         return vetMapper.mapToDto(vet);
+    }
+
+    @Override
+    public Vet getVetByUuid(UUID uuid) {
+        return vetRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException("vet.not.found"));
     }
 
     @Override

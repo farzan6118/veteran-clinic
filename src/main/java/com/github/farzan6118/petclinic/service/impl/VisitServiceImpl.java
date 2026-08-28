@@ -2,15 +2,16 @@ package com.github.farzan6118.petclinic.service.impl;
 
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
 import com.github.farzan6118.petclinic.dto.request.CreateVisitRequestDto;
+import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
 import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.Visit;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
-import com.github.farzan6118.petclinic.repository.jpa.PetRepository;
-import com.github.farzan6118.petclinic.repository.jpa.VetRepository;
 import com.github.farzan6118.petclinic.repository.jpa.VisitRepository;
+import com.github.farzan6118.petclinic.service.PetService;
+import com.github.farzan6118.petclinic.service.VetService;
 import com.github.farzan6118.petclinic.service.VisitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,19 +28,17 @@ import java.util.UUID;
 public class VisitServiceImpl implements VisitService {
 
     private final VisitRepository visitRepository;
-    private final PetRepository petRepository;
-    private final VetRepository vetRepository;
+    private final PetService petService;
+    private final VetService vetService;
     private final VisitMapper visitMapper;
 
     @Override
     @Transactional
     public VisitResponseDto bookVisit(CreateVisitRequestDto request) {
 
-        Pet pet = petRepository.findByUuid(request.petUuid())
-                .orElseThrow(() -> new RuntimeException("Pet not found: " + request.petUuid()));
+        Pet pet = petService.getByUuid(request.petUuid());
 
-        Vet vet = vetRepository.findByUuid(request.vetUuid())
-                .orElseThrow(() -> new RuntimeException("Vet not found: " + request.vetUuid()));
+        Vet vet = vetService.getVetByUuid(request.vetUuid());
 
         boolean vetHasVisit = visitRepository.existsByVetUuidAndVisitDateTime(
                 request.vetUuid(),

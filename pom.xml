@@ -29,6 +29,26 @@
     <properties>
         <java.version>21</java.version>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>home</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>home</spring.profiles.active>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>company</id>
+            <properties>
+                <spring.profiles.active>company</spring.profiles.active>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
 
         <dependency>

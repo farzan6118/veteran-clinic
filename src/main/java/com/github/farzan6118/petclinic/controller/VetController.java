@@ -24,7 +24,7 @@ public class VetController {
 
     @GetMapping("/{uuid}")
     public ResponseEntity<VetResponseDto> getById(@PathVariable UUID uuid) {
-        return ResponseEntity.ok(vetService.getById(uuid));
+        return ResponseEntity.ok(vetService.getByUuid(uuid));
     }
 
     @GetMapping

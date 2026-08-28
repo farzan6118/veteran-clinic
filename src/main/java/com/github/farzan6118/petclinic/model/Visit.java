@@ -5,12 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Audited;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@Audited
 public class Visit extends BaseEntity<Long> {
 
     @ManyToOne(optional = false)
