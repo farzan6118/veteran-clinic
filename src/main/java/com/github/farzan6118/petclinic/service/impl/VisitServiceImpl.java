@@ -34,7 +34,7 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     @Transactional
-    public VisitResponseDto bookVisit(CreateVisitRequestDto request) {
+    public void bookVisit(CreateVisitRequestDto request) {
 
         Pet pet = petService.getByUuid(request.petUuid());
 
@@ -56,8 +56,6 @@ public class VisitServiceImpl implements VisitService {
         log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
                 savedVisit.getUuid(), pet.getUuid(), vet.getUuid()
         );
-
-        return visitMapper.toResponse(savedVisit);
     }
 
     @Override

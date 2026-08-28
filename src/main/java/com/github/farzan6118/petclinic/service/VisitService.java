@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface VisitService {
 
-    VisitResponseDto bookVisit(CreateVisitRequestDto request);
+    void bookVisit(CreateVisitRequestDto request);
 
     List<VisitResponseDto> getMyVisits();
 

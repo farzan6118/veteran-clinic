@@ -8,6 +8,8 @@ import com.github.farzan6118.petclinic.model.Visit;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class VisitMapper {
     public VisitResponseDto toResponse(Visit visit) {

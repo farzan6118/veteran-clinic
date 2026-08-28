@@ -23,10 +23,9 @@ public class VisitController {
     private final VisitService visitService;
 
     @PostMapping
-    public ResponseEntity<VisitResponseDto> bookVisit(
-            @Valid @RequestBody CreateVisitRequestDto request) {
-        VisitResponseDto response = visitService.bookVisit(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<Void> bookVisit(@Valid @RequestBody CreateVisitRequestDto request) {
+        visitService.bookVisit(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/my")

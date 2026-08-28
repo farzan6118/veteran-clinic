@@ -67,7 +67,6 @@ keycloak:
   server-url: http://localhost:8180
   realm: my-realm
   client-id: pet-clinic
-#  client-secret: OTsWNHPnVe8O0NLKUwL13PD6ir5GzC5te1nnXaQETEQri7YJWhGXlvzF23K0FPAGkQCouv5i0LKDNnCGq1qj42
   client-secret: FOQMRj0eUxo7evJj5BWhJ0dSF8HiDB9Ja6QKgwuAy053YnzTCe5nkdBF18ochptSVxsG5Brnu0U1AsKutjmafP
 
 springdoc:
