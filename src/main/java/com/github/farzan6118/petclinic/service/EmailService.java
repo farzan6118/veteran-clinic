@@ -13,7 +13,7 @@ public interface EmailService {
 
     void sendVisitScheduledNotification(
             String email,
-            String name,
+            String ownerName,
             String petName,
             LocalDateTime visitDate,
             String vetName
@@ -30,7 +30,9 @@ public interface EmailService {
 
     void sendVisitRescheduledNotification(
             String email,
+            String ownerName,
             String petName,
+            String petType,
             String vetName,
             LocalDateTime previousVisitDate,
             LocalDateTime newVisitDate
@@ -48,7 +50,9 @@ public interface EmailService {
 
     void sendVisitCancelledNotification(
             String email,
+            String ownerName,
             String petName,
+            String petType,
             String vetName,
             LocalDateTime visitDate,
             String cancellationReason

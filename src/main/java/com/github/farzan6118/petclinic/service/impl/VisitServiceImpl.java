@@ -146,7 +146,9 @@ public class VisitServiceImpl implements VisitService {
 
         emailService.sendVisitCancelledNotification(
                 owner.getEmail(),
+                owner.getFullName(),
                 pet.getName(),
+                pet.getPetType().getName(),
                 vet.getFullName(),
                 visit.getVisitDateTime(),
                 reason

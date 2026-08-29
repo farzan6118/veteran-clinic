@@ -61,15 +61,15 @@ public class EmailServiceImpl implements EmailService {
             String vetName
     ) {
         Context context = new Context();
-        context.setVariable("ownerName", petName);
+        context.setVariable("ownerName", ownerName);
         context.setVariable("petName", petName);
         context.setVariable("vetName", vetName);
-        context.setVariable("appointmentDate", visitDate);
+        context.setVariable("visitDate", visitDate);
 
         sendHtmlEmail(
                 email,
                 "Veterinary Visit Scheduled",
-                "email/pet-clinic-appointment-scheduled",
+                "email/vet-appointment-scheduled",
                 context
         );
 
@@ -83,7 +83,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendVetAppointmentScheduledNotification(
             String vetEmail,
             String vetName,
-            LocalDateTime appointmentDate,
+            LocalDateTime visitDate,
             String petName,
             String petType,
             String ownerName
@@ -93,7 +93,7 @@ public class EmailServiceImpl implements EmailService {
         context.setVariable("petName", petName);
         context.setVariable("petType", petType);
         context.setVariable("ownerName", ownerName);
-        context.setVariable("appointmentDate", appointmentDate);
+        context.setVariable("visitDate", visitDate);
 
         sendHtmlEmail(
                 vetEmail,
@@ -111,13 +111,17 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendVisitRescheduledNotification(
             String email,
+            String ownerName,
             String petName,
+            String petType,
             String vetName,
             LocalDateTime previousVisitDate,
             LocalDateTime newVisitDate
     ) {
         Context context = new Context();
+        context.setVariable("ownerName", ownerName);
         context.setVariable("petName", petName);
+        context.setVariable("petType", petType);
         context.setVariable("vetName", vetName);
         context.setVariable("previousVisitDate", previousVisitDate);
         context.setVariable("newVisitDate", newVisitDate);
@@ -142,14 +146,15 @@ public class EmailServiceImpl implements EmailService {
             String petName,
             String petType,
             String ownerName,
-            LocalDateTime previousAppointmentDate,
+            LocalDateTime previousVisitDate,
             LocalDateTime newAppointmentDate
     ) {
         Context context = new Context();
         context.setVariable("vetName", vetName);
-        context.setVariable("ownerName", ownerName);
         context.setVariable("petName", petName);
-        context.setVariable("previousAppointmentDate", previousAppointmentDate);
+        context.setVariable("petType", petType);
+        context.setVariable("ownerName", ownerName);
+        context.setVariable("previousVisitDate", previousVisitDate);
         context.setVariable("newAppointmentDate", newAppointmentDate);
 
         sendHtmlEmail(
@@ -163,18 +168,22 @@ public class EmailServiceImpl implements EmailService {
     }
 
     /**
-     * OWNER — Send immediately after the owner's visit is canceled.
+     * OWNER — Send immediately after the owner's visit is cancelled.
      */
     @Override
     public void sendVisitCancelledNotification(
             String email,
+            String ownerName,
             String petName,
+            String petType,
             String vetName,
             LocalDateTime visitDate,
             String cancellationReason
     ) {
         Context context = new Context();
+        context.setVariable("ownerName", ownerName);
         context.setVariable("petName", petName);
+        context.setVariable("petType", petType);
         context.setVariable("vetName", vetName);
         context.setVariable("visitDate", visitDate);
         context.setVariable("cancellationReason", cancellationReason);
@@ -190,7 +199,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     /**
-     * VET — Send immediately after an appointment assigned to the vet is canceled.
+     * VET — Send immediately after an appointment assigned to the vet is cancelled.
      */
     @Override
     public void sendVetAppointmentCancelledNotification(
@@ -198,14 +207,14 @@ public class EmailServiceImpl implements EmailService {
             String vetName,
             String petName,
             String ownerName,
-            LocalDateTime appointmentDate,
+            LocalDateTime visitDate,
             String cancellationReason
     ) {
         Context context = new Context();
         context.setVariable("vetName", vetName);
         context.setVariable("petName", petName);
         context.setVariable("ownerName", ownerName);
-        context.setVariable("appointmentDate", appointmentDate);
+        context.setVariable("visitDate", visitDate);
         context.setVariable("cancellationReason", cancellationReason);
 
         sendHtmlEmail(
@@ -220,7 +229,6 @@ public class EmailServiceImpl implements EmailService {
 
     /**
      * INTERNAL — Common method used by all email operations.
-     * Do not call this directly from the business/service layer.
      */
     private void sendHtmlEmail(
             String to,
@@ -249,6 +257,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 }
+
 
 
 

@@ -2,27 +2,34 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Visit Cancelled</title>
+    <title>Appointment Cancelled</title>
 </head>
 <body>
 
-<h2>Veterinary Visit Canceled</h2>
+<h2>Veterinary Appointment Canceled</h2>
 
 <p>
-    Hello,
+    Hello
+    <strong th:text="${vetName}">Dr. Smith</strong>,
 </p>
 
 <p>
-    The veterinary visit for
-    <strong th:text="${petName}">Jessy</strong>,
-    a <strong th:text="${petType}">cat</strong>
-    owned by <strong th:text="${ownerName}">John Doe</strong>,
-    has been canceled.
+    The following appointment assigned to you has been canceled.
 </p>
 
 <p>
-    <strong>Veterinarian:</strong>
-    <span th:text="${vetName}">Dr. Smith</span>
+    <strong>Pet:</strong>
+    <span th:text="${petName}">Jessy</span>
+</p>
+
+<p>
+    <strong>Pet type:</strong>
+    <span th:text="${petType}">cat</span>
+</p>
+
+<p>
+    <strong>Owner:</strong>
+    <span th:text="${ownerName}">John Doe</span>
 </p>
 
 <p>
@@ -38,8 +45,7 @@
 </p>
 
 <p>
-    If you would like to schedule a new appointment,
-    please contact the clinic.
+    The appointment time is now available for other bookings.
 </p>
 
 <p>
