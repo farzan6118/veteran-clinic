@@ -1,6 +1,7 @@
 package com.github.farzan6118.petclinic.repository.jpa;
 
 import com.github.farzan6118.petclinic.model.Visit;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,12 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 
     boolean existsByVetUuidAndVisitDateTime(UUID uuid, LocalDateTime localDateTime);
 
+    @EntityGraph(attributePaths = {
+            "vet",
+            "pet",
+            "pet.owner",
+            "pet.petType",
+    })
     Optional<Visit> findByUuid(UUID uuid);
 
     List<Visit> findAllByVetUuidOrderByVisitDateTimeAsc(UUID currentVetUuid);

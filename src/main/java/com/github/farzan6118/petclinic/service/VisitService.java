@@ -15,9 +15,11 @@ public interface VisitService {
 
     VisitResponseDto getByUuid(UUID uuid);
 
-    void cancelVisit(UUID uuid);
+    void cancelVisit(UUID uuid, String reason);
 
     List<VisitResponseDto> getVetVisits();
 
     VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request);
+
+    List<VisitResponseDto> getAllVisits();
 }

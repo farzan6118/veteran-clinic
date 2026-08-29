@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Appointment Scheduled</title>
+</head>
+<body>
+
+<h2>New Veterinary Appointment</h2>
+
+<p>
+    Hello
+    <strong th:text="${vetName}">Dr. Smith</strong>,
+</p>
+
+<p>
+    A new appointment has been scheduled with you.
+</p>
+
+<p>
+    <strong>Pet:</strong>
+    <span th:text="${petName}">Jessy</span>
+</p>
+
+<p>
+    <strong>PetType:</strong>
+    <span th:text="${petType}">Cat</span>
+</p>
+
+<p>
+    <strong>Owner:</strong>
+    <span th:text="${ownerName}">John Doe</span>
+</p>
+
+<p>
+    <strong>Appointment date:</strong>
+    <span th:text="${appointmentDate}">2026-08-20 10:00</span>
+</p>
+
+<p>
+    Please review the appointment details before the scheduled time.
+</p>
+
+<p>
+    Best regards,<br>
+    PetClinic Farzan6118
+</p>
+
+</body>
+</html>

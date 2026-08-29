@@ -5,9 +5,61 @@ import java.time.LocalDateTime;
 
 public interface EmailService {
 
-    void sendCheckupReminder(String email, String petName, LocalDate checkupDate);
+    void sendCheckupReminder(
+            String email,
+            String petName,
+            LocalDate checkupDate
+    );
 
-    void sendVisitReminder(String email, String petName, LocalDateTime visitDate, String vetName);
+    void sendVisitScheduledNotification(
+            String email,
+            String name,
+            String petName,
+            LocalDateTime visitDate,
+            String vetName
+    );
 
-    void sendVetAppointmentReminder(String email, String vetName, LocalDateTime appointmentDate);
+    void sendVetAppointmentScheduledNotification(
+            String vetEmail,
+            String vetName,
+            LocalDateTime appointmentDate,
+            String petName,
+            String petType,
+            String ownerName
+    );
+
+    void sendVisitRescheduledNotification(
+            String email,
+            String petName,
+            String vetName,
+            LocalDateTime previousVisitDate,
+            LocalDateTime newVisitDate
+    );
+
+    void sendVetAppointmentRescheduledNotification(
+            String vetEmail,
+            String vetName,
+            String petName,
+            String petType,
+            String ownerName,
+            LocalDateTime previousAppointmentDate,
+            LocalDateTime newAppointmentDate
+    );
+
+    void sendVisitCancelledNotification(
+            String email,
+            String petName,
+            String vetName,
+            LocalDateTime visitDate,
+            String cancellationReason
+    );
+
+    void sendVetAppointmentCancelledNotification(
+            String vetEmail,
+            String vetName,
+            String petName,
+            String ownerName,
+            LocalDateTime appointmentDate,
+            String cancellationReason
+    );
 }

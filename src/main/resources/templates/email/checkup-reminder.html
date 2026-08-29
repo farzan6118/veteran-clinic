@@ -6,21 +6,35 @@
 </head>
 <body>
 
-<h2>Checkup Reminder</h2>
+<h2>Periodic Checkup Reminder</h2>
+
+<p>
+    Hello,
+</p>
 
 <p>
     This is a reminder that
-    <strong th:text="${petName}">Pet</strong>
+    <strong th:text="${petName}">Buddy</strong>
     is due for a periodic checkup.
 </p>
 
 <p>
-    Checkup date:
-    <strong th:text="${checkupDate}">2026-08-20</strong>
+    <strong>Recommended checkup date:</strong>
+    <span th:text="${checkupDate}">2026-08-20</span>
 </p>
 
 <p>
-    Please contact the clinic to schedule your appointment.
+    Please contact the clinic to schedule an appointment.
+</p>
+
+<p>
+    Regular checkups help keep your pet healthy and allow potential
+    health issues to be identified early.
+</p>
+
+<p>
+    Best regards,<br>
+    PetClinic Farzan6118
 </p>
 
 </body>

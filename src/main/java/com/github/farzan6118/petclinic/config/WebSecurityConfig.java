@@ -30,7 +30,8 @@ public class WebSecurityConfig {
                         ).permitAll()
 
                         // Authenticated
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
+//                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(Customizer.withDefaults())

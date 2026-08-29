@@ -28,6 +28,11 @@ public class VisitController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @GetMapping
+    public ResponseEntity<List<VisitResponseDto>> getAllVisits() {
+        return ResponseEntity.ok(visitService.getAllVisits());
+    }
+
     @GetMapping("/my")
     public ResponseEntity<List<VisitResponseDto>> getMyVisits() {
         return ResponseEntity.ok(visitService.getMyVisits());
@@ -39,8 +44,8 @@ public class VisitController {
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> cancelVisit(@PathVariable UUID uuid) {
-        visitService.cancelVisit(uuid);
+    public ResponseEntity<Void> cancelVisit(@PathVariable UUID uuid, String reason) {
+        visitService.cancelVisit(uuid, reason);
         return ResponseEntity.noContent().build();
     }
 

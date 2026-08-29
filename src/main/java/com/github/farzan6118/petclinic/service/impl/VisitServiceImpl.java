@@ -4,6 +4,7 @@ import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
 import com.github.farzan6118.petclinic.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
+import com.github.farzan6118.petclinic.model.Owner;
 import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.Visit;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,26 +40,50 @@ public class VisitServiceImpl implements VisitService {
     public void bookVisit(CreateVisitRequestDto request) {
 
         Pet pet = petService.getByUuid(request.petUuid());
-
         Vet vet = vetService.getVetByUuid(request.vetUuid());
 
-        boolean vetHasVisit = visitRepository.existsByVetUuidAndVisitDateTime(
-                request.vetUuid(),
-                request.visitDateTime()
-        );
-
-        if (vetHasVisit) {
-            throw new RuntimeException("Vet is already booked at this time");
-        }
+        validateVetAvailability(vet, request.visitDateTime());
 
         Visit visit = visitMapper.mapToVisitEntity(request, pet, vet);
-
-        emailService.sendVetAppointmentReminder(vet.getEmail(), vet.getFirstname() + " " + vet.getLastname(), visit.getVisitDateTime());
-
         Visit savedVisit = visitRepository.save(visit);
 
-        log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
-                savedVisit.getUuid(), pet.getUuid(), vet.getUuid()
+        notifyBookVisitParticipants(savedVisit, pet, vet);
+
+        log.info(
+                "Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
+                savedVisit.getUuid(),
+                pet.getUuid(),
+                vet.getUuid()
+        );
+    }
+
+    private void validateVetAvailability(Vet vet, LocalDateTime visitDateTime) {
+        boolean alreadyBooked = visitRepository
+                .existsByVetUuidAndVisitDateTime(vet.getUuid(), visitDateTime);
+
+        if (alreadyBooked) {
+            throw new RuntimeException("Vet is already booked at the requested time");
+        }
+    }
+
+    private void notifyBookVisitParticipants(Visit visit, Pet pet, Vet vet) {
+        Owner owner = pet.getOwner();
+
+        emailService.sendVetAppointmentScheduledNotification(
+                vet.getEmail(),
+                vet.getFullName(),
+                visit.getVisitDateTime(),
+                pet.getName(),
+                pet.getPetType().getName(),
+                owner.getFullName()
+        );
+
+        emailService.sendVisitScheduledNotification(
+                owner.getEmail(),
+                owner.getFullName(),
+                pet.getName(),
+                visit.getVisitDateTime(),
+                vet.getFullName()
         );
     }
 
@@ -76,18 +102,16 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public VisitResponseDto getByUuid(UUID uuid) {
 
-        Visit visit = visitRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("Visit not found: " + uuid));
+        Visit visit = getVisitByUuid(uuid);
 
         return visitMapper.toResponse(visit);
     }
 
     @Override
     @Transactional
-    public void cancelVisit(UUID uuid) {
+    public void cancelVisit(UUID uuid, String reason) {
 
-        Visit visit = visitRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("Visit not found: " + uuid));
+        Visit visit = getVisitByUuid(uuid);
 
         if (visit.getStatus() == VisitStatus.CANCELLED) {
             return;
@@ -97,9 +121,36 @@ public class VisitServiceImpl implements VisitService {
             throw new RuntimeException("Completed visit cannot be cancelled");
         }
 
+
         visit.setStatus(VisitStatus.CANCELLED);
 
+        Pet pet = visit.getPet();
+        Vet vet = visit.getVet();
+
+        notifyCancelVisitParticipants(visit, pet, vet, reason);
+
         log.info("Visit cancelled. visitUuid={}", uuid);
+    }
+
+    private void notifyCancelVisitParticipants(Visit visit, Pet pet, Vet vet, String reason) {
+        Owner owner = pet.getOwner();
+
+        emailService.sendVetAppointmentCancelledNotification(
+                vet.getEmail(),
+                vet.getFullName(),
+                pet.getName(),
+                owner.getFullName(),
+                visit.getVisitDateTime(),
+                reason
+        );
+
+        emailService.sendVisitCancelledNotification(
+                owner.getEmail(),
+                pet.getName(),
+                vet.getFullName(),
+                visit.getVisitDateTime(),
+                reason
+        );
     }
 
     @Override
@@ -118,8 +169,7 @@ public class VisitServiceImpl implements VisitService {
     @Transactional
     public VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request) {
 
-        Visit visit = visitRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("Visit not found: " + uuid));
+        Visit visit = getVisitByUuid(uuid);
 
         if (visit.getStatus() == VisitStatus.CANCELLED) {
             throw new RuntimeException("Cancelled visit cannot be completed");
@@ -138,6 +188,19 @@ public class VisitServiceImpl implements VisitService {
         log.info("Visit completed. visitUuid={}", uuid);
 
         return visitMapper.toResponse(savedVisit);
+    }
+
+    @Override
+    public List<VisitResponseDto> getAllVisits() {
+        List<Visit> allVisits = visitRepository.findAll();
+        return allVisits.stream()
+                .map(visitMapper::toResponse)
+                .toList();
+    }
+
+    private Visit getVisitByUuid(UUID uuid) {
+        return visitRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException("Visit not found: " + uuid));
     }
 
     private UUID getCurrentUserUuid() {
