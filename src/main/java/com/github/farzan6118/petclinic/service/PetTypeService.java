@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PetTypeService {
-    PetTypeResponseDto getById(UUID uuid);
+    PetTypeResponseDto getByUuid(UUID uuid);
+
+    PetType getPetTypeByUuid(UUID uuid);
 
     List<PetTypeResponseDto> findAll();
 
@@ -19,5 +21,4 @@ public interface PetTypeService {
 
     void delete(UUID uuid);
 
-    PetType getByPetType(String petTypeName);
 }

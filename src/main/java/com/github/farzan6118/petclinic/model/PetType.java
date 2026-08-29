@@ -10,10 +10,12 @@ import lombok.Setter;
 @Setter
 public class PetType extends BaseEntity<Integer> {
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
     @Column(unique = true)
     private String code;
+    private String breed;
+    private String origin;
     private String description;
 
 }

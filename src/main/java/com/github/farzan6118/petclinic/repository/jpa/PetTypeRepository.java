@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PetTypeRepository extends JpaRepository<PetType, Integer> {
-    Optional<PetType> findByName(String name);
 
     Optional<PetType> findByUuid(UUID uuid);
 }

@@ -2,6 +2,7 @@ package com.github.farzan6118.petclinic.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
@@ -19,6 +20,8 @@ public class Owner extends BaseEntity<Long> {
     private LocalDate birthDate;
     @Column(unique = true, nullable = false)
     private String telephone;
+    @Email
+    @Column(unique = true, nullable = false)
     private String email;
     private String city;
     private String address;

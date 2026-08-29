@@ -70,7 +70,7 @@ public class PetServiceImpl implements PetService {
     @Override
     @Transactional
     public void create(CreatePetRequestDto request) {
-        PetType petType = petTypeService.getByPetType(request.petType());
+        PetType petType = petTypeService.getPetTypeByUuid(request.petTypeUuid());
         Owner owner = ownerService.getByUuid(request.ownerUuid());
         Pet pet = new Pet();
         mapToPet(request, owner, pet, petType);
@@ -80,17 +80,11 @@ public class PetServiceImpl implements PetService {
         log.info("Pet created successfully. petId={}", savedPet.getId());
     }
 
-    private void mapToPet(CreatePetRequestDto request, Pet pet, PetType petType) {
-        pet.setName(request.name());
-        pet.setBirthDate(request.birthDate());
-        pet.setPetType(petType);
-    }
-
     @Transactional
     @Override
     public void update(UUID uuid, UpdatePetRequestDto request) {
         Pet pet = this.getByUuid(uuid);
-        PetType petType = petTypeService.getByPetType(request.petType());
+        PetType petType = petTypeService.getPetTypeByUuid(request.petTypeUuid());
         Owner owner = ownerService.getByUuid(request.ownerUuid());
         mapToPet(request, owner, pet, petType);
 

@@ -71,8 +71,9 @@ public class EmailServiceImpl implements EmailService {
             LocalDateTime appointmentDate
     ) {
         Context context = new Context();
-        context.setVariable("vetName", vetName);
-        context.setVariable("appointmentDate", appointmentDate);
+        context.setVariable("Dear Veteran", vetName);
+        context.setVariable("your appointmentDate is", appointmentDate);
+        context.setVariable("your appointmentDate is", appointmentDate);
 
         sendHtmlEmail(
                 email,

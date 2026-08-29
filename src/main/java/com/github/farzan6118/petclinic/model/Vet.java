@@ -2,6 +2,7 @@ package com.github.farzan6118.petclinic.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
@@ -16,11 +17,14 @@ public class Vet extends BaseEntity<Long> {
     private String firstname;
     private String lastname;
     private String specialty;
+    @Column(unique = true)
     private String nationalCode;
     private LocalDate birthDate;
     @Column(unique = true, nullable = false)
     private String telephone;
     private String address;
+    @Email
+    @Column(unique = true, nullable = false)
     private String email;
     private String city;
 }

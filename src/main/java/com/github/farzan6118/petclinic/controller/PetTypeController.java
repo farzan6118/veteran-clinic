@@ -24,7 +24,7 @@ public class PetTypeController {
 
     @GetMapping("/{uuid}")
     public ResponseEntity<PetTypeResponseDto> getById(@PathVariable UUID uuid) {
-        return ResponseEntity.ok(petTypeService.getById(uuid));
+        return ResponseEntity.ok(petTypeService.getByUuid(uuid));
     }
 
     @GetMapping

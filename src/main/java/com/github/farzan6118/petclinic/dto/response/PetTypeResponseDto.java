@@ -6,6 +6,8 @@ public record PetTypeResponseDto(
         UUID Uuid,
         String Name,
         String code,
+        String breed,
+        String origin,
         String description
 ) {
 }

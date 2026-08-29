@@ -2,7 +2,6 @@ package com.github.farzan6118.petclinic.service.impl;
 
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
 import com.github.farzan6118.petclinic.dto.request.CreateVisitRequestDto;
-import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
 import com.github.farzan6118.petclinic.model.Pet;
@@ -10,6 +9,7 @@ import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.Visit;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.repository.jpa.VisitRepository;
+import com.github.farzan6118.petclinic.service.EmailService;
 import com.github.farzan6118.petclinic.service.PetService;
 import com.github.farzan6118.petclinic.service.VetService;
 import com.github.farzan6118.petclinic.service.VisitService;
@@ -31,6 +31,7 @@ public class VisitServiceImpl implements VisitService {
     private final PetService petService;
     private final VetService vetService;
     private final VisitMapper visitMapper;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -50,6 +51,8 @@ public class VisitServiceImpl implements VisitService {
         }
 
         Visit visit = visitMapper.mapToVisitEntity(request, pet, vet);
+
+        emailService.sendVetAppointmentReminder(vet.getEmail(), vet.getFirstname() + " " + vet.getLastname(), visit.getVisitDateTime());
 
         Visit savedVisit = visitRepository.save(visit);
 

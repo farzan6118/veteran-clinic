@@ -4,7 +4,6 @@ import com.github.farzan6118.petclinic.model.constant.RecordStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Audited;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;

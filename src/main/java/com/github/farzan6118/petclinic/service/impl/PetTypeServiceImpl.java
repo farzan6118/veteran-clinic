@@ -24,11 +24,15 @@ public class PetTypeServiceImpl implements PetTypeService {
     private final PetTypeRepository petTypeRepository;
 
     @Override
-    public PetTypeResponseDto getById(UUID uuid) {
-        PetType petType = petTypeRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
-
+    public PetTypeResponseDto getByUuid(UUID uuid) {
+        PetType petType = getPetTypeByUuid(uuid);
         return mapToDto(petType);
+    }
+
+    @Override
+    public PetType getPetTypeByUuid(UUID uuid) {
+        return petTypeRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
     }
 
     @Override
@@ -51,8 +55,10 @@ public class PetTypeServiceImpl implements PetTypeService {
     }
 
     private void mapToPetType(CreatePetTypeRequestDto request, PetType petType) {
+        petType.setName(request.name());
         petType.setCode(request.code());
-        petType.setName(normalizeName(request.name()));
+        petType.setBreed(request.breed());
+        petType.setOrigin(request.origin());
         petType.setDescription(request.description());
     }
 
@@ -68,13 +74,11 @@ public class PetTypeServiceImpl implements PetTypeService {
     }
 
     private void mapToPetType(UpdatePetTypeRequestDto request, PetType petType) {
+        petType.setName(request.name());
         petType.setCode(request.code());
-        petType.setName(normalizeName(request.name()));
+        petType.setBreed(request.breed());
+        petType.setOrigin(request.origin());
         petType.setDescription(request.description());
-    }
-
-    private String normalizeName(String name) {
-        return name.trim().toUpperCase(Locale.ROOT);
     }
 
     @Transactional
@@ -93,13 +97,10 @@ public class PetTypeServiceImpl implements PetTypeService {
                 petType.getUuid(),
                 petType.getName(),
                 petType.getCode(),
+                petType.getBreed(),
+                petType.getOrigin(),
                 petType.getDescription()
         );
     }
 
-    @Override
-    public PetType getByPetType(String petType) {
-        return petTypeRepository.findByName(petType)
-                .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
-    }
 }
