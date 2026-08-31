@@ -1,7 +1,8 @@
 package com.github.farzan6118.petclinic.service.impl;
 
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
-import com.github.farzan6118.petclinic.dto.request.CreateVisitRequestDto;
+import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
+import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
 import com.github.farzan6118.petclinic.model.Pet;
@@ -36,9 +37,9 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     @Transactional
-    public void bookVisit(CreateVisitRequestDto request) {
+    public void bookVisit(VisitRequestDto request) {
 
-        Pet pet = petService.getByUuid(request.petUuid());
+        Pet pet = petService.getEntityByUuid(request.petUuid());
         Vet vet = vetService.getVetByUuid(request.vetUuid());
 
         validateVetAvailability(vet, request.visitDateTime());
@@ -153,6 +154,39 @@ public class VisitServiceImpl implements VisitService {
         return allVisits.stream()
                 .map(visitMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
+        Visit visit = visitRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException("visit.not.found"));
+
+        if (visit.getStatus() == VisitStatus.CANCELLED) {
+            throw new RuntimeException("Cancelled visit cannot be completed");
+        }
+
+        if (visit.getStatus() == VisitStatus.COMPLETED) {
+            throw new RuntimeException("Visit is already completed");
+        }
+
+        Pet pet = visit.getPet();
+        Vet vet = visit.getVet();
+
+        validateVetAvailability(vet, request.visitDateTime());
+
+        visit.setVisitDateTime(request.visitDateTime());
+        visit.setDescription(request.description());
+
+        Visit savedVisit = visitRepository.save(visit);
+
+        visitNotificationService.notifyRescheduleVisitParticipants(savedVisit, pet, vet, request.visitDateTime());
+
+        log.info(
+                "Visit rescheduled to dateAndTime={} successfully. visitUuid={}",
+                savedVisit.getVisitDateTime(),
+                savedVisit.getUuid()
+        );
     }
 
     private Visit getVisitByUuid(UUID uuid) {

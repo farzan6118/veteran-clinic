@@ -34,8 +34,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
                     pet.getName(),
                     pet.getPetType().getName(),
                     pet.getPetType().getBreed(),
-                    owner.getFullName(),
-                    reason
+                    owner.getFullName()
             );
 
             emailService.sendOwnerVisitRescheduledEmail(
@@ -44,8 +43,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
                     pet.getName(),
                     oldVisitDate,
                     visit.getVisitDateTime(),
-                    vet.getFullName(),
-                    reason
+                    vet.getFullName()
             );
 
         } catch (Exception e) {
@@ -106,6 +104,37 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
                     pet.getName(),
                     pet.getPetType().getName(),
                     visit.getVisitDateTime(),
+                    vet.getFullName()
+            );
+
+        } catch (Exception e) {
+            log.error("Failed to send visit scheduled notifications. visitUuid={}", visit.getUuid(), e);
+        }
+    }
+
+    @Async("emailExecutor")
+    @Override
+    public void notifyRescheduleVisitParticipants(Visit visit, Pet pet, Vet vet, LocalDateTime newVisitDateTime) {
+        Owner owner = pet.getOwner();
+
+        try {
+            emailService.sendVetVisitRescheduledEmail(
+                    vet.getEmail(),
+                    vet.getFullName(),
+                    visit.getVisitDateTime(),
+                    newVisitDateTime,
+                    pet.getName(),
+                    pet.getPetType().getName(),
+                    pet.getPetType().getBreed(),
+                    owner.getFullName()
+            );
+
+            emailService.sendOwnerVisitRescheduledEmail(
+                    owner.getEmail(),
+                    owner.getFullName(),
+                    pet.getName(),
+                    visit.getVisitDateTime(),
+                    newVisitDateTime,
                     vet.getFullName()
             );
 

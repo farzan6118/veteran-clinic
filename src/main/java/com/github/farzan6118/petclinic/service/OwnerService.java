@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface OwnerService {
 
-    OwnerResponseDto getById(UUID uuid);
+    OwnerResponseDto getByUuid(UUID uuid);
 
     List<OwnerResponseDto> findAll();
 
@@ -20,5 +20,5 @@ public interface OwnerService {
 
     void delete(UUID uuid);
 
-    Owner getByUuid(UUID uuid);
+    Owner getEntityByUuid(UUID uuid);
 }

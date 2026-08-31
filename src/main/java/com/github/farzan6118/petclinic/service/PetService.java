@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface PetService {
 
-    PetResponseDto getById(UUID uuid);
+    PetResponseDto getByUuid(UUID uuid);
 
     List<PetResponseDto> findAll();
 
@@ -20,5 +20,7 @@ public interface PetService {
 
     void delete(UUID uuid);
 
-    Pet getByUuid(UUID uuid);
+    Pet getEntityByUuid(UUID uuid);
+
+    List<PetResponseDto> getPetListByOwnerUuid(UUID uuid);
 }

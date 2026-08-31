@@ -14,10 +14,12 @@ import java.time.LocalDateTime;
 @Audited
 public class Visit extends BaseEntity<Long> {
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vet_id", nullable = false)
     private Vet vet;
 
     @Column(nullable = false)

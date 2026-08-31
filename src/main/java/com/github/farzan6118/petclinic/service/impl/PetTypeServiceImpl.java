@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 @Slf4j
@@ -25,12 +24,12 @@ public class PetTypeServiceImpl implements PetTypeService {
 
     @Override
     public PetTypeResponseDto getByUuid(UUID uuid) {
-        PetType petType = getPetTypeByUuid(uuid);
+        PetType petType = getEntityByUuid(uuid);
         return mapToDto(petType);
     }
 
     @Override
-    public PetType getPetTypeByUuid(UUID uuid) {
+    public PetType getEntityByUuid(UUID uuid) {
         return petTypeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
     }

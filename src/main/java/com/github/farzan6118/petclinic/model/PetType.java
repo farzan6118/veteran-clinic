@@ -12,10 +12,12 @@ public class PetType extends BaseEntity<Integer> {
 
     @Column(nullable = false)
     private String name;
-    @Column(unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String code;
     private String breed;
     private String origin;
+    @Column(columnDefinition = "TEXT")
+    private String information;
     private String description;
 
 }

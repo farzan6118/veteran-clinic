@@ -43,7 +43,7 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public PetResponseDto getById(UUID uuid) {
+    public PetResponseDto getByUuid(UUID uuid) {
         Pet pet = petRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("pet.not.found"));
 
@@ -70,8 +70,8 @@ public class PetServiceImpl implements PetService {
     @Override
     @Transactional
     public void create(CreatePetRequestDto request) {
-        PetType petType = petTypeService.getPetTypeByUuid(request.petTypeUuid());
-        Owner owner = ownerService.getByUuid(request.ownerUuid());
+        PetType petType = petTypeService.getEntityByUuid(request.petTypeUuid());
+        Owner owner = ownerService.getEntityByUuid(request.ownerUuid());
         Pet pet = new Pet();
         mapToPet(request, owner, pet, petType);
 
@@ -83,9 +83,9 @@ public class PetServiceImpl implements PetService {
     @Transactional
     @Override
     public void update(UUID uuid, UpdatePetRequestDto request) {
-        Pet pet = this.getByUuid(uuid);
-        PetType petType = petTypeService.getPetTypeByUuid(request.petTypeUuid());
-        Owner owner = ownerService.getByUuid(request.ownerUuid());
+        Pet pet = this.getEntityByUuid(uuid);
+        PetType petType = petTypeService.getEntityByUuid(request.petTypeUuid());
+        Owner owner = ownerService.getEntityByUuid(request.ownerUuid());
         mapToPet(request, owner, pet, petType);
 
         log.info("Pet updated successfully. petUuid={}", uuid);
@@ -94,7 +94,7 @@ public class PetServiceImpl implements PetService {
     @Transactional
     @Override
     public void delete(UUID uuid) {
-        Pet pet = this.getByUuid(uuid);
+        Pet pet = this.getEntityByUuid(uuid);
 
         petRepository.delete(pet);
 
@@ -102,9 +102,17 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public Pet getByUuid(UUID uuid) {
+    public Pet getEntityByUuid(UUID uuid) {
         return petRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("pet.not.found"));
+    }
+
+    @Override
+    public List<PetResponseDto> getPetListByOwnerUuid(UUID uuid) {
+       return petRepository.findByOwnerUuid(uuid)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
     }
 }
 

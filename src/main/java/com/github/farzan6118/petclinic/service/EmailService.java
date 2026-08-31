@@ -20,7 +20,7 @@ public interface EmailService {
     void sendVetVisitCancelledEmail(String email, String vetName, LocalDateTime visitDate,
                                     String petName, String petType, String petBreed, String ownerName, String reason);
 
-    void sendOwnerVisitRescheduledEmail(String email, String ownerName, String petName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String vetName, String reason);
+    void sendOwnerVisitRescheduledEmail(String email, String ownerName, String petName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String vetName);
 
-    void sendVetVisitRescheduledEmail(String email, String vetName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String petName, String petType, String breed, String ownerName, String reason);
+    void sendVetVisitRescheduledEmail(String email, String vetName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String petName, String petType, String breed, String ownerName);
 }

@@ -105,14 +105,13 @@ public class EmailServiceImpl implements EmailService {
      * OWNER — Sent when a veterinary visit is rescheduled.
      */
     @Override
-    public void sendOwnerVisitRescheduledEmail(String email, String ownerName, String petName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String vetName, String reason) {
+    public void sendOwnerVisitRescheduledEmail(String email, String ownerName, String petName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String vetName) {
         Context context = new Context();
         context.setVariable("ownerName", ownerName);
         context.setVariable("petName", petName);
         context.setVariable("vetName", vetName);
         context.setVariable("oldVisitDate", oldVisitDate);
         context.setVariable("newVisitDate", newVisitDate);
-        context.setVariable("reason", reason);
         sendHtmlEmail(email, "Veterinary Visit Rescheduled", "email/owner/visit-rescheduled", context);
         log.info("Owner visit rescheduled email sent. email={}, petName={}, oldVisitDate={}, newVisitDate={}", email, petName, oldVisitDate, newVisitDate);
     }
@@ -121,7 +120,7 @@ public class EmailServiceImpl implements EmailService {
      * VET — Sent when a veterinary visit is rescheduled.
      */
     @Override
-    public void sendVetVisitRescheduledEmail(String email, String vetName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String petName, String petType, String breed, String ownerName, String reason) {
+    public void sendVetVisitRescheduledEmail(String email, String vetName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String petName, String petType, String breed, String ownerName) {
         Context context = new Context();
         context.setVariable("vetName", vetName);
         context.setVariable("petName", petName);
@@ -130,7 +129,6 @@ public class EmailServiceImpl implements EmailService {
         context.setVariable("ownerName", ownerName);
         context.setVariable("oldVisitDate", oldVisitDate);
         context.setVariable("newVisitDate", newVisitDate);
-        context.setVariable("reason", reason);
         sendHtmlEmail(email, "Veterinary Appointment Rescheduled", "email/vet/visit-rescheduled", context);
         log.info("Vet visit rescheduled email sent. email={}, petName={}, oldVisitDate={}, newVisitDate={}", email, petName, oldVisitDate, newVisitDate);
     }

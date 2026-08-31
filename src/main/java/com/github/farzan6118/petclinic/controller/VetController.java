@@ -23,7 +23,7 @@ public class VetController {
     private final VetService vetService;
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<VetResponseDto> getById(@PathVariable UUID uuid) {
+    public ResponseEntity<VetResponseDto> getByUuid(@PathVariable UUID uuid) {
         return ResponseEntity.ok(vetService.getByUuid(uuid));
     }
 

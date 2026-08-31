@@ -23,7 +23,7 @@ public class PetTypeController {
     private final PetTypeService petTypeService;
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<PetTypeResponseDto> getById(@PathVariable UUID uuid) {
+    public ResponseEntity<PetTypeResponseDto> getByUuid(@PathVariable UUID uuid) {
         return ResponseEntity.ok(petTypeService.getByUuid(uuid));
     }
 

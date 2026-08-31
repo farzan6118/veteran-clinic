@@ -23,7 +23,7 @@ public class OwnerServiceImpl implements OwnerService {
     private final OwnerRepository ownerRepository;
 
     @Override
-    public OwnerResponseDto getById(UUID uuid) {
+    public OwnerResponseDto getByUuid(UUID uuid) {
         Owner owner = ownerRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("owner.not.found"));
         return mapToDto(owner);
@@ -104,7 +104,7 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public Owner getByUuid(UUID uuid) {
+    public Owner getEntityByUuid(UUID uuid) {
         return ownerRepository.findByUuid(uuid)
                 .orElseThrow(() -> new RuntimeException("owner.not.found"));
     }

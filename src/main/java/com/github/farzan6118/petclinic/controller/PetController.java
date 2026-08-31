@@ -17,14 +17,14 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/pet")
+@RequestMapping("/api/pets")
 public class PetController {
 
     private final PetService petService;
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<PetResponseDto> getById(@PathVariable UUID uuid) {
-        return ResponseEntity.ok(petService.getById(uuid));
+    public ResponseEntity<PetResponseDto> getByUuid(@PathVariable UUID uuid) {
+        return ResponseEntity.ok(petService.getByUuid(uuid));
     }
 
     @GetMapping

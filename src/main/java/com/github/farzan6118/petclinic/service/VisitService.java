@@ -1,7 +1,8 @@
 package com.github.farzan6118.petclinic.service;
 
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
-import com.github.farzan6118.petclinic.dto.request.CreateVisitRequestDto;
+import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
+import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.UUID;
 
 public interface VisitService {
 
-    void bookVisit(CreateVisitRequestDto request);
+    void bookVisit(VisitRequestDto request);
 
     List<VisitResponseDto> getMyVisits();
 
@@ -22,4 +23,6 @@ public interface VisitService {
     VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request);
 
     List<VisitResponseDto> getAllVisits();
+
+    void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request);
 }

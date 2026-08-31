@@ -16,4 +16,7 @@ public interface VisitNotificationService {
 
     @Async("emailExecutor")
     void notifyBookVisitParticipants(Visit visit, Pet pet, Vet vet);
+
+    @Async("emailExecutor")
+    void notifyRescheduleVisitParticipants(Visit visit, Pet pet, Vet vet, LocalDateTime newVisitDateTime);
 }

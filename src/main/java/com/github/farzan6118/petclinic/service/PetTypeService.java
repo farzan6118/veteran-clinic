@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface PetTypeService {
     PetTypeResponseDto getByUuid(UUID uuid);
 
-    PetType getPetTypeByUuid(UUID uuid);
+    PetType getEntityByUuid(UUID uuid);
 
     List<PetTypeResponseDto> findAll();
 
