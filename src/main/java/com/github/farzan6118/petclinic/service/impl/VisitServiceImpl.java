@@ -4,15 +4,14 @@ import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
 import com.github.farzan6118.petclinic.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
-import com.github.farzan6118.petclinic.model.Owner;
 import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.Visit;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.repository.jpa.VisitRepository;
-import com.github.farzan6118.petclinic.service.EmailService;
 import com.github.farzan6118.petclinic.service.PetService;
 import com.github.farzan6118.petclinic.service.VetService;
+import com.github.farzan6118.petclinic.service.VisitNotificationService;
 import com.github.farzan6118.petclinic.service.VisitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +28,11 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class VisitServiceImpl implements VisitService {
 
+    private final VisitNotificationService visitNotificationService;
     private final VisitRepository visitRepository;
     private final PetService petService;
     private final VetService vetService;
     private final VisitMapper visitMapper;
-    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -47,7 +46,7 @@ public class VisitServiceImpl implements VisitService {
         Visit visit = visitMapper.mapToVisitEntity(request, pet, vet);
         Visit savedVisit = visitRepository.save(visit);
 
-        notifyBookVisitParticipants(savedVisit, pet, vet);
+        visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
 
         log.info(
                 "Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
@@ -64,27 +63,6 @@ public class VisitServiceImpl implements VisitService {
         if (alreadyBooked) {
             throw new RuntimeException("Vet is already booked at the requested time");
         }
-    }
-
-    private void notifyBookVisitParticipants(Visit visit, Pet pet, Vet vet) {
-        Owner owner = pet.getOwner();
-
-        emailService.sendVetAppointmentScheduledNotification(
-                vet.getEmail(),
-                vet.getFullName(),
-                visit.getVisitDateTime(),
-                pet.getName(),
-                pet.getPetType().getName(),
-                owner.getFullName()
-        );
-
-        emailService.sendVisitScheduledNotification(
-                owner.getEmail(),
-                owner.getFullName(),
-                pet.getName(),
-                visit.getVisitDateTime(),
-                vet.getFullName()
-        );
     }
 
     @Override
@@ -127,32 +105,9 @@ public class VisitServiceImpl implements VisitService {
         Pet pet = visit.getPet();
         Vet vet = visit.getVet();
 
-        notifyCancelVisitParticipants(visit, pet, vet, reason);
+        visitNotificationService.notifyCancelVisitParticipants(visit, pet, vet, reason);
 
         log.info("Visit cancelled. visitUuid={}", uuid);
-    }
-
-    private void notifyCancelVisitParticipants(Visit visit, Pet pet, Vet vet, String reason) {
-        Owner owner = pet.getOwner();
-
-        emailService.sendVetAppointmentCancelledNotification(
-                vet.getEmail(),
-                vet.getFullName(),
-                pet.getName(),
-                owner.getFullName(),
-                visit.getVisitDateTime(),
-                reason
-        );
-
-        emailService.sendVisitCancelledNotification(
-                owner.getEmail(),
-                owner.getFullName(),
-                pet.getName(),
-                pet.getPetType().getName(),
-                vet.getFullName(),
-                visit.getVisitDateTime(),
-                reason
-        );
     }
 
     @Override

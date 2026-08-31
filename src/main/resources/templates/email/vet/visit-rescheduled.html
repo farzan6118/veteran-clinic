@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Veterinary Appointment Rescheduled</title>
+</head>
+<body>
+
+<h2>Veterinary Appointment Rescheduled</h2>
+
+<p>
+    Dear <strong th:text="${vetName}">Dr. Smith</strong>,
+</p>
+
+<p>
+    The following veterinary appointment has been rescheduled.
+</p>
+
+<p>
+    <strong>Pet:</strong>
+    <span th:text="${petName}">Jessy</span>
+</p>
+
+<p>
+    <strong>Pet type:</strong>
+    <span th:text="${petType}">Dog</span>
+</p>
+
+<p>
+    <strong>Owner:</strong>
+    <span th:text="${ownerName}">John Doe</span>
+</p>
+
+<p>
+    <strong>Previous appointment date:</strong>
+    <span th:text="${oldVisitDate}">2026-08-20 10:00</span>
+</p>
+
+<p>
+    <strong>New appointment date:</strong>
+    <span th:text="${newVisitDate}">2026-08-22 14:00</span>
+</p>
+
+<p>
+    Please review the updated appointment details before the scheduled time.
+</p>
+
+<p>
+    Best regards,<br>
+    PetClinic Farzan6118
+</p>
+
+</body>
+</html>

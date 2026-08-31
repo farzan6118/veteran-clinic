@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Veterinary Visit Cancelled</title>
+</head>
+<body>
+
+<h2>Veterinary Visit Canceled</h2>
+
+<p>
+    Dear <strong th:text="${ownerName}">John Doe</strong>,
+</p>
+
+<p>
+    We would like to inform you that the following veterinary visit
+    has been canceled.
+</p>
+
+<p>
+    <strong>Pet:</strong>
+    <span th:text="${petName}">Jessy</span>
+</p>
+
+<p>
+    <strong>Veterinarian:</strong>
+    <span th:text="${vetName}">Dr. Smith</span>
+</p>
+
+<p>
+    <strong>Scheduled date:</strong>
+    <span th:text="${visitDate}">2026-08-20 10:00</span>
+</p>
+
+<p>
+    <strong>cancellation reason:</strong>
+    <span th:text="${reason}"> </span>
+</p>
+
+<p>
+    If you still need a veterinary appointment, please schedule a new visit.
+</p>
+
+<p>
+    Best regards,<br>
+    PetClinic Farzan6118
+</p>
+
+</body>
+</html>

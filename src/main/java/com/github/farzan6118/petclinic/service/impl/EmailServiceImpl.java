@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
-
     private final SpringTemplateEngine templateEngine;
     private final JavaMailSender mailSender;
 
@@ -27,222 +26,125 @@ public class EmailServiceImpl implements EmailService {
     private String from;
 
     /**
-     * OWNER — Send when a pet becomes due for a periodic checkup.
+     * OWNER — Sent when a pet is due for a periodic checkup.
      */
     @Override
-    public void sendCheckupReminder(
-            String email,
-            String petName,
-            LocalDate checkupDate
-    ) {
+    public void sendOwnerCheckupReminderEmail(String email, String petName, LocalDate checkupDate) {
         Context context = new Context();
         context.setVariable("petName", petName);
         context.setVariable("checkupDate", checkupDate);
-
-        sendHtmlEmail(
-                email,
-                "Periodic Checkup Reminder",
-                "email/checkup-reminder",
-                context
-        );
-
-        log.info("Checkup reminder sent: {}", petName);
+        sendHtmlEmail(email, "Periodic Checkup Reminder", "email/checkup-reminder", context);
+        log.info("Owner checkup reminder email sent. email={}, petName={}, checkupDate={}", email, petName, checkupDate);
     }
 
     /**
-     * OWNER — Send immediately after a veterinary visit is scheduled.
+     * OWNER — Sent when a veterinary visit is scheduled for their pet.
      */
     @Override
-    public void sendVisitScheduledNotification(
-            String email,
-            String ownerName,
-            String petName,
-            LocalDateTime visitDate,
-            String vetName
-    ) {
-        Context context = new Context();
-        context.setVariable("ownerName", ownerName);
-        context.setVariable("petName", petName);
-        context.setVariable("vetName", vetName);
-        context.setVariable("visitDate", visitDate);
-
-        sendHtmlEmail(
-                email,
-                "Veterinary Visit Scheduled",
-                "email/vet-appointment-scheduled",
-                context
-        );
-
-        log.info("Visit scheduled notification sent: {}", petName);
-    }
-
-    /**
-     * VET — Send immediately after a new appointment is assigned to the vet.
-     */
-    @Override
-    public void sendVetAppointmentScheduledNotification(
-            String vetEmail,
-            String vetName,
-            LocalDateTime visitDate,
-            String petName,
-            String petType,
-            String ownerName
-    ) {
-        Context context = new Context();
-        context.setVariable("vetName", vetName);
-        context.setVariable("petName", petName);
-        context.setVariable("petType", petType);
-        context.setVariable("ownerName", ownerName);
-        context.setVariable("visitDate", visitDate);
-
-        sendHtmlEmail(
-                vetEmail,
-                "New Veterinary Appointment",
-                "email/visit-vet-scheduled",
-                context
-        );
-
-        log.info("Vet appointment scheduled: {}", petName);
-    }
-
-    /**
-     * OWNER — Send immediately after an existing visit is rescheduled.
-     */
-    @Override
-    public void sendVisitRescheduledNotification(
-            String email,
-            String ownerName,
-            String petName,
-            String petType,
-            String vetName,
-            LocalDateTime previousVisitDate,
-            LocalDateTime newVisitDate
-    ) {
+    public void sendOwnerVisitScheduledEmail(
+            String email, String ownerName, String petName, String petType, LocalDateTime visitDate, String vetName) {
         Context context = new Context();
         context.setVariable("ownerName", ownerName);
         context.setVariable("petName", petName);
         context.setVariable("petType", petType);
         context.setVariable("vetName", vetName);
-        context.setVariable("previousVisitDate", previousVisitDate);
+        context.setVariable("visitDate", visitDate);
+        sendHtmlEmail(email, "Veterinary Visit Scheduled", "email/owner/visit-scheduled", context);
+        log.info("Owner visit scheduled email sent. email={}, petName={}, visitDate={}", email, petName, visitDate);
+    }
+
+    /**
+     * VET — Sent when a new veterinary visit is scheduled with the vet.
+     */
+    @Override
+    public void sendVetVisitScheduledEmail(String email, String vetName, LocalDateTime visitDate, String petName, String petType, String petBreed, String ownerName) {
+        Context context = new Context();
+        context.setVariable("vetName", vetName);
+        context.setVariable("petName", petName);
+        context.setVariable("petType", petType);
+        context.setVariable("petBreed", petBreed);
+        context.setVariable("ownerName", ownerName);
+        context.setVariable("visitDate", visitDate);
+        sendHtmlEmail(email, "New Veterinary Appointment", "email/vet/visit-scheduled", context);
+        log.info("Vet visit scheduled email sent. email={}, petName={}, visitDate={}", email, petName, visitDate);
+    }
+
+    /**
+     * OWNER — Sent when a scheduled veterinary visit is canceled.
+     */
+    @Override
+    public void sendOwnerVisitCancelledEmail(String email, String ownerName, String petName, LocalDateTime visitDate, String vetName, String reason) {
+        Context context = new Context();
+        context.setVariable("ownerName", ownerName);
+        context.setVariable("petName", petName);
+        context.setVariable("vetName", vetName);
+        context.setVariable("visitDate", visitDate);
+        context.setVariable("reason", reason);
+        sendHtmlEmail(email, "Veterinary Visit Cancelled", "email/owner/visit-cancelled", context);
+        log.info("Owner visit cancellation email sent. email={}, petName={}, visitDate={}", email, petName, visitDate);
+    }
+
+    /**
+     * VET — Sent when a scheduled veterinary visit is canceled.
+     */
+    @Override
+    public void sendVetVisitCancelledEmail(String email, String vetName, LocalDateTime visitDate, String petName, String petType, String petBreed, String ownerName, String reason) {
+        Context context = new Context();
+        context.setVariable("vetName", vetName);
+        context.setVariable("petName", petName);
+        context.setVariable("petType", petType);
+        context.setVariable("petBreed", petBreed);
+        context.setVariable("ownerName", ownerName);
+        context.setVariable("visitDate", visitDate);
+        context.setVariable("reason", reason);
+        sendHtmlEmail(email, "Veterinary Appointment Cancelled", "email/vet/visit-cancelled", context);
+        log.info("Vet visit cancellation email sent. email={}, petName={}, visitDate={}", email, petName, visitDate);
+    }
+
+    /**
+     * OWNER — Sent when a veterinary visit is rescheduled.
+     */
+    @Override
+    public void sendOwnerVisitRescheduledEmail(String email, String ownerName, String petName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String vetName, String reason) {
+        Context context = new Context();
+        context.setVariable("ownerName", ownerName);
+        context.setVariable("petName", petName);
+        context.setVariable("vetName", vetName);
+        context.setVariable("oldVisitDate", oldVisitDate);
         context.setVariable("newVisitDate", newVisitDate);
-
-        sendHtmlEmail(
-                email,
-                "Veterinary Visit Rescheduled",
-                "email/visit-rescheduled",
-                context
-        );
-
-        log.info("Visit rescheduled notification sent: {}", petName);
+        context.setVariable("reason", reason);
+        sendHtmlEmail(email, "Veterinary Visit Rescheduled", "email/owner/visit-rescheduled", context);
+        log.info("Owner visit rescheduled email sent. email={}, petName={}, oldVisitDate={}, newVisitDate={}", email, petName, oldVisitDate, newVisitDate);
     }
 
     /**
-     * VET — Send immediately after an appointment assigned to the vet is rescheduled.
+     * VET — Sent when a veterinary visit is rescheduled.
      */
     @Override
-    public void sendVetAppointmentRescheduledNotification(
-            String vetEmail,
-            String vetName,
-            String petName,
-            String petType,
-            String ownerName,
-            LocalDateTime previousVisitDate,
-            LocalDateTime newAppointmentDate
-    ) {
+    public void sendVetVisitRescheduledEmail(String email, String vetName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String petName, String petType, String breed, String ownerName, String reason) {
         Context context = new Context();
         context.setVariable("vetName", vetName);
         context.setVariable("petName", petName);
         context.setVariable("petType", petType);
+        context.setVariable("breed", breed);
         context.setVariable("ownerName", ownerName);
-        context.setVariable("previousVisitDate", previousVisitDate);
-        context.setVariable("newAppointmentDate", newAppointmentDate);
-
-        sendHtmlEmail(
-                vetEmail,
-                "Veterinary Appointment Rescheduled",
-                "email/vet-appointment-rescheduled",
-                context
-        );
-
-        log.info("Vet appointment rescheduled: {}", petName);
-    }
-
-    /**
-     * OWNER — Send immediately after the owner's visit is cancelled.
-     */
-    @Override
-    public void sendVisitCancelledNotification(
-            String email,
-            String ownerName,
-            String petName,
-            String petType,
-            String vetName,
-            LocalDateTime visitDate,
-            String cancellationReason
-    ) {
-        Context context = new Context();
-        context.setVariable("ownerName", ownerName);
-        context.setVariable("petName", petName);
-        context.setVariable("petType", petType);
-        context.setVariable("vetName", vetName);
-        context.setVariable("visitDate", visitDate);
-        context.setVariable("cancellationReason", cancellationReason);
-
-        sendHtmlEmail(
-                email,
-                "Veterinary Visit Cancelled",
-                "email/visit-cancelled",
-                context
-        );
-
-        log.info("Visit cancellation notification sent: {}", petName);
-    }
-
-    /**
-     * VET — Send immediately after an appointment assigned to the vet is cancelled.
-     */
-    @Override
-    public void sendVetAppointmentCancelledNotification(
-            String vetEmail,
-            String vetName,
-            String petName,
-            String ownerName,
-            LocalDateTime visitDate,
-            String cancellationReason
-    ) {
-        Context context = new Context();
-        context.setVariable("vetName", vetName);
-        context.setVariable("petName", petName);
-        context.setVariable("ownerName", ownerName);
-        context.setVariable("visitDate", visitDate);
-        context.setVariable("cancellationReason", cancellationReason);
-
-        sendHtmlEmail(
-                vetEmail,
-                "Veterinary Appointment Cancelled",
-                "email/vet-appointment-cancelled",
-                context
-        );
-
-        log.info("Vet appointment cancellation sent: {}", petName);
+        context.setVariable("oldVisitDate", oldVisitDate);
+        context.setVariable("newVisitDate", newVisitDate);
+        context.setVariable("reason", reason);
+        sendHtmlEmail(email, "Veterinary Appointment Rescheduled", "email/vet/visit-rescheduled", context);
+        log.info("Vet visit rescheduled email sent. email={}, petName={}, oldVisitDate={}, newVisitDate={}", email, petName, oldVisitDate, newVisitDate);
     }
 
     /**
      * INTERNAL — Common method used by all email operations.
      */
-    private void sendHtmlEmail(
-            String to,
-            String subject,
-            String templateName,
-            Context context
-    ) {
+    private void sendHtmlEmail(String to, String subject, String templateName, Context context) {
         try {
             String htmlContent = templateEngine.process(templateName, context);
 
             MimeMessage message = mailSender.createMimeMessage();
 
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true, "UTF-8");
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(from);
             helper.setTo(to);

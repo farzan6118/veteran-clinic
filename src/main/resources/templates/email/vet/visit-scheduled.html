@@ -2,14 +2,14 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Appointment Scheduled</title>
+    <title>New Veterinary Appointment</title>
 </head>
 <body>
 
 <h2>New Veterinary Appointment</h2>
 
 <p>
-    Dear <strong th:text="${vetName}">John Due</strong>,
+    Dear <strong th:text="${vetName}">Dr. Smith</strong>,
 </p>
 
 <p>
@@ -19,6 +19,16 @@
 <p>
     <strong>Pet:</strong>
     <span th:text="${petName}">Jessy</span>
+</p>
+
+<p>
+    <strong>Pet type:</strong>
+    <span th:text="${petType}">Cat</span>
+</p>
+
+<p>
+    <strong>Pet breed:</strong>
+    <span th:text="${petBreed}">Persian</span>
 </p>
 
 <p>

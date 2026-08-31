@@ -5,65 +5,22 @@ import java.time.LocalDateTime;
 
 public interface EmailService {
 
-    void sendCheckupReminder(
-            String email,
-            String petName,
-            LocalDate checkupDate
-    );
+    void sendOwnerCheckupReminderEmail(String email, String petName, LocalDate checkupDate);
 
-    void sendVisitScheduledNotification(
-            String email,
-            String ownerName,
-            String petName,
-            LocalDateTime visitDate,
-            String vetName
-    );
 
-    void sendVetAppointmentScheduledNotification(
-            String vetEmail,
-            String vetName,
-            LocalDateTime appointmentDate,
-            String petName,
-            String petType,
-            String ownerName
-    );
+    void sendOwnerVisitScheduledEmail(String email, String ownerName, String petName,
+                                      String petType, LocalDateTime visitDate, String vetName);
 
-    void sendVisitRescheduledNotification(
-            String email,
-            String ownerName,
-            String petName,
-            String petType,
-            String vetName,
-            LocalDateTime previousVisitDate,
-            LocalDateTime newVisitDate
-    );
+    void sendVetVisitScheduledEmail(String email, String vetName, LocalDateTime visitDate,
+                                    String petName, String petType, String petBreed, String ownerName);
 
-    void sendVetAppointmentRescheduledNotification(
-            String vetEmail,
-            String vetName,
-            String petName,
-            String petType,
-            String ownerName,
-            LocalDateTime previousAppointmentDate,
-            LocalDateTime newAppointmentDate
-    );
+    void sendOwnerVisitCancelledEmail(String email, String ownerName, String petName,
+                                      LocalDateTime visitDate, String vetName, String reason);
 
-    void sendVisitCancelledNotification(
-            String email,
-            String ownerName,
-            String petName,
-            String petType,
-            String vetName,
-            LocalDateTime visitDate,
-            String cancellationReason
-    );
+    void sendVetVisitCancelledEmail(String email, String vetName, LocalDateTime visitDate,
+                                    String petName, String petType, String petBreed, String ownerName, String reason);
 
-    void sendVetAppointmentCancelledNotification(
-            String vetEmail,
-            String vetName,
-            String petName,
-            String ownerName,
-            LocalDateTime appointmentDate,
-            String cancellationReason
-    );
+    void sendOwnerVisitRescheduledEmail(String email, String ownerName, String petName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String vetName, String reason);
+
+    void sendVetVisitRescheduledEmail(String email, String vetName, LocalDateTime oldVisitDate, LocalDateTime newVisitDate, String petName, String petType, String breed, String ownerName, String reason);
 }
