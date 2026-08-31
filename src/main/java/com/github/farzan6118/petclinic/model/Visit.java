@@ -1,9 +1,7 @@
 package com.github.farzan6118.petclinic.model;
 
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
@@ -29,6 +27,7 @@ public class Visit extends BaseEntity<Long> {
     @Column(length = 2048)
     private String description;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private VisitStatus status;
     private String diagnosis;
 }
