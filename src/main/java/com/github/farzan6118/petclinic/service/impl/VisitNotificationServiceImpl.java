@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -21,7 +22,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
     private final EmailService emailService;
 
     @Override
-    @Async("emailExecutor")
+    @Async
     public void notifyVisitRescheduled(Visit visit, Pet pet, Vet vet, LocalDateTime oldVisitDate, String reason) {
         Owner owner = pet.getOwner();
 
@@ -52,7 +53,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
     }
 
     @Override
-    @Async("emailExecutor")
+    @Async
     public void notifyCancelVisitParticipants(Visit visit, Pet pet, Vet vet, String reason) {
         Owner owner = pet.getOwner();
 
@@ -83,7 +84,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
     }
 
     @Override
-    @Async("emailExecutor")
+    @Async
     public void notifyBookVisitParticipants(Visit visit, Pet pet, Vet vet) {
         Owner owner = pet.getOwner();
 
@@ -112,7 +113,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
         }
     }
 
-    @Async("emailExecutor")
+    @Async
     @Override
     public void notifyRescheduleVisitParticipants(Visit visit, Pet pet, Vet vet, LocalDateTime newVisitDateTime) {
         Owner owner = pet.getOwner();

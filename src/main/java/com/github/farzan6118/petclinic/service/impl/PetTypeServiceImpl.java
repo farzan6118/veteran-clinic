@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.service.impl;
 import com.github.farzan6118.petclinic.dto.request.CreatePetTypeRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdatePetTypeRequestDto;
 import com.github.farzan6118.petclinic.dto.response.PetTypeResponseDto;
+import com.github.farzan6118.petclinic.exception.ClinicBadRequestException;
 import com.github.farzan6118.petclinic.model.PetType;
 import com.github.farzan6118.petclinic.repository.jpa.PetTypeRepository;
 import com.github.farzan6118.petclinic.service.PetTypeService;
@@ -31,7 +32,7 @@ public class PetTypeServiceImpl implements PetTypeService {
     @Override
     public PetType getEntityByUuid(UUID uuid) {
         return petTypeRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("pet.type.not.found"));
     }
 
     @Override
@@ -65,7 +66,7 @@ public class PetTypeServiceImpl implements PetTypeService {
     @Override
     public void update(UUID uuid, UpdatePetTypeRequestDto request) {
         PetType petType = petTypeRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("pet.type.not.found"));
 
         mapToPetType(request, petType);
 
@@ -84,7 +85,7 @@ public class PetTypeServiceImpl implements PetTypeService {
     @Override
     public void delete(UUID uuid) {
         PetType petType = petTypeRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("pet.type.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("pet.type.not.found"));
 
         petTypeRepository.delete(petType);
 

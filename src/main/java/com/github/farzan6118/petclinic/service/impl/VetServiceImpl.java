@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.service.impl;
 import com.github.farzan6118.petclinic.dto.request.CreateVetRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdateVetRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
+import com.github.farzan6118.petclinic.exception.ClinicBadRequestException;
 import com.github.farzan6118.petclinic.mapper.VetMapper;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.repository.jpa.VetRepository;
@@ -33,7 +34,7 @@ public class VetServiceImpl implements VetService {
     @Override
     public Vet getVetByUuid(UUID uuid) {
         return vetRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("vet.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("vet.not.found"));
     }
 
     @Override
@@ -59,7 +60,7 @@ public class VetServiceImpl implements VetService {
     @Override
     public void update(UUID uuid, UpdateVetRequestDto request) {
         Vet vet = vetRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("vet.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("vet.not.found"));
 
         vetMapper.mapToEntity(request, vet);
 
@@ -70,7 +71,7 @@ public class VetServiceImpl implements VetService {
     @Override
     public void delete(UUID uuid) {
         Vet vet = vetRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("vet.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("vet.not.found"));
 
         vetRepository.delete(vet);
 

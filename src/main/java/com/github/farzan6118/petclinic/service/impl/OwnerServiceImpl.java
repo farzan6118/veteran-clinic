@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.service.impl;
 import com.github.farzan6118.petclinic.dto.request.CreateOwnerRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdateOwnerRequestDto;
 import com.github.farzan6118.petclinic.dto.response.OwnerResponseDto;
+import com.github.farzan6118.petclinic.exception.ClinicBadRequestException;
 import com.github.farzan6118.petclinic.model.Owner;
 import com.github.farzan6118.petclinic.repository.jpa.OwnerRepository;
 import com.github.farzan6118.petclinic.service.OwnerService;
@@ -25,7 +26,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public OwnerResponseDto getByUuid(UUID uuid) {
         Owner owner = ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("owner.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("owner.not.found"));
         return mapToDto(owner);
     }
 
@@ -75,7 +76,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public void update(UUID uuid, UpdateOwnerRequestDto request) {
         Owner owner = ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("owner.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("owner.not.found"));
         mapToOwner(request, owner);
 
         log.info("Owner updated successfully. ownerUuid={}", uuid);
@@ -96,7 +97,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public void delete(UUID uuid) {
         Owner owner = ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("owner.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("owner.not.found"));
 
         ownerRepository.delete(owner);
 
@@ -106,7 +107,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Owner getEntityByUuid(UUID uuid) {
         return ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("owner.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("owner.not.found"));
     }
 
 }

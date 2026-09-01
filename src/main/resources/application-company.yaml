@@ -79,6 +79,10 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
     default-models-expand-depth: -1
+    oauth:
+      client-id: ${keycloak.client-id}
+      use-pkce-with-authorization-code-grant: true
+      persist-authorization: true
 
 system:
   default:

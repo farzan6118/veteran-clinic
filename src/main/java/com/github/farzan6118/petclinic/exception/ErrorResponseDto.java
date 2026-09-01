@@ -1,10 +1,12 @@
 package com.github.farzan6118.petclinic.exception;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDateTime;
 
-@Setter
-@Getter
-public class ErrorResponseDto {
-    private String message;
+public record ErrorResponseDto(
+        int status,
+        String error,
+        String message,
+        LocalDateTime timestamp,
+        String path
+) {
 }

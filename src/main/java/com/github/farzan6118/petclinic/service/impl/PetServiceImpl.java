@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.service.impl;
 import com.github.farzan6118.petclinic.dto.request.CreatePetRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdatePetRequestDto;
 import com.github.farzan6118.petclinic.dto.response.PetResponseDto;
+import com.github.farzan6118.petclinic.exception.ClinicBadRequestException;
 import com.github.farzan6118.petclinic.model.Owner;
 import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.PetType;
@@ -45,7 +46,7 @@ public class PetServiceImpl implements PetService {
     @Override
     public PetResponseDto getByUuid(UUID uuid) {
         Pet pet = petRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("pet.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("pet.not.found"));
 
         return mapToDto(pet);
     }
@@ -104,7 +105,7 @@ public class PetServiceImpl implements PetService {
     @Override
     public Pet getEntityByUuid(UUID uuid) {
         return petRepository.findByUuid(uuid)
-                .orElseThrow(() -> new RuntimeException("pet.not.found"));
+                .orElseThrow(() -> new ClinicBadRequestException("pet.not.found"));
     }
 
     @Override
