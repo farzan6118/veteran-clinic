@@ -175,13 +175,13 @@ public class VisitServiceImpl implements VisitService {
         Vet vet = visit.getVet();
 
         validateVetAvailability(vet, request.visitDateTime());
-
+        LocalDateTime oldVisitDate = visit.getVisitDateTime();
         visit.setVisitDateTime(request.visitDateTime());
         visit.setDescription(request.description());
 
         Visit savedVisit = visitRepository.save(visit);
 
-        visitNotificationService.notifyRescheduleVisitParticipants(savedVisit, pet, vet, request.visitDateTime());
+        visitNotificationService.notifyRescheduleVisitParticipants(savedVisit, pet, vet, oldVisitDate);
 
         log.info(
                 "Visit rescheduled to dateAndTime={} successfully. visitUuid={}",

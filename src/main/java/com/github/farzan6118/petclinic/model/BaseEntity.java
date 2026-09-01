@@ -12,7 +12,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Getter
@@ -34,11 +36,11 @@ public class BaseEntity<ID extends Serializable> implements Serializable {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    private Instant createdDate;
 
     @LastModifiedDate
     @Column(nullable = false, updatable = false)
-    private LocalDateTime lastModifiedDate;
+    private Instant lastModifiedDate;
 
     @CreatedBy
     @Column(nullable = false)

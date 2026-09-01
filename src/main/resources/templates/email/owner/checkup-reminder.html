@@ -20,7 +20,7 @@
 
 <p>
     <strong>Checkup date:</strong>
-    <span th:text="${checkupDate}">2026-08-20</span>
+    <span th:text="${#temporals.format(checkupDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Thursday, August 20, 2026 10:00</span>
 </p>
 
 <p>

@@ -28,12 +28,12 @@
 
 <p>
     <strong>Previous visit date:</strong>
-    <span th:text="${oldVisitDate}">2026-08-20 10:00</span>
+    <span th:text="${#temporals.format(oldVisitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Thursday, August 20, 2026 10:00</span>
 </p>
 
 <p>
     <strong>New visit date:</strong>
-    <span th:text="${newVisitDate}">2026-08-22 14:00</span>
+    <span th:text="${#temporals.format(newVisitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Thursday, August 20, 2026 10:00</span>
 </p>
 
 <p>

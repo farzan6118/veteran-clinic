@@ -29,7 +29,7 @@
 
 <p>
     <strong>Scheduled date:</strong>
-    <span th:text="${visitDate}">2026-08-20 10:00</span>
+    <span th:text="${#temporals.format(visitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Thursday, August 20, 2026 10:00</span>
 </p>
 
 <p>
