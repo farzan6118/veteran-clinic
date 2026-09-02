@@ -49,9 +49,9 @@ public class PetTypeServiceImpl implements PetTypeService {
         PetType petType = new PetType();
         mapToPetType(request, petType);
 
-        PetType savedPetType = petTypeRepository.save(petType);
+        petTypeRepository.save(petType);
 
-        log.info("Pet type created successfully. petTypeId={}", savedPetType.getId());
+        log.info("Pet type created");
     }
 
     private void mapToPetType(CreatePetTypeRequestDto request, PetType petType) {
@@ -70,7 +70,7 @@ public class PetTypeServiceImpl implements PetTypeService {
 
         mapToPetType(request, petType);
 
-        log.info("Pet type updated successfully. petTypeUuid={}", uuid);
+        log.info("Pet type updated");
     }
 
     private void mapToPetType(UpdatePetTypeRequestDto request, PetType petType) {
@@ -89,7 +89,7 @@ public class PetTypeServiceImpl implements PetTypeService {
 
         petTypeRepository.delete(petType);
 
-        log.info("Pet type deleted successfully. petTypeUuid={}", uuid);
+        log.info("Pet type deleted");
     }
 
     private PetTypeResponseDto mapToDto(PetType petType) {

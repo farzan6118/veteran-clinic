@@ -1,6 +1,6 @@
 package com.github.farzan6118.petclinic.model;
 
-import com.github.farzan6118.petclinic.model.constant.RecordStatus;
+import com.github.farzan6118.petclinic.model.constant.EntityStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -28,7 +28,7 @@ public class BaseEntity<ID extends Serializable> implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private ID id;
 
-    @UuidGenerator
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     @Column(nullable = false, updatable = false, unique = true)
     private UUID uuid;
 
@@ -37,11 +37,11 @@ public class BaseEntity<ID extends Serializable> implements Serializable {
     private Instant createdDate;
 
     @LastModifiedDate
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private Instant lastModifiedDate;
 
     @CreatedBy
-    @Column(nullable = false)
+    @Column(updatable = false)
     private UUID createdBy;
 
     @LastModifiedBy
@@ -50,7 +50,7 @@ public class BaseEntity<ID extends Serializable> implements Serializable {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private RecordStatus recordStatus = RecordStatus.ACTIVE;
+    private EntityStatus entityStatus = EntityStatus.ACTIVE;
 
 }
 

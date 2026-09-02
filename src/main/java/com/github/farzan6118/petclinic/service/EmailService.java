@@ -4,9 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface EmailService {
-
     void sendOwnerCheckupReminderEmail(String email, String petName, LocalDate checkupDate);
-
 
     void sendOwnerVisitScheduledEmail(String email, String ownerName, String petName,
                                       String petType, LocalDateTime visitDate, String vetName);

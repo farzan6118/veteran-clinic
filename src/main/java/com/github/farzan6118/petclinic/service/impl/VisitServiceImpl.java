@@ -160,8 +160,8 @@ public class VisitServiceImpl implements VisitService {
         }
 
         visit.setStatus(VisitStatus.COMPLETED);
-        visit.setDiagnosis(request.diagnosis());
-        visit.setNotes(request.notes());
+//        visit.setDiagnosis(request.diagnosis());
+//        visit.setNotes(request.notes());
 
         Visit savedVisit = visitRepository.save(visit);
 

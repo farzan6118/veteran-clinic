@@ -33,8 +33,7 @@ public class Vet extends BaseEntity<Long> {
     @OneToOne(
             mappedBy = "vet",
             cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            optional = false
+            orphanRemoval = true
     )
     private Profile profile;
 
@@ -44,6 +43,12 @@ public class Vet extends BaseEntity<Long> {
             orphanRemoval = true
     )
     private List<VetAvailability> availabilities = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "vet"
+    )
+    private List<AppointmentSlot> slots = new ArrayList<>();
+
 
     public String getFullName() {
         return Stream.of(firstname, lastname)

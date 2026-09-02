@@ -78,7 +78,7 @@ public class PetServiceImpl implements PetService {
 
         Pet savedPet = petRepository.save(pet);
 
-        log.info("Pet created successfully. petId={}", savedPet.getId());
+        log.info("pet created");
     }
 
     @Transactional
@@ -89,7 +89,7 @@ public class PetServiceImpl implements PetService {
         Owner owner = ownerService.getEntityByUuid(request.ownerUuid());
         mapToPet(request, owner, pet, petType);
 
-        log.info("Pet updated successfully. petUuid={}", uuid);
+        log.info("pet updated");
     }
 
     @Transactional
@@ -99,7 +99,7 @@ public class PetServiceImpl implements PetService {
 
         petRepository.delete(pet);
 
-        log.info("Pet deleted successfully. petUuid={}", uuid);
+        log.info("pet deleted");
     }
 
     @Override

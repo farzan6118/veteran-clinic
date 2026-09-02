@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
 
+import java.time.Instant;
+
 @Entity
 @Getter
 @Setter
@@ -32,6 +34,8 @@ public class Visit extends BaseEntity<Long> {
 
     @Column(length = 1000)
     private String description;
+
+    private Instant bookedAt;
 
 
     public static Visit create(Pet pet, Vet vet, AppointmentSlot slot, String description) {

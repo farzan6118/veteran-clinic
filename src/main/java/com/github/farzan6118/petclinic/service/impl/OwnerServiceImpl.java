@@ -57,8 +57,8 @@ public class OwnerServiceImpl implements OwnerService {
     public void create(CreateOwnerRequestDto request) {
         Owner owner = new Owner();
         mapToOwner(request, owner);
-        Owner savedOwner = ownerRepository.save(owner);
-        log.info("Owner created successfully. ownerId={}", savedOwner.getId());
+        ownerRepository.save(owner);
+        log.info("owner created");
     }
 
     private void mapToOwner(CreateOwnerRequestDto request, Owner owner) {
@@ -78,8 +78,8 @@ public class OwnerServiceImpl implements OwnerService {
         Owner owner = ownerRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("owner not found"));
         mapToOwner(request, owner);
-
-        log.info("Owner updated successfully. ownerUuid={}", uuid);
+        ownerRepository.save(owner);
+        log.info("owner updated");
     }
 
     private void mapToOwner(UpdateOwnerRequestDto request, Owner owner) {
@@ -101,7 +101,7 @@ public class OwnerServiceImpl implements OwnerService {
 
         ownerRepository.delete(owner);
 
-        log.info("Owner deleted successfully. ownerUuid={}", uuid);
+        log.info("Owner deleted");
     }
 
     @Override

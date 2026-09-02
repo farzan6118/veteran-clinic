@@ -55,7 +55,7 @@ public class VetServiceImpl implements VetService {
         validateUniqueContactInfo(request.telephone(), request.email());
         Vet vet = vetMapper.mapToEntity(request);
         vetRepository.save(vet);
-        log.info("Vet created successfully.");
+        log.info("vet created");
 
     }
 
@@ -75,7 +75,7 @@ public class VetServiceImpl implements VetService {
     public void updateVetProfileByUuid(VetProfileUpdateRequestDto request, UUID vetUuid) {
         Vet vet = getEntityByUuid(vetUuid);
         vet.updateProfile(request.city(), request.address(), request.birthDate(), request.specialty());
-        log.info("Vet profile updated successfully. vetUuid={}", vetUuid);
+        log.info("vet profile updated");
     }
 
     @Transactional
@@ -90,7 +90,7 @@ public class VetServiceImpl implements VetService {
 
         vetMapper.mapToEntity(request, vet);
 
-        log.info("Vet updated successfully. vetUuid={}", uuid);
+        log.info("vet updated");
     }
 
     private void validateEmailUniqueness(String email, UUID vetUuid) {
@@ -113,7 +113,7 @@ public class VetServiceImpl implements VetService {
 
         vetRepository.delete(vet);
 
-        log.info("Vet deleted successfully. vetUuid={}", uuid);
+        log.info("vet deleted");
     }
 
     @Override
