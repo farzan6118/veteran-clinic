@@ -7,6 +7,6 @@ public record PetResponseDto(
         UUID uuid,
         String name,
         LocalDate birthDate,
-        String PetType
+        String petType
 ) {
 }

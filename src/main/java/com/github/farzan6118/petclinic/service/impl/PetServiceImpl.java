@@ -3,11 +3,10 @@ package com.github.farzan6118.petclinic.service.impl;
 import com.github.farzan6118.petclinic.dto.request.CreatePetRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdatePetRequestDto;
 import com.github.farzan6118.petclinic.dto.response.PetResponseDto;
-import com.github.farzan6118.petclinic.exception.ClinicBadRequestException;
 import com.github.farzan6118.petclinic.model.Owner;
 import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.PetType;
-import com.github.farzan6118.petclinic.repository.jpa.PetRepository;
+import com.github.farzan6118.petclinic.repository.PetRepository;
 import com.github.farzan6118.petclinic.service.OwnerService;
 import com.github.farzan6118.petclinic.service.PetService;
 import com.github.farzan6118.petclinic.service.PetTypeService;
@@ -110,7 +109,7 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public List<PetResponseDto> getPetListByOwnerUuid(UUID uuid) {
-       return petRepository.findByOwnerUuid(uuid)
+        return petRepository.findByOwnerUuid(uuid)
                 .stream()
                 .map(this::mapToDto)
                 .toList();

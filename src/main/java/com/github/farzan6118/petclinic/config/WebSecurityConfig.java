@@ -22,15 +22,15 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public
-                        .requestMatchers(
-                                "/swagger-ui/**"
-                                , "/v3/api-docs/**"
-                                , "/api/auth/login"
-                        ).permitAll()
+                                // Public
+                                .requestMatchers(
+                                        "/swagger-ui/**"
+                                        , "/v3/api-docs/**"
+                                        , "/api/auth/login"
+                                ).permitAll()
 
-                        // Authenticated
-                        .anyRequest().permitAll()
+                                // Authenticated
+                                .anyRequest().permitAll()
 //                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->

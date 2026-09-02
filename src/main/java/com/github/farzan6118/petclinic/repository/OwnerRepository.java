@@ -1,4 +1,4 @@
-package com.github.farzan6118.petclinic.repository.jpa;
+package com.github.farzan6118.petclinic.repository;
 
 import com.github.farzan6118.petclinic.model.Owner;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -4,13 +4,14 @@ import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
-import com.github.farzan6118.petclinic.exception.ClinicBadRequestException;
+import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
 import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.Vet;
+import com.github.farzan6118.petclinic.model.VetAvailability;
 import com.github.farzan6118.petclinic.model.Visit;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
-import com.github.farzan6118.petclinic.repository.jpa.VisitRepository;
+import com.github.farzan6118.petclinic.repository.VisitRepository;
 import com.github.farzan6118.petclinic.service.PetService;
 import com.github.farzan6118.petclinic.service.VetService;
 import com.github.farzan6118.petclinic.service.VisitNotificationService;
@@ -20,7 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,8 +44,7 @@ public class VisitServiceImpl implements VisitService {
     public void bookVisit(VisitRequestDto request) {
 
         Pet pet = petService.getEntityByUuid(request.petUuid());
-        Vet vet = vetService.getVetByUuid(request.vetUuid());
-
+        Vet vet = vetService.getEntityByUuid(request.vetUuid());
         validateVetAvailability(vet, request.visitDateTime());
 
         Visit visit = visitMapper.mapToVisitEntity(request, pet, vet);
@@ -59,11 +61,27 @@ public class VisitServiceImpl implements VisitService {
     }
 
     private void validateVetAvailability(Vet vet, LocalDateTime visitDateTime) {
-        boolean alreadyBooked = visitRepository
-                .existsByVetUuidAndVisitDateTime(vet.getUuid(), visitDateTime);
+
+        DayOfWeek dayOfWeek = visitDateTime.getDayOfWeek();
+        LocalTime time = visitDateTime.toLocalTime();
+
+        boolean available = vet.getAvailabilities()
+                .stream()
+                .filter(VetAvailability::isActive)
+                .filter(availability -> availability.getDayOfWeek() == dayOfWeek)
+                .anyMatch(availability ->
+                        !time.isBefore(availability.getStartTime())
+                                && time.isBefore(availability.getEndTime())
+                );
+
+        if (!available) {
+            throw new ResourceNotFoundException("Vet is not available at the requested time");
+        }
+
+        boolean alreadyBooked = visitRepository.existsByVetUuidAndVisitDateTime(vet.getUuid(), visitDateTime);
 
         if (alreadyBooked) {
-            throw new ClinicBadRequestException("Vet is already booked at the requested time");
+            throw new ResourceNotFoundException("Vet is already booked at the requested time");
         }
     }
 
@@ -98,7 +116,7 @@ public class VisitServiceImpl implements VisitService {
         }
 
         if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ClinicBadRequestException("Completed visit cannot be cancelled");
+            throw new ResourceNotFoundException("Completed visit cannot be cancelled");
         }
 
 
@@ -131,11 +149,11 @@ public class VisitServiceImpl implements VisitService {
         Visit visit = getVisitByUuid(uuid);
 
         if (visit.getStatus() == VisitStatus.CANCELLED) {
-            throw new ClinicBadRequestException("Cancelled visit cannot be completed");
+            throw new ResourceNotFoundException("Cancelled visit cannot be completed");
         }
 
         if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ClinicBadRequestException("Visit is already completed");
+            throw new ResourceNotFoundException("Visit is already completed");
         }
 
         visit.setStatus(VisitStatus.COMPLETED);
@@ -161,14 +179,14 @@ public class VisitServiceImpl implements VisitService {
     @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
         Visit visit = visitRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ClinicBadRequestException("visit.not.found"));
+                .orElseThrow(() -> new ResourceNotFoundException("visit.not.found"));
 
         if (visit.getStatus() == VisitStatus.CANCELLED) {
-            throw new ClinicBadRequestException("Cancelled visit cannot be completed");
+            throw new ResourceNotFoundException("Cancelled visit cannot be completed");
         }
 
         if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ClinicBadRequestException("Visit is already completed");
+            throw new ResourceNotFoundException("Visit is already completed");
         }
 
         Pet pet = visit.getPet();
@@ -192,19 +210,19 @@ public class VisitServiceImpl implements VisitService {
 
     private Visit getVisitByUuid(UUID uuid) {
         return visitRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ClinicBadRequestException("Visit not found: " + uuid));
+                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + uuid));
     }
 
     private UUID getCurrentUserUuid() {
         // TODO:
         // Get current authenticated user from your SecurityContext
-        throw new ClinicBadRequestException("Current user resolver is not implemented");
+        throw new ResourceNotFoundException("Current user resolver is not implemented");
     }
 
     private UUID getCurrentVetUuid() {
         // TODO:
         // Get current authenticated vet from your SecurityContext
-        throw new ClinicBadRequestException("Current vet resolver is not implemented");
+        throw new ResourceNotFoundException("Current vet resolver is not implemented");
     }
 
 }

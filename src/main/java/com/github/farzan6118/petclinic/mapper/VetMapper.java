@@ -2,7 +2,9 @@ package com.github.farzan6118.petclinic.mapper;
 
 import com.github.farzan6118.petclinic.dto.request.CreateVetRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdateVetRequestDto;
+import com.github.farzan6118.petclinic.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
+import com.github.farzan6118.petclinic.model.Profile;
 import com.github.farzan6118.petclinic.model.Vet;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +21,6 @@ public class VetMapper {
         vet.setNationalCode(request.nationalCode());
         vet.setTelephone(request.telephone());
         vet.setEmail(request.email());
-        vet.setSpecialty(request.specialty());
-        vet.setBirthDate(request.birthDate());
-        vet.setAddress(request.address());
-        vet.setCity(request.city());
 
         return vet;
     }
@@ -33,23 +31,28 @@ public class VetMapper {
         vet.setNationalCode(request.nationalCode());
         vet.setTelephone(request.telephone());
         vet.setEmail(request.email());
-        vet.setSpecialty(request.specialty());
-        vet.setBirthDate(request.birthDate());
-        vet.setAddress(request.address());
-        vet.setCity(request.city());
     }
 
     public VetResponseDto mapToDto(Vet vet) {
         return new VetResponseDto(
                 vet.getUuid(),
-                vet.getFirstname(),
-                vet.getLastname(),
+                vet.getFullName(),
+                vet.getNationalCode(),
+                vet.getTelephone(),
+                vet.getEmail());
+    }
+
+    public VetProfileResponseDto mapToVetProfileDto(Vet vet) {
+        Profile profile = vet.getProfile() != null ? vet.getProfile() : new Profile();
+        return new VetProfileResponseDto(
+                vet.getUuid(),
+                vet.getFullName(),
                 vet.getNationalCode(),
                 vet.getTelephone(),
                 vet.getEmail(),
-                vet.getSpecialty(),
-                vet.getBirthDate(),
-                vet.getAddress(),
-                vet.getCity());
+                profile.getCity(),
+                profile.getAddress(),
+                profile.getSpecialty(),
+                profile.getBirthDate());
     }
 }

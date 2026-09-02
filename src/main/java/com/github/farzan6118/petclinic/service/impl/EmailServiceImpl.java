@@ -1,6 +1,6 @@
 package com.github.farzan6118.petclinic.service.impl;
 
-import com.github.farzan6118.petclinic.exception.ClinicBadRequestException;
+import com.github.farzan6118.petclinic.exception.FailedToSendEmailException;
 import com.github.farzan6118.petclinic.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -153,7 +153,7 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
 
         } catch (MessagingException e) {
-            throw new ClinicBadRequestException(to);
+            throw new FailedToSendEmailException(to);
         }
     }
 }

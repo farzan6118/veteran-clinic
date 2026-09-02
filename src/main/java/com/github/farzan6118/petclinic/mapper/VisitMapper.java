@@ -8,6 +8,9 @@ import com.github.farzan6118.petclinic.model.Visit;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 @Component
 public class VisitMapper {
     public VisitResponseDto toResponse(Visit visit) {
@@ -24,10 +27,11 @@ public class VisitMapper {
     }
 
     public Visit mapToVisitEntity(VisitRequestDto request, Pet pet, Vet vet) {
+        LocalDateTime localDateTime = request.visitDateTime().truncatedTo(ChronoUnit.MINUTES);
         Visit visit = new Visit();
         visit.setPet(pet);
         visit.setVet(vet);
-        visit.setVisitDateTime(request.visitDateTime());
+        visit.setVisitDateTime(localDateTime);
         visit.setDescription(request.description());
         visit.setStatus(VisitStatus.BOOKED);
         return visit;

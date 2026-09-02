@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Audited;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
@@ -15,7 +14,6 @@ import java.util.stream.Stream;
 @Entity
 @Getter
 @Setter
-@Audited
 public class Owner extends BaseEntity<Long> {
     private String firstname;
     private String lastname;
