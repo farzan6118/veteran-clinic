@@ -2,6 +2,7 @@ package com.github.farzan6118.petclinic.service.impl;
 
 import com.github.farzan6118.petclinic.dto.request.CreateWeeklyAvailabilityRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdateWeeklyAvailabilityRequestDto;
+import com.github.farzan6118.petclinic.exception.DateTimeValidationException;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.VetAvailability;
@@ -101,11 +102,7 @@ public class VetScheduleServiceImpl implements VetScheduleService {
     private Vet getVet(UUID vetUuid) {
 
         return vetRepository.findByUuid(vetUuid)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Vet not found"
-                        )
-                );
+                .orElseThrow(() ->new ResourceNotFoundException("Vet not found"));
     }
 
     private VetAvailability getAvailability(UUID vetUuid, Long availabilityId) {
@@ -118,7 +115,7 @@ public class VetScheduleServiceImpl implements VetScheduleService {
     private void validateTimeRange(LocalTime from, LocalTime to) {
 
         if (!from.isBefore(to)) {
-            throw new ResourceNotFoundException("Available from must be before available to");
+            throw new DateTimeValidationException("Available from must be before available to");
         }
     }
 
@@ -127,14 +124,14 @@ public class VetScheduleServiceImpl implements VetScheduleService {
         long totalMinutes = Duration.between(from, to).toMinutes();
 
         if (durationMinutes > totalMinutes) {
-            throw new ResourceNotFoundException("Appointment duration cannot exceed availability range");
+            throw new DateTimeValidationException("Appointment duration cannot exceed availability range");
         }
     }
 
     private void validateNoOverlap(UUID vetUuid, DayOfWeek dayOfWeek, LocalTime from, LocalTime to) {
 
         if (vetAvailabilityRepository.existsOverlappingAvailability(vetUuid, dayOfWeek, from, to)) {
-            throw new ResourceNotFoundException("Vet availability overlaps with an existing availability");
+            throw new DateTimeValidationException("Vet availability overlaps with an existing availability");
         }
     }
 
@@ -154,7 +151,7 @@ public class VetScheduleServiceImpl implements VetScheduleService {
                 to
         )) {
 
-            throw new ResourceNotFoundException("Vet availability overlaps with an existing availability");
+            throw new DateTimeValidationException("Vet availability overlaps with an existing availability");
         }
     }
 }

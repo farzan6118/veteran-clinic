@@ -5,6 +5,7 @@ import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,4 +26,7 @@ public interface VisitService {
     List<VisitResponseDto> getAllVisits();
 
     void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request);
+
+    List<VetAvailableSlotResponseDto> getAvailableSlots(UUID vetUuid, LocalDate date);
+
 }

@@ -1,7 +1,9 @@
 package com.github.farzan6118.petclinic.model.constant;
 
 public enum VisitStatus {
-    BOOKED,
+    SCHEDULED,
+    CONFIRMED,
     COMPLETED,
-    CANCELLED
+    CANCELLED,
+    NO_SHOW
 }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,6 +66,17 @@ public class VetController {
     @GetMapping("/{uuid}/profile")
     public ResponseEntity<VetProfileResponseDto> getVetProfile(@PathVariable UUID uuid) {
         return ResponseEntity.ok(vetService.getVetProfileByUuid(uuid));
+    }
+
+    @GetMapping("/{vetUuid}/available-slots")
+    public List<VetAvailableSlotResponseDto> getAvailableSlots(
+            @PathVariable UUID vetUuid,
+            @RequestParam LocalDate date
+    ) {
+        return visitService.getAvailableSlots(
+                vetUuid,
+                date
+        );
     }
 
 }

@@ -3,14 +3,14 @@ package com.github.farzan6118.petclinic.service.impl;
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
+import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
-import com.github.farzan6118.petclinic.model.Pet;
-import com.github.farzan6118.petclinic.model.Vet;
-import com.github.farzan6118.petclinic.model.VetAvailability;
-import com.github.farzan6118.petclinic.model.Visit;
+import com.github.farzan6118.petclinic.model.*;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
+import com.github.farzan6118.petclinic.repository.AppointmentSlotRepository;
+import com.github.farzan6118.petclinic.repository.VetRepository;
 import com.github.farzan6118.petclinic.repository.VisitRepository;
 import com.github.farzan6118.petclinic.service.PetService;
 import com.github.farzan6118.petclinic.service.VetService;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -35,9 +36,11 @@ public class VisitServiceImpl implements VisitService {
 
     private final VisitNotificationService visitNotificationService;
     private final VisitRepository visitRepository;
+    private final AppointmentSlotRepository slotRepository;
     private final PetService petService;
     private final VetService vetService;
     private final VisitMapper visitMapper;
+    private final VetRepository vetRepository;
 
     @Override
     @Transactional
@@ -223,6 +226,89 @@ public class VisitServiceImpl implements VisitService {
         // TODO:
         // Get current authenticated vet from your SecurityContext
         throw new ResourceNotFoundException("Current vet resolver is not implemented");
+    }
+
+    @Override
+    public List<VetAvailableSlotResponseDto> getAvailableSlots(
+            UUID vetUuid,
+            LocalDate date
+    ) {
+
+        validateVetExists(vetUuid);
+
+
+        return slotRepository
+                .findAllAvailableSlots(
+                        vetUuid,
+                        date
+                )
+                .stream()
+                .map(slot ->
+                        new VetAvailableSlotResponseDto(
+                                slot.getUuid(),
+                                slot.getStartTime(),
+                                slot.getEndTime()
+                        )
+                )
+                .toList();
+    }
+
+
+    @Transactional
+    @Override
+    public UUID bookVisit(CreateVisitRequestDto request) {
+
+        Vet vet = vetRepository.findByUuid(request.ve())
+                .orElseThrow(() -> new ResourceNotFoundException("Vet not found"));
+
+        AppointmentSlot slot = slotRepository.findAvailableSlotForUpdate(request.slotUuid())
+                .orElseThrow(() ->new ResourceNotFoundException("visit.slot.not.available","Selected time slot is not available"));
+
+        validateSlotBelongsToVet(slot,vet);
+
+        Visit visit = new Visit();
+
+        visit.setVet(vet);
+        visit.setAppointmentSlot(slot);
+        visit.setVisitDate(slot.getDate());
+        visit.setStartTime(slot.getStartTime());
+        visit.setEndTime(slot.getEndTime());
+        visit.setStatus(VisitStatus.SCHEDULED);
+
+
+        slot.book(visit);
+
+
+        Visit savedVisit =
+                visitRepository.save(visit);
+
+
+        log.info("Visit booked successfully. visitUuid={}, vetUuid={}",
+                savedVisit.getUuid(),vet.getUuid());
+
+
+        return savedVisit.getUuid();
+    }
+
+
+    private void validateVetExists(UUID vetUuid) {
+
+        if (!vetRepository.existsByUuid(vetUuid)) {
+
+            throw new ResourceNotFoundException(
+                    "Vet not found"
+            );
+        }
+    }
+
+
+    private void validateSlotBelongsToVet(AppointmentSlot slot,Vet vet) {
+
+        if (!slot.getVet().getId()
+                .equals(vet.getId())) {
+
+            throw new ResourceNotFoundException("visit invalid slot", "Slot does not belong to selected vet");
+        }
     }
 
 }

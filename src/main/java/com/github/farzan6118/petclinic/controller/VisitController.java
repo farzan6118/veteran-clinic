@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,32 @@ public class VisitController {
     public ResponseEntity<Void> bookVisit(@Valid @RequestBody VisitRequestDto request) {
         visitService.bookVisit(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/vets/{vetUuid}/available-slots")
+    public ResponseEntity<List<VetAvailableSlotResponseDto>> getAvailableSlots(
+            @PathVariable UUID vetUuid,
+            @RequestParam LocalDate date
+    ) {
+
+        return ResponseEntity.ok(
+                visitService.getAvailableSlots(
+                        vetUuid,
+                        date
+                )
+        );
+    }
+
+    @PostMapping
+    public ResponseEntity<UUID> bookVisit(
+            @Valid @RequestBody CreateVisitRequestDto request
+    ) {
+
+        UUID visitUuid = visitService.bookVisit(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(visitUuid);
     }
 
     @PutMapping("{uuid}")
