@@ -53,7 +53,8 @@ public class VetServiceImpl implements VetService {
     @Override
     public void create(CreateVetRequestDto request) {
         validateUniqueContactInfo(request.telephone(), request.email());
-        vetMapper.mapToEntity(request);
+        Vet vet = vetMapper.mapToEntity(request);
+        vetRepository.save(vet);
         log.info("Vet created successfully.");
 
     }
