@@ -38,7 +38,7 @@ public class VetServiceImpl implements VetService {
     @Override
     public Vet getEntityByUuid(UUID uuid) {
         return vetRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("vet.not.found"));
+                .orElseThrow(() -> new ResourceNotFoundException("vet not found"));
     }
 
     @Override

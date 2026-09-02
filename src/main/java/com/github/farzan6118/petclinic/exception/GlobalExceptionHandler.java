@@ -21,7 +21,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BaseAppException.class)
     public ResponseEntity<ErrorResponseDto> handle(BaseAppException ex, HttpServletRequest request) {
 
-        log.warn(ex.getLogMessage());
+        if (ex.getLogMessage() != null) {
+            log.warn(ex.getLogMessage());
+        }
 
         return ResponseEntity
                 .status(ex.getStatus())

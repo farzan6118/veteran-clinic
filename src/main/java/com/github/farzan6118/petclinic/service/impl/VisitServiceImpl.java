@@ -179,7 +179,7 @@ public class VisitServiceImpl implements VisitService {
     @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
         Visit visit = visitRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("visit.not.found"));
+                .orElseThrow(() -> new ResourceNotFoundException("visit not found"));
 
         if (visit.getStatus() == VisitStatus.CANCELLED) {
             throw new ResourceNotFoundException("Cancelled visit cannot be completed");
