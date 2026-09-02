@@ -62,11 +62,11 @@ public class VetServiceImpl implements VetService {
     private void validateUniqueContactInfo(String telephone, String email) {
 
         if (vetRepository.existsByEmail(email)) {
-            throw new EmailAlreadyExistsException("vet with email " + email + " already exists");
+            throw new EmailAlreadyExistsException("email exists", "vet with email " + email + " already exists");
         }
 
         if (vetRepository.existsByTelephone(telephone)) {
-            throw new PhoneAlreadyExistsException("vet with telephone " + telephone + " already exists");
+            throw new PhoneAlreadyExistsException("mobile exists", "vet with telephone " + telephone + " already exists");
         }
     }
 

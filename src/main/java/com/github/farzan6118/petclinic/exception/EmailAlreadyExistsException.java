@@ -1,7 +1,9 @@
 package com.github.farzan6118.petclinic.exception;
 
-public class EmailAlreadyExistsException extends RuntimeException {
-    public EmailAlreadyExistsException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class EmailAlreadyExistsException extends BaseAppException {
+    public EmailAlreadyExistsException(String message, String logMessage) {
+        super(HttpStatus.BAD_REQUEST, message, logMessage);
     }
 }

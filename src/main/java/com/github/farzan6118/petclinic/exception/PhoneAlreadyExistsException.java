@@ -1,7 +1,9 @@
 package com.github.farzan6118.petclinic.exception;
 
-public class PhoneAlreadyExistsException extends RuntimeException {
-    public PhoneAlreadyExistsException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class PhoneAlreadyExistsException extends BaseAppException {
+    public PhoneAlreadyExistsException(String message, String logMessage) {
+        super(HttpStatus.BAD_REQUEST, message, logMessage);
     }
 }
