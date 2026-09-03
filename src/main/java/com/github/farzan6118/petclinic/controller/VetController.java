@@ -3,9 +3,11 @@ package com.github.farzan6118.petclinic.controller;
 import com.github.farzan6118.petclinic.dto.request.CreateVetRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdateVetRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VetProfileUpdateRequestDto;
+import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.service.VetService;
+import com.github.farzan6118.petclinic.service.VisitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class VetController {
 
     private final VetService vetService;
+    private final VisitService visitService;
 
     @GetMapping("/{uuid}")
     public ResponseEntity<VetResponseDto> getByUuid(@PathVariable UUID uuid) {

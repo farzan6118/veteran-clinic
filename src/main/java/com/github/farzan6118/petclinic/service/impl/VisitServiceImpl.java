@@ -7,24 +7,28 @@ import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
-import com.github.farzan6118.petclinic.model.*;
+import com.github.farzan6118.petclinic.model.AppointmentSlot;
+import com.github.farzan6118.petclinic.model.Pet;
+import com.github.farzan6118.petclinic.model.Vet;
+import com.github.farzan6118.petclinic.model.Visit;
+import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.repository.AppointmentSlotRepository;
 import com.github.farzan6118.petclinic.repository.VetRepository;
 import com.github.farzan6118.petclinic.repository.VisitRepository;
 import com.github.farzan6118.petclinic.service.PetService;
-import com.github.farzan6118.petclinic.service.VetService;
 import com.github.farzan6118.petclinic.service.VisitNotificationService;
 import com.github.farzan6118.petclinic.service.VisitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,68 +42,78 @@ public class VisitServiceImpl implements VisitService {
     private final VisitRepository visitRepository;
     private final AppointmentSlotRepository slotRepository;
     private final PetService petService;
-    private final VetService vetService;
     private final VisitMapper visitMapper;
     private final VetRepository vetRepository;
 
+    /**
+     * Book an available appointment slot for a pet.
+     */
     @Override
     @Transactional
-    public void bookVisit(VisitRequestDto request) {
+    public UUID bookVisit(VisitRequestDto request) {
 
         Pet pet = petService.getEntityByUuid(request.petUuid());
-        Vet vet = vetService.getEntityByUuid(request.vetUuid());
-        validateVetAvailability(vet, request.visitDateTime());
 
-        Visit visit = visitMapper.mapToVisitEntity(request, pet, vet);
+        Vet vet = getVetByUuid(request.vetUuid());
+
+        AppointmentSlot slot = slotRepository
+                .findAvailableSlotForUpdate(request.slotUuid())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "visit.slot.not.available",
+                                "Selected appointment slot is not available"
+                        ));
+
+        validateSlotBelongsToVet(slot, vet);
+
+        Visit visit = Visit.create(
+                pet,
+                vet,
+                slot,
+                request.description()
+        );
+
+        slot.book();
+
         Visit savedVisit = visitRepository.save(visit);
 
-        visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
+        visitNotificationService.notifyBookVisitParticipants(
+                savedVisit,
+                pet,
+                vet
+        );
 
         log.info(
-                "Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
+                "Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}, slotUuid={}",
                 savedVisit.getUuid(),
                 pet.getUuid(),
-                vet.getUuid()
+                vet.getUuid(),
+                slot.getUuid()
         );
+
+        return savedVisit.getUuid();
     }
 
-    private void validateVetAvailability(Vet vet, LocalDateTime visitDateTime) {
-
-        DayOfWeek dayOfWeek = visitDateTime.getDayOfWeek();
-        LocalTime time = visitDateTime.toLocalTime();
-
-        boolean available = vet.getAvailabilities()
-                .stream()
-                .filter(VetAvailability::isActive)
-                .filter(availability -> availability.getDayOfWeek() == dayOfWeek)
-                .anyMatch(availability ->
-                        !time.isBefore(availability.getStartTime())
-                                && time.isBefore(availability.getEndTime())
-                );
-
-        if (!available) {
-            throw new ResourceNotFoundException("Vet is not available at the requested time");
-        }
-
-        boolean alreadyBooked = visitRepository.existsByVetUuidAndVisitDateTime(vet.getUuid(), visitDateTime);
-
-        if (alreadyBooked) {
-            throw new ResourceNotFoundException("Vet is already booked at the requested time");
-        }
-    }
-
+    /**
+     * Get the current owner's visits.
+     */
     @Override
-    public List<VisitResponseDto> getMyVisits() {
+    public List<VisitResponseDto> getMyVisits(Jwt jwt) {
 
-        UUID currentUserUuid = getCurrentUserUuid();
+        UUID currentUserUuid = getCurrentUserUuid(jwt);
 
         return visitRepository
-                .findAllByPetOwnerUuidOrderByVisitDateTimeDesc(currentUserUuid)
+                .findAllByPetOwnerUuidOrderByAppointmentSlotDateAsc(
+                        currentUserUuid
+                )
                 .stream()
                 .map(visitMapper::toResponse)
                 .toList();
     }
 
+    /**
+     * Get a visit by UUID.
+     */
     @Override
     public VisitResponseDto getByUuid(UUID uuid) {
 
@@ -108,6 +122,9 @@ public class VisitServiceImpl implements VisitService {
         return visitMapper.toResponse(visit);
     }
 
+    /**
+     * Cancel a scheduled visit.
+     */
     @Override
     @Transactional
     public void cancelVisit(UUID uuid, String reason) {
@@ -119,115 +136,162 @@ public class VisitServiceImpl implements VisitService {
         }
 
         if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ResourceNotFoundException("Completed visit cannot be cancelled");
+            throw new ResourceNotFoundException(
+                    "visit.already.completed",
+                    "Completed visit cannot be cancelled"
+            );
         }
 
+        AppointmentSlot slot = visit.getAppointmentSlot();
 
-        visit.setStatus(VisitStatus.CANCELLED);
+        visit.cancel();
 
-        Pet pet = visit.getPet();
-        Vet vet = visit.getVet();
+        if (slot != null && !slot.isAvailable()) {
+            slot.release();
+        }
 
-        visitNotificationService.notifyCancelVisitParticipants(visit, pet, vet, reason);
+        visitNotificationService.notifyCancelVisitParticipants(
+                visit,
+                visit.getPet(),
+                visit.getVet(),
+                reason
+        );
 
-        log.info("Visit cancelled. visitUuid={}", uuid);
+        log.info(
+                "Visit cancelled. visitUuid={}, slotUuid={}",
+                visit.getUuid(),
+                slot != null ? slot.getUuid() : null
+        );
     }
 
+    /**
+     * Get all visits of the currently authenticated vet.
+     */
     @Override
     public List<VisitResponseDto> getVetVisits() {
 
         UUID currentVetUuid = getCurrentVetUuid();
 
         return visitRepository
-                .findAllByVetUuidOrderByVisitDateTimeAsc(currentVetUuid)
+                .findAllByVetUuidOrderByAppointmentSlotDateAsc(
+                        currentVetUuid
+                )
                 .stream()
                 .map(visitMapper::toResponse)
                 .toList();
     }
 
+    /**
+     * Complete a visit.
+     */
     @Override
     @Transactional
-    public VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request) {
+    public VisitResponseDto completeVisit(
+            UUID uuid,
+            CompleteVisitRequest request
+    ) {
 
         Visit visit = getVisitByUuid(uuid);
 
         if (visit.getStatus() == VisitStatus.CANCELLED) {
-            throw new ResourceNotFoundException("Cancelled visit cannot be completed");
+            throw new ResourceNotFoundException(
+                    "visit.cancelled",
+                    "Cancelled visit cannot be completed"
+            );
         }
 
         if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ResourceNotFoundException("Visit is already completed");
+            throw new ResourceNotFoundException(
+                    "visit.already.completed",
+                    "Visit is already completed"
+            );
         }
 
-        visit.setStatus(VisitStatus.COMPLETED);
-//        visit.setDiagnosis(request.diagnosis());
-//        visit.setNotes(request.notes());
+        visit.complete();
 
-        Visit savedVisit = visitRepository.save(visit);
+        log.info(
+                "Visit completed. visitUuid={}",
+                visit.getUuid()
+        );
 
-        log.info("Visit completed. visitUuid={}", uuid);
-
-        return visitMapper.toResponse(savedVisit);
+        return visitMapper.toResponse(visit);
     }
 
+    /**
+     * Get all visits.
+     */
     @Override
     public List<VisitResponseDto> getAllVisits() {
-        List<Visit> allVisits = visitRepository.findAll();
-        return allVisits.stream()
+
+        return visitRepository.findAll()
+                .stream()
                 .map(visitMapper::toResponse)
                 .toList();
     }
 
+    /**
+     * Reschedule a visit to another available slot.
+     */
     @Override
     @Transactional
-    public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
-        Visit visit = visitRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("visit not found"));
+    public void rescheduleVisit(
+            UUID uuid,
+            RescheduleVisitRequestDto request
+    ) {
 
-        if (visit.getStatus() == VisitStatus.CANCELLED) {
-            throw new ResourceNotFoundException("Cancelled visit cannot be completed");
+        Visit visit = getVisitByUuid(uuid);
+
+        validateCanBeRescheduled(visit);
+
+        AppointmentSlot oldSlot = visit.getAppointmentSlot();
+
+        AppointmentSlot newSlot = slotRepository
+                .findAvailableSlotForUpdate(request.slotUuid())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "visit.slot.not.available",
+                                "Selected appointment slot is not available"
+                        ));
+
+        validateSlotBelongsToVet(
+                newSlot,
+                visit.getVet()
+        );
+
+        /*
+         * Release the old slot.
+         */
+        oldSlot.release();
+
+        /*
+         * Book the new slot.
+         */
+        newSlot.book();
+
+        visit.setAppointmentSlot(newSlot);
+
+        if (request.description() != null) {
+            visit.setDescription(request.description());
         }
 
-        if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ResourceNotFoundException("Visit is already completed");
-        }
-
-        Pet pet = visit.getPet();
-        Vet vet = visit.getVet();
-
-        validateVetAvailability(vet, request.visitDateTime());
-        LocalDateTime oldVisitDate = visit.getVisitDateTime();
-        visit.setVisitDateTime(request.visitDateTime());
-        visit.setDescription(request.description());
-
-        Visit savedVisit = visitRepository.save(visit);
-
-        visitNotificationService.notifyRescheduleVisitParticipants(savedVisit, pet, vet, oldVisitDate);
+        visitNotificationService.notifyRescheduleVisitParticipants(
+                visit,
+                visit.getPet(),
+                visit.getVet(),
+                null
+        );
 
         log.info(
-                "Visit rescheduled to dateAndTime={} successfully. visitUuid={}",
-                savedVisit.getVisitDateTime(),
-                savedVisit.getUuid()
+                "Visit rescheduled successfully. visitUuid={}, oldSlotUuid={}, newSlotUuid={}",
+                visit.getUuid(),
+                oldSlot.getUuid(),
+                newSlot.getUuid()
         );
     }
 
-    private Visit getVisitByUuid(UUID uuid) {
-        return visitRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + uuid));
-    }
-
-    private UUID getCurrentUserUuid() {
-        // TODO:
-        // Get current authenticated user from your SecurityContext
-        throw new ResourceNotFoundException("Current user resolver is not implemented");
-    }
-
-    private UUID getCurrentVetUuid() {
-        // TODO:
-        // Get current authenticated vet from your SecurityContext
-        throw new ResourceNotFoundException("Current vet resolver is not implemented");
-    }
-
+    /**
+     * Get available slots for a vet on a specific date.
+     */
     @Override
     public List<VetAvailableSlotResponseDto> getAvailableSlots(
             UUID vetUuid,
@@ -236,80 +300,99 @@ public class VisitServiceImpl implements VisitService {
 
         validateVetExists(vetUuid);
 
-
         return slotRepository
-                .findAllAvailableSlots(
+                .findAllByVetUuidAndDateAndStatusOrderByStartTime(
                         vetUuid,
-                        date
+                        date,
+                        SlotStatus.AVAILABLE
                 )
                 .stream()
-                .map(slot ->
-                        new VetAvailableSlotResponseDto(
-                                slot.getUuid(),
-                                slot.getStartTime(),
-                                slot.getEndTime()
-                        )
-                )
+                .map(slot -> new VetAvailableSlotResponseDto(
+                        slot.getUuid(),
+                        slot.getDate(),
+                        slot.getStartTime(),
+                        slot.getEndTime()
+                ))
                 .toList();
     }
 
+    private Visit getVisitByUuid(UUID uuid) {
 
-    @Transactional
-    @Override
-    public UUID bookVisit(CreateVisitRequestDto request) {
-
-        Vet vet = vetRepository.findByUuid(request.ve())
-                .orElseThrow(() -> new ResourceNotFoundException("Vet not found"));
-
-        AppointmentSlot slot = slotRepository.findAvailableSlotForUpdate(request.slotUuid())
-                .orElseThrow(() ->new ResourceNotFoundException("visit.slot.not.available","Selected time slot is not available"));
-
-        validateSlotBelongsToVet(slot,vet);
-
-        Visit visit = new Visit();
-
-        visit.setVet(vet);
-        visit.setAppointmentSlot(slot);
-        visit.setVisitDate(slot.getDate());
-        visit.setStartTime(slot.getStartTime());
-        visit.setEndTime(slot.getEndTime());
-        visit.setStatus(VisitStatus.SCHEDULED);
-
-
-        slot.book(visit);
-
-
-        Visit savedVisit =
-                visitRepository.save(visit);
-
-
-        log.info("Visit booked successfully. visitUuid={}, vetUuid={}",
-                savedVisit.getUuid(),vet.getUuid());
-
-
-        return savedVisit.getUuid();
+        return visitRepository.findByUuid(uuid)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Visit not found: " + uuid
+                        ));
     }
 
+    private Vet getVetByUuid(UUID vetUuid) {
+
+        return vetRepository.findByUuid(vetUuid)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Vet not found: " + vetUuid
+                        ));
+    }
 
     private void validateVetExists(UUID vetUuid) {
 
         if (!vetRepository.existsByUuid(vetUuid)) {
-
             throw new ResourceNotFoundException(
-                    "Vet not found"
+                    "Vet not found: " + vetUuid
             );
         }
     }
 
+    private void validateSlotBelongsToVet(
+            AppointmentSlot slot,
+            Vet vet
+    ) {
 
-    private void validateSlotBelongsToVet(AppointmentSlot slot,Vet vet) {
-
-        if (!slot.getVet().getId()
-                .equals(vet.getId())) {
-
-            throw new ResourceNotFoundException("visit invalid slot", "Slot does not belong to selected vet");
+        if (!slot.getVet().getUuid().equals(vet.getUuid())) {
+            throw new ResourceNotFoundException(
+                    "visit.slot.invalid.vet",
+                    "Selected appointment slot does not belong to the requested vet"
+            );
         }
     }
 
-}
+    private void validateCanBeRescheduled(Visit visit) {
 
+        if (visit.getStatus() == VisitStatus.CANCELLED) {
+            throw new ResourceNotFoundException(
+                    "visit.cancelled",
+                    "Cancelled visit cannot be rescheduled"
+            );
+        }
+
+        if (visit.getStatus() == VisitStatus.COMPLETED) {
+            throw new ResourceNotFoundException(
+                    "visit.already.completed",
+                    "Completed visit cannot be rescheduled"
+            );
+        }
+    }
+
+    private UUID getCurrentUserUuid(Jwt jwt) {
+
+        return UUID.fromString(jwt.getSubject());
+    }
+
+    private UUID getCurrentVetUuid() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication instanceof JwtAuthenticationToken jwtAuthentication) {
+            return UUID.fromString(
+                    jwtAuthentication.getToken().getSubject()
+            );
+        }
+
+        throw new IllegalStateException(
+                "Authenticated JWT user not found"
+        );
+    }
+}

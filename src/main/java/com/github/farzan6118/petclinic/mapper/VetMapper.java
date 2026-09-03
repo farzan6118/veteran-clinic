@@ -19,7 +19,7 @@ public class VetMapper {
         vet.setFirstname(request.firstname());
         vet.setLastname(request.lastname());
         vet.setNationalCode(request.nationalCode());
-        vet.setTelephone(request.telephone());
+        vet.setMobileNumber(request.telephone());
         vet.setEmail(request.email());
 
         return vet;
@@ -29,7 +29,7 @@ public class VetMapper {
         vet.setFirstname(request.firstname());
         vet.setLastname(request.lastname());
         vet.setNationalCode(request.nationalCode());
-        vet.setTelephone(request.telephone());
+        vet.setMobileNumber(request.telephone());
         vet.setEmail(request.email());
     }
 
@@ -38,7 +38,7 @@ public class VetMapper {
                 vet.getUuid(),
                 vet.getFullName(),
                 vet.getNationalCode(),
-                vet.getTelephone(),
+                vet.getMobileNumber(),
                 vet.getEmail());
     }
 
@@ -48,7 +48,7 @@ public class VetMapper {
                 vet.getUuid(),
                 vet.getFullName(),
                 vet.getNationalCode(),
-                vet.getTelephone(),
+                vet.getMobileNumber(),
                 vet.getEmail(),
                 profile.getCity(),
                 profile.getAddress(),

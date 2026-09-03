@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
@@ -13,12 +13,11 @@ import java.time.LocalTime;
 public class VetAvailability extends BaseEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "vet_id", nullable = false)
     private Vet vet;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private DayOfWeek dayOfWeek;
+    private LocalDate date;
 
     @Column(nullable = false)
     private LocalTime startTime;
@@ -26,40 +25,34 @@ public class VetAvailability extends BaseEntity<Long> {
     @Column(nullable = false)
     private LocalTime endTime;
 
-    private Integer durationMinutes;
-
     @Column(nullable = false)
     private boolean active = true;
 
-    public void updateSchedule(
-            DayOfWeek dayOfWeek,
-            LocalTime startTime,
-            LocalTime endTime,
-            Integer durationMinutes
-    ) {
-        this.dayOfWeek = dayOfWeek;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.durationMinutes = durationMinutes;
-    }
-
-    public VetAvailability create(
+    public static VetAvailability create(
             Vet vet,
-            DayOfWeek dayOfWeek,
+            LocalDate date,
             LocalTime startTime,
-            LocalTime endTime,
-            Integer durationMinutes
+            LocalTime endTime
     ) {
         VetAvailability availability = new VetAvailability();
 
         availability.vet = vet;
-        availability.dayOfWeek = dayOfWeek;
+        availability.date = date;
         availability.startTime = startTime;
         availability.endTime = endTime;
-        availability.durationMinutes = durationMinutes;
         availability.active = true;
 
         return availability;
+    }
+
+    public void updateSchedule(
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime
+    ) {
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
 }

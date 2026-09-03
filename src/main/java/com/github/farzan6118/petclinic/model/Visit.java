@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.model;
 
+import com.github.farzan6118.petclinic.exception.StatusInvalidException;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -39,7 +40,6 @@ public class Visit extends BaseEntity<Long> {
 
 
     public static Visit create(Pet pet, Vet vet, AppointmentSlot slot, String description) {
-
         Visit visit = new Visit();
 
         visit.pet = pet;
@@ -47,22 +47,33 @@ public class Visit extends BaseEntity<Long> {
         visit.appointmentSlot = slot;
         visit.description = description;
         visit.status = VisitStatus.SCHEDULED;
+        visit.bookedAt = Instant.now();
 
         return visit;
     }
 
-
     public void cancel() {
 
         if (status == VisitStatus.COMPLETED) {
-            throw new IllegalStateException("Completed visit cannot be cancelled");
+            throw new StatusInvalidException("Completed visit cannot be cancelled");
+        }
+
+        if (status == VisitStatus.CANCELLED) {
+            return;
         }
 
         this.status = VisitStatus.CANCELLED;
     }
 
-
     public void complete() {
+
+        if (status == VisitStatus.CANCELLED) {
+            throw new StatusInvalidException("Cancelled visit cannot be completed");
+        }
+
+        if (status == VisitStatus.COMPLETED) {
+            throw new StatusInvalidException("Visit is already completed");
+        }
 
         this.status = VisitStatus.COMPLETED;
     }

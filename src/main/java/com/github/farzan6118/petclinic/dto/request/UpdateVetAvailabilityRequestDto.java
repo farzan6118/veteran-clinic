@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record CreateVetAvailabilityRequestDto(
+public record UpdateVetAvailabilityRequestDto(
         @NotNull
         LocalDate date,
 

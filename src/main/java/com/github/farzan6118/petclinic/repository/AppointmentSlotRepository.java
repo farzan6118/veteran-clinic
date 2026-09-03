@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,4 +33,7 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
             @Param("uuid") UUID uuid
     );
 
+    boolean existsByVetUuidAndDateAndStartTime(UUID uuid, LocalDate date, LocalTime startTime);
+
+    List<AppointmentSlot> findAllByVetUuidAndDateAndStatusOrderByStartTime(UUID vetUuid, LocalDate date, SlotStatus slotStatus);
 }

@@ -10,18 +10,17 @@ public interface VetRepository extends JpaRepository<Vet, Long> {
 
     Optional<Vet> findByUuid(UUID uuid);
 
-    Optional<Vet> findById(Long id);
-
     Optional<Vet> findByEmail(String email);
 
-    Optional<Vet> findByTelephone(String telephone);
+    Optional<Vet> findByMobileNumber(String mobile);
 
     boolean existsByEmailAndUuidNot(String email, UUID uuid);
 
-    boolean existsByTelephoneAndUuidNot(String telephone, UUID uuid);
+    boolean existsByMobileNumberAndUuidNot(String mobile, UUID uuid);
 
-    boolean existsByTelephone(String telephone);
+    boolean existsByMobileNumber(String mobile);
 
     boolean existsByEmail(String email);
 
+    boolean existsByUuid(UUID vetUuid);
 }

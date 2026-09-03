@@ -5,6 +5,7 @@ import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,9 +13,9 @@ import java.util.UUID;
 
 public interface VisitService {
 
-    void bookVisit(VisitRequestDto request);
+    UUID bookVisit(VisitRequestDto request);
 
-    List<VisitResponseDto> getMyVisits();
+    List<VisitResponseDto> getMyVisits(Jwt jwt);
 
     VisitResponseDto getByUuid(UUID uuid);
 
