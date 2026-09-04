@@ -3,13 +3,13 @@ package com.github.farzan6118.petclinic.dto.request;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record CreateWeeklyAvailabilityRequestDto(
 
         @NotNull
-        DayOfWeek dayOfWeek,
+        LocalDate date,
 
         @NotNull
         LocalTime availableFrom,

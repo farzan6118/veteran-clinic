@@ -20,9 +20,6 @@ public class Profile extends BaseEntity<Long> {
     private LocalDate birthDate;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "vet_id",
-            unique = true
-    )
+    @JoinColumn(name = "vet_id", unique = true)
     private Vet vet;
 }

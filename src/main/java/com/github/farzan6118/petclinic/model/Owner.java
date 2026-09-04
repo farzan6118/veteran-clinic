@@ -3,6 +3,8 @@ package com.github.farzan6118.petclinic.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.util.StringUtils;
@@ -15,22 +17,28 @@ import java.util.stream.Stream;
 @Getter
 @Setter
 public class Owner extends BaseEntity<Long> {
-    private String firstname;
-    private String lastname;
+
+    private String firstName;
+    private String lastName;
     private String nationalCode;
     private LocalDate birthDate;
-    @Column(unique = true, nullable = false)
-    private String telephone;
+
+    @NotBlank
+    @Column(nullable = false, unique = true)
+    @Size(max = 20)
+    private String mobileNumber;
+
     @Email
-    @Column(unique = true, nullable = false)
+    @NotBlank
+    @Column(nullable = false, unique = true)
     private String email;
+
     private String city;
     private String address;
 
     public String getFullName() {
-        return Stream.of(firstname, lastname)
+        return Stream.of(firstName, lastName)
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(" "));
     }
-
 }

@@ -1,13 +1,15 @@
 package com.github.farzan6118.petclinic.model;
 
+import com.github.farzan6118.petclinic.model.constant.AppointmentDuration;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
 import org.springframework.util.StringUtils;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -22,28 +24,33 @@ import java.util.stream.Stream;
 public class Vet extends BaseEntity<Long> {
     private String firstname;
     private String lastname;
+
     @Column(unique = true)
-    private String nationalCode;
-    @Column(unique = true, nullable = false)
-    private String telephone;
+    private String nationalId;
+
+    @NotBlank
+    @Column(nullable = false, unique = true)
+    @Size(max = 20)
+    private String mobileNumber;
+
     @Email
-    @Column(unique = true, nullable = false)
+    @NotBlank
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @OneToOne(
-            mappedBy = "vet",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            optional = false
-    )
+    @OneToOne(mappedBy = "vet", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 
-    @OneToMany(
-            mappedBy = "vet",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "vet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VetAvailability> availabilities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "vet")
+    private List<AppointmentSlot> slots = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AppointmentDuration appointmentDuration;
+
 
     public String getFullName() {
         return Stream.of(firstname, lastname)
@@ -83,12 +90,12 @@ public class Vet extends BaseEntity<Long> {
     }
 
     public void addAvailability(
-            DayOfWeek dayOfWeek,
+            LocalDate date,
             LocalTime startTime,
             LocalTime endTime
     ) {
         VetAvailability availability = new VetAvailability();
-        availability.setDayOfWeek(dayOfWeek);
+        availability.setDate(date);
         availability.setStartTime(startTime);
         availability.setEndTime(endTime);
 

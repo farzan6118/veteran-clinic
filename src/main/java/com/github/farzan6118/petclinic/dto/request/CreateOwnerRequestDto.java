@@ -12,21 +12,22 @@ public record CreateOwnerRequestDto(
         String firstname,
         @Schema(example = "Due")
         String lastname,
-        @Schema(example = "6311001012")
-        String nationalCode,
-        @Schema(example = "Long St.")
-        String address,
-        @Schema(example = "Tehran")
-        String city,
-        @Schema(example = "09121111111")
-        @NotBlank(message = "telephone.is.required")
-        String telephone,
-        @Past(message = "invalid.birth.date")
-        @Schema(example = "2008-08-29")
-        LocalDate birthDate,
         @Schema(example = "owner@test.com")
         @NotBlank(message = "email.is.required")
         @Email
-        String email
+        String email,
+        @Schema(example = "09121111111")
+        @NotBlank(message = "mobile.mumber.is.required")
+        String mobileNumber,
+        @Schema(example = "6311001012")
+        String nationalCode,
+        @Past(message = "invalid.birth.date")
+        @Schema(example = "2008-08-29")
+        LocalDate birthDate,
+        @Schema(example = "Long St.")
+        String address,
+        @Schema(example = "Tehran")
+        String city
+
 ) {
 }

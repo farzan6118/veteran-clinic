@@ -1,6 +1,6 @@
 package com.github.farzan6118.petclinic.model;
 
-import com.github.farzan6118.petclinic.model.constant.PetStatus;
+import com.github.farzan6118.petclinic.model.constant.Sex;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,19 +14,20 @@ public class Pet extends BaseEntity<Long> {
 
     @Column(nullable = false)
     private String name;
-    private LocalDate birthDate;
     private String color;
+    private String marks;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Sex sex;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "pet_type_id", nullable = false)
-    private PetType petType;
+    @JoinColumn(name = "species_id", nullable = false)
+    private Species species;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private Owner owner;
+    private LocalDate birthDate;
 
-    @Enumerated(EnumType.STRING)
-    private PetStatus status;
-
-    // todo: Add medical record entity manyToOne later
 }

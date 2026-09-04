@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PetService {
-
     PetResponseDto getByUuid(UUID uuid);
 
     List<PetResponseDto> findAll();

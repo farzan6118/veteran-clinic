@@ -3,15 +3,19 @@ package com.github.farzan6118.petclinic.controller;
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
+import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.service.VisitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,10 +27,30 @@ public class VisitController {
 
     private final VisitService visitService;
 
+    @GetMapping("/vets/{vetUuid}/available-slots")
+    public ResponseEntity<List<VetAvailableSlotResponseDto>> getAvailableSlots(
+            @PathVariable UUID vetUuid,
+            @RequestParam LocalDate date
+    ) {
+
+        return ResponseEntity.ok(
+                visitService.getAvailableSlots(
+                        vetUuid,
+                        date
+                )
+        );
+    }
+
     @PostMapping
-    public ResponseEntity<Void> bookVisit(@Valid @RequestBody VisitRequestDto request) {
-        visitService.bookVisit(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<UUID> bookVisit(
+            @Valid @RequestBody VisitRequestDto request
+    ) {
+
+        UUID visitUuid = visitService.bookVisit(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(visitUuid);
     }
 
     @PutMapping("{uuid}")
@@ -41,8 +65,8 @@ public class VisitController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<VisitResponseDto>> getMyVisits() {
-        return ResponseEntity.ok(visitService.getMyVisits());
+    public ResponseEntity<List<VisitResponseDto>> getMyVisits(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(visitService.getMyVisits(jwt));
     }
 
     @GetMapping("/{uuid}")
