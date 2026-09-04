@@ -2,7 +2,7 @@ package com.github.farzan6118.petclinic.service.impl;
 
 import com.github.farzan6118.petclinic.dto.request.CreateVetAvailabilityRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdateVetAvailabilityRequestDto;
-import com.github.farzan6118.petclinic.exception.DateTimeValidationException;
+import com.github.farzan6118.petclinic.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.VetAvailability;
@@ -35,7 +35,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
                 vetUuid, request.date(), request.startTime(), request.endTime());
 
         if (overlapping) {
-            throw new DateTimeValidationException("Vet already has an availability overlapping this time range");
+            throw new GenericValidationException("Vet already has an availability overlapping this time range");
         }
 
         VetAvailability availability = VetAvailability.create(
@@ -56,7 +56,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
                 vetUuid, availabilityUuid, request.date(), request.startTime(), request.endTime());
 
         if (overlapping) {
-            throw new DateTimeValidationException("Vet already has an availability overlapping this time range");
+            throw new GenericValidationException("Vet already has an availability overlapping this time range");
         }
 
         availability.updateSchedule(request.date(), request.startTime(), request.endTime());
@@ -78,7 +78,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
     private void validateTimeRange(LocalTime startTime, LocalTime endTime) {
         if (!startTime.isBefore(endTime)) {
-            throw new DateTimeValidationException("Start time must be before end time");
+            throw new GenericValidationException("Start time must be before end time");
         }
     }
 }

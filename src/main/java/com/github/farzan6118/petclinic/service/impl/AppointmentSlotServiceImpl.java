@@ -1,6 +1,6 @@
 package com.github.farzan6118.petclinic.service.impl;
 
-import com.github.farzan6118.petclinic.exception.DateTimeValidationException;
+import com.github.farzan6118.petclinic.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.model.AppointmentSlot;
 import com.github.farzan6118.petclinic.model.Vet;
@@ -60,7 +60,7 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
     public void generateUpcomingSlots(UUID vetUuid, LocalDate from, LocalDate to) {
 
         if (from.isAfter(to)) {
-            throw new DateTimeValidationException(
+            throw new GenericValidationException(
                     "appointment.slot.invalid.date.range",
                     "From date must be before or equal to to date"
             );
@@ -140,21 +140,21 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
     private void validateAvailability(LocalTime startTime, LocalTime endTime, Integer durationMinutes) {
 
         if (startTime == null || endTime == null) {
-            throw new DateTimeValidationException(
+            throw new GenericValidationException(
                     "vet.availability.invalid.time",
                     "Availability time cannot be null"
             );
         }
 
         if (!startTime.isBefore(endTime)) {
-            throw new DateTimeValidationException(
+            throw new GenericValidationException(
                     "vet.availability.invalid.time.range",
                     "Start time must be before end time"
             );
         }
 
         if (durationMinutes == null || durationMinutes <= 0) {
-            throw new DateTimeValidationException(
+            throw new GenericValidationException(
                     "vet.availability.invalid.duration",
                     "Duration must be greater than zero"
             );
@@ -163,7 +163,7 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
         long availableMinutes = Duration.between(startTime, endTime).toMinutes();
 
         if (durationMinutes > availableMinutes) {
-            throw new DateTimeValidationException(
+            throw new GenericValidationException(
                     "vet.availability.invalid.duration",
                     "Appointment duration cannot exceed availability duration"
             );

@@ -29,7 +29,7 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
 
   #  flyway:
   #    enabled: true
@@ -79,6 +79,9 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
     default-models-expand-depth: -1
+    oauth:
+      client-id: pet-clinic
+      use-pkce-with-authorization-code-grant: true
 
 system:
   default:

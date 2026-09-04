@@ -66,7 +66,7 @@ public class VetServiceImpl implements VetService {
         }
 
         if (vetRepository.existsByMobileNumber(telephone)) {
-            throw new PhoneAlreadyExistsException("mobile exists", "vet with telephone " + telephone + " already exists");
+            throw new PhoneAlreadyExistsException("mobile exists", "vet with mobileNumber " + telephone + " already exists");
         }
     }
 
@@ -101,7 +101,7 @@ public class VetServiceImpl implements VetService {
 
     private void validateTelephoneUniqueness(String telephone, UUID vetUuid) {
         if (vetRepository.existsByMobileNumberAndUuidNot(telephone, vetUuid)) {
-            throw new ResourceNotFoundException("Vet with this telephone already exists");
+            throw new ResourceNotFoundException("Vet with this mobileNumber already exists");
         }
     }
 

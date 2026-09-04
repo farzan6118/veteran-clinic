@@ -10,4 +10,11 @@ public interface OwnerRepository extends JpaRepository<Owner, Long> {
 
     Optional<Owner> findByUuid(UUID uuid);
 
+    boolean existsByEmail(String email);
+
+    boolean existsByMobileNumber(String mobile);
+
+    boolean existsByEmailAndUuidNot(String email, UUID uuid);
+
+    boolean existsByMobileNumberAndUuidNot(String telephone, UUID uuid);
 }

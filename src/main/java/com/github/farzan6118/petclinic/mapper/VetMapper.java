@@ -18,7 +18,7 @@ public class VetMapper {
         Vet vet = new Vet();
         vet.setFirstname(request.firstname());
         vet.setLastname(request.lastname());
-        vet.setNationalCode(request.nationalCode());
+        vet.setNationalId(request.nationalCode());
         vet.setMobileNumber(request.telephone());
         vet.setEmail(request.email());
 
@@ -28,7 +28,7 @@ public class VetMapper {
     public void mapToEntity(UpdateVetRequestDto request, Vet vet) {
         vet.setFirstname(request.firstname());
         vet.setLastname(request.lastname());
-        vet.setNationalCode(request.nationalCode());
+        vet.setNationalId(request.nationalCode());
         vet.setMobileNumber(request.telephone());
         vet.setEmail(request.email());
     }
@@ -37,7 +37,7 @@ public class VetMapper {
         return new VetResponseDto(
                 vet.getUuid(),
                 vet.getFullName(),
-                vet.getNationalCode(),
+                vet.getNationalId(),
                 vet.getMobileNumber(),
                 vet.getEmail());
     }
@@ -47,7 +47,7 @@ public class VetMapper {
         return new VetProfileResponseDto(
                 vet.getUuid(),
                 vet.getFullName(),
-                vet.getNationalCode(),
+                vet.getNationalId(),
                 vet.getMobileNumber(),
                 vet.getEmail(),
                 profile.getCity(),

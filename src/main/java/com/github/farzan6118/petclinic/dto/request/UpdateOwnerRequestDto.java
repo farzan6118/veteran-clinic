@@ -12,21 +12,19 @@ public record UpdateOwnerRequestDto(
         String firstname,
         @Schema(example = "Due")
         String lastname,
+        @Schema(example = "owner@test.com")
+        @Email
+        String email,
+        @Schema(example = "09121111111")
+        String telephone,
         @Schema(example = "6311001012")
         String nationalCode,
-        @Schema(example = "Long St.")
-        String address,
-        @Schema(example = "Tehran")
-        String city,
-        @Schema(example = "09121111111")
-        @NotBlank(message = "telephone.is.required")
-        String telephone,
         @Past(message = "invalid.birth.date")
         @Schema(example = "2008-08-29")
         LocalDate birthDate,
-        @Schema(example = "owner@test.com")
-        @NotBlank(message = "email.is.required")
-        @Email
-        String email
+        @Schema(example = "Tehran")
+        String city,
+        @Schema(example = "Long St.")
+        String address
 ) {
 }

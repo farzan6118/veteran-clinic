@@ -8,16 +8,16 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class PetType extends BaseEntity<Integer> {
+public class Species extends BaseEntity<Integer> {
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String name;
+
     @Column(nullable = false, unique = true, length = 50)
     private String code;
-    private String breed;
-    private String origin;
-    @Column(columnDefinition = "TEXT")
-    private String information;
-    private String description;
 
+    private String origin;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }

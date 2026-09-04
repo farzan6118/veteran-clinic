@@ -12,7 +12,7 @@ public record CreateVetRequestDto(
         @Schema(example = "6311001012")
         String nationalCode,
         @Schema(example = "09121111111")
-        @NotBlank(message = "telephone.is.required")
+        @NotBlank(message = "mobileNumber.is.required")
         String telephone,
         @Schema(example = "vet@test.com")
         @NotBlank(message = "email.is.required")
