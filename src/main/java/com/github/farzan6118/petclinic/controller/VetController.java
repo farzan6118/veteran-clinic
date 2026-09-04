@@ -72,14 +72,9 @@ public class VetController {
     }
 
     @GetMapping("/{vetUuid}/available-slots")
-    public List<VetAvailableSlotResponseDto> getAvailableSlots(
-            @PathVariable UUID vetUuid,
-            @RequestParam LocalDate date
-    ) {
-        return visitService.getAvailableSlots(
-                vetUuid,
-                date
-        );
+    public List<VetAvailableSlotResponseDto> getAvailableSlots(@PathVariable UUID vetUuid,
+                                                               @RequestParam LocalDate date) {
+        return visitService.getAvailableSlots(vetUuid, date);
     }
 
 }

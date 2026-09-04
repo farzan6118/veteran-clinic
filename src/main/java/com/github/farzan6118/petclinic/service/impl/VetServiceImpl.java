@@ -5,11 +5,11 @@ import com.github.farzan6118.petclinic.dto.request.UpdateVetRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VetProfileUpdateRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
-import com.github.farzan6118.petclinic.exception.EmailAlreadyExistsException;
-import com.github.farzan6118.petclinic.exception.PhoneAlreadyExistsException;
+import com.github.farzan6118.petclinic.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.VetMapper;
 import com.github.farzan6118.petclinic.model.Vet;
+import com.github.farzan6118.petclinic.model.constant.EntityStatus;
 import com.github.farzan6118.petclinic.repository.VetRepository;
 import com.github.farzan6118.petclinic.service.VetService;
 import lombok.RequiredArgsConstructor;
@@ -52,21 +52,21 @@ public class VetServiceImpl implements VetService {
     @Transactional
     @Override
     public void create(CreateVetRequestDto request) {
-        validateUniqueContactInfo(request.telephone(), request.email());
+
+        validateUniqueContactInfo(request.mobileNumber(), request.email());
         Vet vet = vetMapper.mapToEntity(request);
+
         vetRepository.save(vet);
         log.info("vet created");
 
     }
 
-    private void validateUniqueContactInfo(String telephone, String email) {
-
+    private void validateUniqueContactInfo(String mobileNumber, String email) {
         if (vetRepository.existsByEmail(email)) {
-            throw new EmailAlreadyExistsException("email exists", "vet with email " + email + " already exists");
+            throw new GenericValidationException("email exists", "vet email " + email + " exists");
         }
-
-        if (vetRepository.existsByMobileNumber(telephone)) {
-            throw new PhoneAlreadyExistsException("mobile exists", "vet with mobileNumber " + telephone + " already exists");
+        if (vetRepository.existsByMobileNumber(mobileNumber)) {
+            throw new GenericValidationException("mobileNumber exists", "vet mobileNumber " + mobileNumber + " exists");
         }
     }
 
@@ -81,39 +81,34 @@ public class VetServiceImpl implements VetService {
     @Transactional
     @Override
     public void update(UUID uuid, UpdateVetRequestDto request) {
-
         Vet vet = getEntityByUuid(uuid);
-
         validateEmailUniqueness(request.email(), uuid);
-
-        validateTelephoneUniqueness(request.telephone(), uuid);
-
+        validateTelephoneUniqueness(request.mobileNumber(), uuid);
         vetMapper.mapToEntity(request, vet);
-
         log.info("vet updated");
     }
 
     private void validateEmailUniqueness(String email, UUID vetUuid) {
         if (vetRepository.existsByEmailAndUuidNot(email, vetUuid)) {
-            throw new ResourceNotFoundException("Vet with this email already exists");
+            throw new GenericValidationException("Vet with this email already exists");
         }
     }
 
-    private void validateTelephoneUniqueness(String telephone, UUID vetUuid) {
-        if (vetRepository.existsByMobileNumberAndUuidNot(telephone, vetUuid)) {
-            throw new ResourceNotFoundException("Vet with this mobileNumber already exists");
+    private void validateTelephoneUniqueness(String mobileNumber, UUID vetUuid) {
+        if (vetRepository.existsByMobileNumberAndUuidNot(mobileNumber, vetUuid)) {
+            throw new GenericValidationException("Vet with this mobileNumber already exists");
         }
     }
 
     @Transactional
     @Override
     public void delete(UUID uuid) {
-        Vet vet = vetRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("vet not found"));
-
-        vetRepository.delete(vet);
-
-        log.info("vet deleted");
+        Vet vet = this.getEntityByUuid(uuid);
+        if (!vet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
+            throw new GenericValidationException("vet is already inactive");
+        }
+        vet.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        log.info("vet inactivated");
     }
 
     @Override

@@ -48,7 +48,7 @@ public class Vet extends BaseEntity<Long> {
     private List<AppointmentSlot> slots = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-//    @Column(nullable = false)
+    @Column(nullable = false)
     private AppointmentDuration appointmentDuration;
 
 

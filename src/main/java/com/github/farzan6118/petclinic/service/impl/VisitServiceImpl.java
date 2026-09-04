@@ -58,38 +58,21 @@ public class VisitServiceImpl implements VisitService {
 
         AppointmentSlot slot = slotRepository
                 .findAvailableSlotForUpdate(request.slotUuid())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "visit.slot.not.available",
-                                "Selected appointment slot is not available"
-                        ));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "visit.slot.not.available", "Selected appointment slot is not available"));
 
         validateSlotBelongsToVet(slot, vet);
 
-        Visit visit = Visit.create(
-                pet,
-                vet,
-                slot,
-                request.description()
-        );
+        Visit visit = Visit.create(pet, vet, slot, request.description());
 
         slot.book();
 
         Visit savedVisit = visitRepository.save(visit);
 
-        visitNotificationService.notifyBookVisitParticipants(
-                savedVisit,
-                pet,
-                vet
-        );
+        visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
 
-        log.info(
-                "Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}, slotUuid={}",
-                savedVisit.getUuid(),
-                pet.getUuid(),
-                vet.getUuid(),
-                slot.getUuid()
-        );
+        log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}, slotUuid={}",
+                savedVisit.getUuid(), pet.getUuid(), vet.getUuid(), slot.getUuid());
 
         return savedVisit.getUuid();
     }
@@ -102,10 +85,7 @@ public class VisitServiceImpl implements VisitService {
 
         UUID currentUserUuid = getCurrentUserUuid(jwt);
 
-        return visitRepository
-                .findAllByPetOwnerUuidOrderByAppointmentSlotDateAsc(
-                        currentUserUuid
-                )
+        return visitRepository.findAllByPetOwnerUuidOrderByAppointmentSlotDateAsc(currentUserUuid)
                 .stream()
                 .map(visitMapper::toResponse)
                 .toList();
@@ -136,10 +116,7 @@ public class VisitServiceImpl implements VisitService {
         }
 
         if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ResourceNotFoundException(
-                    "visit.already.completed",
-                    "Completed visit cannot be cancelled"
-            );
+            throw new ResourceNotFoundException("visit.already.completed", "Completed visit cannot be cancelled");
         }
 
         AppointmentSlot slot = visit.getAppointmentSlot();
@@ -150,17 +127,11 @@ public class VisitServiceImpl implements VisitService {
             slot.release();
         }
 
-        visitNotificationService.notifyCancelVisitParticipants(
-                visit,
-                visit.getPet(),
-                visit.getVet(),
-                reason
-        );
+        visitNotificationService.notifyCancelVisitParticipants(visit, visit.getPet(), visit.getVet(), reason);
 
         log.info(
                 "Visit cancelled. visitUuid={}, slotUuid={}",
-                visit.getUuid(),
-                slot != null ? slot.getUuid() : null
+                visit.getUuid(), slot != null ? slot.getUuid() : null
         );
     }
 
@@ -172,10 +143,7 @@ public class VisitServiceImpl implements VisitService {
 
         UUID currentVetUuid = getCurrentVetUuid();
 
-        return visitRepository
-                .findAllByVetUuidOrderByAppointmentSlotDateAsc(
-                        currentVetUuid
-                )
+        return visitRepository.findAllByVetUuidOrderByAppointmentSlotDateAsc(currentVetUuid)
                 .stream()
                 .map(visitMapper::toResponse)
                 .toList();
@@ -186,34 +154,16 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     @Transactional
-    public VisitResponseDto completeVisit(
-            UUID uuid,
-            CompleteVisitRequest request
-    ) {
-
+    public VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request) {
         Visit visit = getVisitByUuid(uuid);
-
         if (visit.getStatus() == VisitStatus.CANCELLED) {
-            throw new ResourceNotFoundException(
-                    "visit.cancelled",
-                    "Cancelled visit cannot be completed"
-            );
+            throw new ResourceNotFoundException("visit.cancelled", "Cancelled visit cannot be completed");
         }
-
         if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ResourceNotFoundException(
-                    "visit.already.completed",
-                    "Visit is already completed"
-            );
+            throw new ResourceNotFoundException("visit.already.completed", "Visit is already completed");
         }
-
         visit.complete();
-
-        log.info(
-                "Visit completed. visitUuid={}",
-                visit.getUuid()
-        );
-
+        log.info("Visit completed. visitUuid={}", visit.getUuid());
         return visitMapper.toResponse(visit);
     }
 
@@ -222,7 +172,6 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     public List<VisitResponseDto> getAllVisits() {
-
         return visitRepository.findAll()
                 .stream()
                 .map(visitMapper::toResponse)
@@ -234,15 +183,9 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     @Transactional
-    public void rescheduleVisit(
-            UUID uuid,
-            RescheduleVisitRequestDto request
-    ) {
-
+    public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
         Visit visit = getVisitByUuid(uuid);
-
         validateCanBeRescheduled(visit);
-
         AppointmentSlot oldSlot = visit.getAppointmentSlot();
 
         AppointmentSlot newSlot = slotRepository
@@ -253,10 +196,7 @@ public class VisitServiceImpl implements VisitService {
                                 "Selected appointment slot is not available"
                         ));
 
-        validateSlotBelongsToVet(
-                newSlot,
-                visit.getVet()
-        );
+        validateSlotBelongsToVet(newSlot, visit.getVet());
 
         /*
          * Release the old slot.
@@ -275,37 +215,23 @@ public class VisitServiceImpl implements VisitService {
         }
 
         visitNotificationService.notifyRescheduleVisitParticipants(
-                visit,
-                visit.getPet(),
-                visit.getVet(),
-                null
-        );
+                visit, visit.getPet(), visit.getVet(), null);
 
         log.info(
                 "Visit rescheduled successfully. visitUuid={}, oldSlotUuid={}, newSlotUuid={}",
-                visit.getUuid(),
-                oldSlot.getUuid(),
-                newSlot.getUuid()
-        );
+                visit.getUuid(), oldSlot.getUuid(), newSlot.getUuid());
     }
 
     /**
      * Get available slots for a vet on a specific date.
      */
     @Override
-    public List<VetAvailableSlotResponseDto> getAvailableSlots(
-            UUID vetUuid,
-            LocalDate date
-    ) {
+    public List<VetAvailableSlotResponseDto> getAvailableSlots(UUID vetUuid, LocalDate date) {
 
         validateVetExists(vetUuid);
 
         return slotRepository
-                .findAllByVetUuidAndDateAndStatusOrderByStartTime(
-                        vetUuid,
-                        date,
-                        SlotStatus.AVAILABLE
-                )
+                .findAllByVetUuidAndDateAndStatusOrderByStartTime(vetUuid, date, SlotStatus.AVAILABLE)
                 .stream()
                 .map(slot -> new VetAvailableSlotResponseDto(
                         slot.getUuid(),
@@ -317,37 +243,22 @@ public class VisitServiceImpl implements VisitService {
     }
 
     private Visit getVisitByUuid(UUID uuid) {
-
         return visitRepository.findByUuid(uuid)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Visit not found: " + uuid
-                        ));
+                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + uuid));
     }
 
     private Vet getVetByUuid(UUID vetUuid) {
-
         return vetRepository.findByUuid(vetUuid)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Vet not found: " + vetUuid
-                        ));
+                .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
     }
 
     private void validateVetExists(UUID vetUuid) {
-
         if (!vetRepository.existsByUuid(vetUuid)) {
-            throw new ResourceNotFoundException(
-                    "Vet not found: " + vetUuid
-            );
+            throw new ResourceNotFoundException("Vet not found: " + vetUuid);
         }
     }
 
-    private void validateSlotBelongsToVet(
-            AppointmentSlot slot,
-            Vet vet
-    ) {
-
+    private void validateSlotBelongsToVet(AppointmentSlot slot, Vet vet) {
         if (!slot.getVet().getUuid().equals(vet.getUuid())) {
             throw new ResourceNotFoundException(
                     "visit.slot.invalid.vet",
@@ -357,7 +268,6 @@ public class VisitServiceImpl implements VisitService {
     }
 
     private void validateCanBeRescheduled(Visit visit) {
-
         if (visit.getStatus() == VisitStatus.CANCELLED) {
             throw new ResourceNotFoundException(
                     "visit.cancelled",
@@ -374,25 +284,15 @@ public class VisitServiceImpl implements VisitService {
     }
 
     private UUID getCurrentUserUuid(Jwt jwt) {
-
         return UUID.fromString(jwt.getSubject());
     }
 
     private UUID getCurrentVetUuid() {
-
-        Authentication authentication =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken jwtAuthentication) {
-            return UUID.fromString(
-                    jwtAuthentication.getToken().getSubject()
+            return UUID.fromString(jwtAuthentication.getToken().getSubject()
             );
         }
-
-        throw new IllegalStateException(
-                "Authenticated JWT user not found"
-        );
+        throw new IllegalStateException("Authenticated JWT user not found");
     }
 }

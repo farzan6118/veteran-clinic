@@ -50,4 +50,6 @@ public interface VetAvailabilityRepository extends JpaRepository<VetAvailability
     );
 
     Optional<VetAvailability> findByUuidAndVetUuid(UUID uuid, UUID vetUuid);
+
+    List<VetAvailability> findAllByVetUuid(UUID vetUuid);
 }

@@ -1,5 +1,7 @@
 package com.github.farzan6118.petclinic.dto.response;
 
+import com.github.farzan6118.petclinic.model.constant.AppointmentDuration;
+
 import java.util.UUID;
 
 public record VetResponseDto(
@@ -7,6 +9,7 @@ public record VetResponseDto(
         String fullName,
         String nationalCode,
         String telephone,
-        String email
+        String email,
+        AppointmentDuration appointmentDuration
 ) {
 }
