@@ -1,30 +1,24 @@
 package com.github.farzan6118.petclinic.service;
 
-import com.github.farzan6118.petclinic.dto.request.CreateVetRequestDto;
-import com.github.farzan6118.petclinic.dto.request.UpdateVetRequestDto;
-import com.github.farzan6118.petclinic.dto.request.VetProfileUpdateRequestDto;
-import com.github.farzan6118.petclinic.dto.response.VetProfileResponseDto;
-import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
-import com.github.farzan6118.petclinic.model.Vet;
+import com.github.farzan6118.petclinic.dto.request.CreateRoomTypeRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdateRoomTypeRequestDto;
+import com.github.farzan6118.petclinic.dto.response.RoomTypeResponseDto;
+import com.github.farzan6118.petclinic.model.RoomType;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface RoomTypeService {
 
-    VetResponseDto getByUuid(UUID uuid);
+    RoomTypeResponseDto getByUuid(UUID uuid);
 
-    Vet getEntityByUuid(UUID uuid);
+    RoomType getEntityByUuid(UUID uuid);
 
-    List<VetResponseDto> findAll();
+    List<RoomTypeResponseDto> findAll();
 
-    void create(CreateVetRequestDto request);
+    void create(CreateRoomTypeRequestDto request);
 
-    void updateVetProfileByUuid(VetProfileUpdateRequestDto request, UUID vetUuid);
-
-    void update(UUID uuid, UpdateVetRequestDto request);
+    void update(UUID uuid, UpdateRoomTypeRequestDto request);
 
     void delete(UUID uuid);
-
-    VetProfileResponseDto getVetProfileByUuid(UUID uuid);
 }

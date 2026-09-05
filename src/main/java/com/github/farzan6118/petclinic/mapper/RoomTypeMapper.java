@@ -1,9 +1,9 @@
 package com.github.farzan6118.petclinic.mapper;
 
-import com.github.farzan6118.petclinic.dto.request.CreateRoomRequestDto;
-import com.github.farzan6118.petclinic.dto.request.UpdateRoomRequestDto;
+import com.github.farzan6118.petclinic.dto.request.CreateRoomTypeRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdateRoomTypeRequestDto;
 import com.github.farzan6118.petclinic.dto.response.RoomTypeResponseDto;
-import com.github.farzan6118.petclinic.model.Room;
+import com.github.farzan6118.petclinic.model.RoomType;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
@@ -11,25 +11,22 @@ import java.util.Locale;
 @Component
 public class RoomTypeMapper {
 
-    public RoomTypeResponseDto mapToDto(Room room) {
+    public RoomTypeResponseDto mapToDto(RoomType roomType) {
         return new RoomTypeResponseDto(
-                room.getUuid(),
-                room.getCode(),
-                room.getName(),
-                room.isActive()
+                roomType.getUuid(),
+                roomType.getName(),
+                roomType.getDescription()
         );
     }
 
-    public void mapToEntity(CreateRoomRequestDto request, Room room) {
-        room.setName(normalizeName(request.name()));
-        room.setRoomType(request.roomType());
-        room.setActive(request.active());
+    public void mapToEntity(CreateRoomTypeRequestDto request, RoomType roomType) {
+        roomType.setName(normalizeName(request.name()));
+        roomType.setDescription(request.description());
     }
 
-    public void mapToEntity(UpdateRoomRequestDto request, Room room) {
-        room.setName(normalizeName(request.name()));
-        room.setRoomType(request.roomType());
-        room.setActive(request.active());
+    public void mapToEntity(UpdateRoomTypeRequestDto request, RoomType roomType) {
+        roomType.setName(normalizeName(request.name()));
+        roomType.setDescription(request.description());
     }
 
     private String normalizeName(String string) {
