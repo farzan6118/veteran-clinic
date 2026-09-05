@@ -9,6 +9,8 @@ import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.constant.AppointmentDuration;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
+
 @Component
 public class VetMapper {
 
@@ -17,13 +19,11 @@ public class VetMapper {
             return null;
         }
         Vet vet = new Vet();
-        vet.setAppointmentDuration(handleAppointmentDuration(request.duration()));
-        vet.setFirstname(request.firstName());
-        vet.setLastname(request.lastName());
+        vet.setFirstName(normalizeName(request.firstName()));
+        vet.setLastName(normalizeName(request.lastName()));
         vet.setNationalId(request.nationalId());
         vet.setMobileNumber(request.mobileNumber());
         vet.setEmail(request.email());
-        vet.setAppointmentDuration(request.duration());
         return vet;
     }
 
@@ -32,13 +32,11 @@ public class VetMapper {
     }
 
     public void mapToEntity(UpdateVetRequestDto request, Vet vet) {
-        vet.setAppointmentDuration(handleAppointmentDuration(request.duration()));
-        vet.setFirstname(request.firstName());
-        vet.setLastname(request.lastName());
+        vet.setFirstName(normalizeName(request.firstName()));
+        vet.setLastName(normalizeName(request.lastName()));
         vet.setNationalId(request.nationalId());
         vet.setMobileNumber(request.mobileNumber());
         vet.setEmail(request.email());
-        vet.setAppointmentDuration(request.duration());
     }
 
     public VetResponseDto mapToDto(Vet vet) {
@@ -48,7 +46,7 @@ public class VetMapper {
                 vet.getNationalId(),
                 vet.getMobileNumber(),
                 vet.getEmail(),
-                vet.getAppointmentDuration()
+                null
         );
     }
 
@@ -60,10 +58,13 @@ public class VetMapper {
                 vet.getNationalId(),
                 vet.getMobileNumber(),
                 vet.getEmail(),
-                vet.getAppointmentDuration(),
                 profile.getCity(),
                 profile.getAddress(),
                 profile.getSpecialty(),
                 profile.getBirthDate());
+    }
+
+    private String normalizeName(String string) {
+        return string.toLowerCase(Locale.ROOT).trim();
     }
 }

@@ -5,7 +5,6 @@ import com.github.farzan6118.petclinic.dto.request.UpdateVetAvailabilityRequestD
 import com.github.farzan6118.petclinic.dto.response.AvailabilityResponseDto;
 import com.github.farzan6118.petclinic.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
-import com.github.farzan6118.petclinic.model.AppointmentSlot;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.VetAvailability;
 import com.github.farzan6118.petclinic.repository.VetAvailabilityRepository;

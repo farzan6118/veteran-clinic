@@ -9,9 +9,9 @@ import java.time.LocalDate;
 
 public record CreateOwnerRequestDto(
         @Schema(example = "John")
-        String firstname,
+        String firstName,
         @Schema(example = "Due")
-        String lastname,
+        String lastName,
         @Schema(example = "owner@test.com")
         @NotBlank(message = "email.is.required")
         @Email
@@ -19,8 +19,8 @@ public record CreateOwnerRequestDto(
         @Schema(example = "09121111111")
         @NotBlank(message = "mobile.mumber.is.required")
         String mobileNumber,
-        @Schema(example = "6311001012")
-        String nationalCode,
+        @Schema(example = "7501110001")
+        String nationalId,
         @Past(message = "invalid.birth.date")
         @Schema(example = "2008-08-29")
         LocalDate birthDate,

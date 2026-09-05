@@ -8,11 +8,13 @@ import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.Species;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
+
 @Component
 public class PetMapper {
 
     public void mapToPet(UpdatePetRequestDto request, Owner owner, Pet pet, Species species) {
-        pet.setName(request.name());
+        pet.setName(normalizeName(request.name()));
         pet.setColor(request.color());
         pet.setMarks(request.marks());
         pet.setSex(request.sex());
@@ -22,7 +24,7 @@ public class PetMapper {
     }
 
     public void mapToPet(CreatePetRequestDto request, Owner owner, Pet pet, Species species) {
-        pet.setName(request.name());
+        pet.setName(normalizeName(request.name()));
         pet.setColor(request.color());
         pet.setMarks(request.marks());
         pet.setSex(request.sex());
@@ -40,9 +42,10 @@ public class PetMapper {
                 pet.getSex(),
                 pet.getBirthDate(),
                 pet.getSpecies().getName()
-
-
-
         );
+    }
+
+    private String normalizeName(String string) {
+        return string.toLowerCase(Locale.ROOT).trim();
     }
 }

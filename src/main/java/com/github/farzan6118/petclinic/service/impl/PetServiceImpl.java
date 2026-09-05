@@ -87,7 +87,7 @@ public class PetServiceImpl implements PetService {
     @Override
     public void delete(UUID uuid) {
         Pet pet = this.getEntityByUuid(uuid);
-        if(!pet.getEntityStatus().equals(EntityStatus.ACTIVE)){
+        if (!pet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
             throw new GenericValidationException("pet is already inactive");
         }
         pet.setEntityStatus(EntityStatus.INACTIVE_DELETED);

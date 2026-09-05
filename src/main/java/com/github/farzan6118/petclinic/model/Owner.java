@@ -20,7 +20,7 @@ public class Owner extends BaseEntity<Long> {
 
     private String firstName;
     private String lastName;
-    private String nationalCode;
+    private String nationalId;
     private LocalDate birthDate;
 
     @NotBlank

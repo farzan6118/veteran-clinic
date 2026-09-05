@@ -1,10 +1,11 @@
 package com.github.farzan6118.petclinic.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.github.farzan6118.petclinic.model.constant.Sex;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -19,7 +20,8 @@ public record UpdatePetRequestDto(
         String marks,
         @NotNull(message = "pet.sex.is.required")
         Sex sex,
-        @Past(message = "invalid.birth.date")
+        @PastOrPresent(message = "invalid.birth.date")
+        @JsonFormat(pattern = "yyyy-MM-dd")
         @Schema(example = "2024-08-29")
         LocalDate birthDate,
         @NotNull(message = "species.is.required")

@@ -1,6 +1,7 @@
 package com.github.farzan6118.petclinic.model;
 
 import com.github.farzan6118.petclinic.model.constant.AppointmentDuration;
+import com.github.farzan6118.petclinic.model.constant.AppointmentType;
 import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,8 +25,18 @@ import java.time.LocalTime;
                 )
         },
         indexes = {
-                @Index(name = "idx_appointment_slot_vet_date", columnList = "vet_id,date"),
-                @Index(name = "idx_appointment_slot_status", columnList = "status")
+                @Index(
+                        name = "idx_appointment_slot_vet_date",
+                        columnList = "vet_id,date"
+                ),
+                @Index(
+                        name = "idx_appointment_slot_room_date",
+                        columnList = "room_id,date"
+                ),
+                @Index(
+                        name = "idx_appointment_slot_status",
+                        columnList = "status"
+                )
         }
 )
 public class AppointmentSlot extends BaseEntity<Long> {
@@ -33,6 +44,10 @@ public class AppointmentSlot extends BaseEntity<Long> {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "vet_id", nullable = false)
     private Vet vet;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -42,6 +57,10 @@ public class AppointmentSlot extends BaseEntity<Long> {
 
     @Column(nullable = false)
     private LocalTime endTime;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AppointmentType appointmentType;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
