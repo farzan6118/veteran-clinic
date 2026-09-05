@@ -29,7 +29,7 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
 
   #  flyway:
   #    enabled: true
