@@ -68,7 +68,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public void update(UUID uuid, UpdateOwnerRequestDto request) {
         validateEmailUniqueness(request.email(), uuid);
-        validateTelephoneUniqueness(request.telephone(), uuid);
+        validateTelephoneUniqueness(request.mobileNumber(), uuid);
         Owner owner = this.getEntityByUuid(uuid);
         ownerMapper.mapToOwner(request, owner);
         ownerRepository.save(owner);
@@ -91,7 +91,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public void delete(UUID uuid) {
         Owner owner = this.getEntityByUuid(uuid);
-        if(!owner.getEntityStatus().equals(EntityStatus.ACTIVE)){
+        if (!owner.getEntityStatus().equals(EntityStatus.ACTIVE)) {
             throw new GenericValidationException("owner is already inactive");
         }
         owner.setEntityStatus(EntityStatus.INACTIVE_DELETED);

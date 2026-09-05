@@ -87,7 +87,7 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
         LocalTime startTime = availability.getStartTime();
         LocalTime endTime = availability.getEndTime();
 
-        AppointmentDuration duration = vet.getAppointmentDuration();
+        AppointmentDuration duration = AppointmentDuration.FIFTEEN_MINUTES;
 
         LocalTime slotStart = startTime;
 

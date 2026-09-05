@@ -1,6 +1,5 @@
 package com.github.farzan6118.petclinic.model;
 
-import com.github.farzan6118.petclinic.model.constant.AppointmentDuration;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -22,8 +21,8 @@ import java.util.stream.Stream;
 @Setter
 @Audited
 public class Vet extends BaseEntity<Long> {
-    private String firstname;
-    private String lastname;
+    private String firstName;
+    private String lastName;
 
     @Column(unique = true)
     private String nationalId;
@@ -47,13 +46,9 @@ public class Vet extends BaseEntity<Long> {
     @OneToMany(mappedBy = "vet")
     private List<AppointmentSlot> slots = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AppointmentDuration appointmentDuration;
-
 
     public String getFullName() {
-        return Stream.of(firstname, lastname)
+        return Stream.of(firstName, lastName)
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(" "));
     }

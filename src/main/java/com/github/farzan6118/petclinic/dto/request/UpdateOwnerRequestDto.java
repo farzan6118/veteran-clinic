@@ -1,25 +1,26 @@
 package com.github.farzan6118.petclinic.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
 
 public record UpdateOwnerRequestDto(
         @Schema(example = "John")
-        String firstname,
+        String firstName,
         @Schema(example = "Due")
-        String lastname,
+        String lastName,
         @Schema(example = "owner@test.com")
         @Email
         String email,
         @Schema(example = "09121111111")
-        String telephone,
-        @Schema(example = "6311001012")
-        String nationalCode,
-        @Past(message = "invalid.birth.date")
+        String mobileNumber,
+        @Schema(example = "7501110001")
+        String nationalId,
+        @PastOrPresent(message = "invalid.birth.date")
+        @JsonFormat(pattern = "yyyy-MM-dd")
         @Schema(example = "2008-08-29")
         LocalDate birthDate,
         @Schema(example = "Tehran")

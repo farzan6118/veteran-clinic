@@ -5,11 +5,11 @@ import java.util.UUID;
 
 public record OwnerResponseDto(
         UUID uuid,
-        String firstname,
-        String lastname,
+        String firstName,
+        String lastName,
         String email,
         String mobileNumber,
-        String nationalCode,
+        String nationalId,
         LocalDate birthDate,
         String city,
         String address

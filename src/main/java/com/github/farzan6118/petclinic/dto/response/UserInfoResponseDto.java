@@ -4,7 +4,7 @@ public record UserInfoResponseDto(
         String givenName,
         String familyName,
         String email,
-        String phoneNumber,
-        String nationalCode
+        String MobileNumber,
+        String nationalId
 ) {
 }

@@ -6,8 +6,6 @@ import com.github.farzan6118.petclinic.dto.request.UpdateSpeciesRequestDto;
 import com.github.farzan6118.petclinic.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.dto.response.SpeciesResponseDto;
 import com.github.farzan6118.petclinic.model.Species;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;

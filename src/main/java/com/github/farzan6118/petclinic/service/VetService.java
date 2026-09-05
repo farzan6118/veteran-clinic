@@ -6,7 +6,6 @@ import com.github.farzan6118.petclinic.dto.request.VetProfileUpdateRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.model.Vet;
-import com.github.farzan6118.petclinic.model.constant.AppointmentDuration;
 
 import java.util.List;
 import java.util.UUID;
