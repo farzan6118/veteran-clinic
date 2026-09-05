@@ -25,8 +25,6 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
     public void notifyVisitRescheduled(Visit visit, Pet pet, Vet vet, LocalDateTime oldVisitDate, String reason) {
         Owner owner = pet.getOwner();
 
-
-
         try {
             emailService.sendVetVisitRescheduledEmail(
                     vet.getEmail(),
