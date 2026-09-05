@@ -79,7 +79,8 @@ public class FillInitialRecords {
             roomRepository.saveAll(List.of(
                     room("Examination Room 1", "EXAM-01", roomTypes.get(0)),
                     room("Surgery Room 1", "SURG-01", roomTypes.get(1)),
-                    room("Isolation Room 1", "ISO-01", roomTypes.get(2))
+                    room("Isolation Room 1", "ISO-01", roomTypes.get(2)),
+                    room("Isolation Room 2", "ISO-02", roomTypes.get(2))
             ));
 
             Vet firstVet = vet("Sara", "Moradi", "09210000001", "sara.moradi@example.com", "100000001");
@@ -99,7 +100,8 @@ public class FillInitialRecords {
             vetAvailabilityRepository.saveAll(List.of(
                     availability(vets.get(0), LocalDate.of(2026, 9, 7), LocalTime.of(9, 0), LocalTime.of(13, 0)),
                     availability(vets.get(1), LocalDate.of(2026, 9, 8), LocalTime.of(10, 0), LocalTime.of(14, 0)),
-                    availability(vets.get(2), LocalDate.of(2026, 9, 9), LocalTime.of(8, 0), LocalTime.of(12, 0))
+                    availability(vets.get(2), LocalDate.of(2026, 9, 9), LocalTime.of(8, 0), LocalTime.of(12, 0)),
+                    availability(vets.get(1), LocalDate.of(2026, 9, 9), LocalTime.of(9, 30), LocalTime.of(12, 30))
             ));
         }
     }
