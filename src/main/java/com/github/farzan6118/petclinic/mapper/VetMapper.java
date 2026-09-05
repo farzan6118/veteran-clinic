@@ -45,8 +45,7 @@ public class VetMapper {
                 vet.getFullName(),
                 vet.getNationalId(),
                 vet.getMobileNumber(),
-                vet.getEmail(),
-                null
+                vet.getEmail()
         );
     }
 
