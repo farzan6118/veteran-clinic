@@ -1,13 +1,9 @@
 package com.github.farzan6118.petclinic.controller;
 
-import com.github.farzan6118.petclinic.dto.request.CreateVetRequestDto;
-import com.github.farzan6118.petclinic.dto.request.UpdateVetRequestDto;
-import com.github.farzan6118.petclinic.dto.request.VetProfileUpdateRequestDto;
-import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
-import com.github.farzan6118.petclinic.dto.response.VetProfileResponseDto;
-import com.github.farzan6118.petclinic.dto.response.VetResponseDto;
-import com.github.farzan6118.petclinic.service.VetService;
-import com.github.farzan6118.petclinic.service.VisitService;
+import com.github.farzan6118.petclinic.dto.request.CreateRoomRequestDto;
+import com.github.farzan6118.petclinic.dto.request.UpdateRoomRequestDto;
+import com.github.farzan6118.petclinic.dto.response.RoomResponseDto;
+import com.github.farzan6118.petclinic.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,57 +20,36 @@ import java.util.UUID;
 @RequestMapping("/api/room")
 public class RoomController {
 
-    private final VetService vetService;
-    private final VisitService visitService;
+    private final RoomService roomService;
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<VetResponseDto> getByUuid(@PathVariable UUID uuid) {
-        return ResponseEntity.ok(vetService.getByUuid(uuid));
+    public ResponseEntity<RoomResponseDto> getByUuid(@PathVariable UUID uuid) {
+        return ResponseEntity.ok(roomService.getByUuid(uuid));
     }
 
     @GetMapping
-    public ResponseEntity<List<VetResponseDto>> findAll() {
-        return ResponseEntity.ok(vetService.findAll());
+    public ResponseEntity<List<RoomResponseDto>> findAll() {
+        return ResponseEntity.ok(roomService.findAll());
     }
 
     @PostMapping
-    public ResponseEntity<VetResponseDto> create(@Valid @RequestBody CreateVetRequestDto request) {
-        vetService.create(request);
+    public ResponseEntity<Void> create(@Valid @RequestBody CreateRoomRequestDto request) {
+        roomService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<VetResponseDto> update(
+    public ResponseEntity<Void> update(
             @PathVariable UUID uuid,
-            @Valid @RequestBody UpdateVetRequestDto request) {
-        vetService.update(uuid, request);
+            @Valid @RequestBody UpdateRoomRequestDto request) {
+        roomService.update(uuid, request);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
-        vetService.delete(uuid);
+        roomService.delete(uuid);
         return ResponseEntity.noContent().build();
     }
-
-    @PutMapping("/{uuid}/profile")
-    public ResponseEntity<VetProfileResponseDto> updateVetProfile(
-            @Valid @RequestBody VetProfileUpdateRequestDto request,
-            @PathVariable UUID uuid) {
-        vetService.updateVetProfileByUuid(request, uuid);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/{uuid}/profile")
-    public ResponseEntity<VetProfileResponseDto> getVetProfile(@PathVariable UUID uuid) {
-        return ResponseEntity.ok(vetService.getVetProfileByUuid(uuid));
-    }
-
-    @GetMapping("/{vetUuid}/available-slots")
-    public List<VetAvailableSlotResponseDto> getAvailableSlots(@PathVariable UUID vetUuid,
-                                                               @RequestParam LocalDate date) {
-        return visitService.getAvailableSlots(vetUuid, date);
-    }
-
 }
 

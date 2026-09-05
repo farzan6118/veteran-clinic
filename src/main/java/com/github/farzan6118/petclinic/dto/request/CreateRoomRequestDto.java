@@ -6,8 +6,6 @@ public record CreateRoomRequestDto(
         String name,
         String code,
         RoomType roomType,
-        String floor,
-        String description,
         Boolean active
 ) {
 }
