@@ -29,32 +29,21 @@ public class VisitController {
 
     @GetMapping("/vets/{vetUuid}/available-slots")
     public ResponseEntity<List<VetAvailableSlotResponseDto>> getAvailableSlots(
-            @PathVariable UUID vetUuid,
-            @RequestParam LocalDate date
-    ) {
-
-        return ResponseEntity.ok(
-                visitService.getAvailableSlots(
-                        vetUuid,
-                        date
-                )
-        );
+            @PathVariable UUID vetUuid, @RequestParam LocalDate date) {
+        return ResponseEntity.ok(visitService.getAvailableSlots(vetUuid, date));
     }
 
     @PostMapping
-    public ResponseEntity<UUID> bookVisit(
-            @Valid @RequestBody VisitRequestDto request
-    ) {
+    public ResponseEntity<UUID> bookVisit(@Valid @RequestBody VisitRequestDto request) {
 
         UUID visitUuid = visitService.bookVisit(request);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(visitUuid);
+        return ResponseEntity.status(HttpStatus.CREATED).body(visitUuid);
     }
 
     @PutMapping("{uuid}")
-    public ResponseEntity<Void> rescheduleVisit(@PathVariable UUID uuid, @Valid @RequestBody RescheduleVisitRequestDto request) {
+    public ResponseEntity<Void> rescheduleVisit(
+            @PathVariable UUID uuid, @Valid @RequestBody RescheduleVisitRequestDto request) {
         visitService.rescheduleVisit(uuid, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
