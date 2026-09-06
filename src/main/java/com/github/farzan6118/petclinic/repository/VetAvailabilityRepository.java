@@ -13,6 +13,22 @@ import java.util.UUID;
 
 public interface VetAvailabilityRepository extends JpaRepository<VetAvailability, Long> {
 
+    @Query("""
+            select case when count(a) > 0 then true else false end
+            from VetAvailability a
+            where a.vet.uuid = :vetUuid
+              and a.date = :date
+              and a.active = true
+              and a.startTime <= :startTime
+              and a.endTime >= :endTime
+            """)
+    boolean existsCoveringTime(
+            @Param("vetUuid") UUID vetUuid,
+            @Param("date") LocalDate date,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime
+    );
+
     List<VetAvailability> findAllByVetUuidAndDateAndActiveTrue(UUID vetUuid, LocalDate date);
 
     @Query("""

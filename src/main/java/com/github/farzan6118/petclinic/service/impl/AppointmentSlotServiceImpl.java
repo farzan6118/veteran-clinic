@@ -13,6 +13,7 @@ import com.github.farzan6118.petclinic.repository.VetRepository;
 import com.github.farzan6118.petclinic.service.AppointmentSlotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,9 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
     private final VetRepository vetRepository;
     private final VetAvailabilityRepository availabilityRepository;
     private final AppointmentSlotRepository appointmentSlotRepository;
+
+    @Value("${clinic.scheduling.standard-duration-minutes:10}")
+    private int standardDurationMinutes;
 
     @Transactional
     @Override
@@ -87,7 +91,7 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
         LocalTime startTime = availability.getStartTime();
         LocalTime endTime = availability.getEndTime();
 
-        AppointmentDuration duration = AppointmentDuration.FIFTEEN_MINUTES;
+        AppointmentDuration duration = AppointmentDuration.fromMinutes(standardDurationMinutes);
 
         LocalTime slotStart = startTime;
 
@@ -103,7 +107,9 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
             slot.setAppointmentDuration(duration);
             slot.setStatus(SlotStatus.AVAILABLE);
 
-            appointmentSlotRepository.save(slot);
+            if (!appointmentSlotRepository.existsByVetUuidAndDateAndStartTime(vet.getUuid(), date, slotStart)) {
+                appointmentSlotRepository.save(slot);
+            }
 
             slotStart = slotEnd;
         }

@@ -7,20 +7,18 @@ import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
-import com.github.farzan6118.petclinic.model.AppointmentSlot;
-import com.github.farzan6118.petclinic.model.Pet;
-import com.github.farzan6118.petclinic.model.Vet;
-import com.github.farzan6118.petclinic.model.Visit;
+import com.github.farzan6118.petclinic.model.*;
+import com.github.farzan6118.petclinic.model.constant.AppointmentType;
 import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
-import com.github.farzan6118.petclinic.repository.AppointmentSlotRepository;
-import com.github.farzan6118.petclinic.repository.VetRepository;
-import com.github.farzan6118.petclinic.repository.VisitRepository;
+import com.github.farzan6118.petclinic.model.constant.VisitType;
+import com.github.farzan6118.petclinic.repository.*;
 import com.github.farzan6118.petclinic.service.PetService;
 import com.github.farzan6118.petclinic.service.VisitNotificationService;
 import com.github.farzan6118.petclinic.service.VisitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -29,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +43,17 @@ public class VisitServiceImpl implements VisitService {
     private final PetService petService;
     private final VisitMapper visitMapper;
     private final VetRepository vetRepository;
+    private final VetAvailabilityRepository availabilityRepository;
+    private final RoomRepository roomRepository;
+
+    @Value("${clinic.scheduling.standard-duration-minutes:10}")
+    private int standardDurationMinutes;
+
+    @Value("${clinic.scheduling.owners-place-duration-minutes:60}")
+    private int ownersPlaceDurationMinutes;
+
+    @Value("${clinic.scheduling.emergency-duration-minutes:30}")
+    private int emergencyDurationMinutes;
 
     /**
      * Book an available appointment slot for a pet.
@@ -63,9 +73,25 @@ public class VisitServiceImpl implements VisitService {
 
         validateSlotBelongsToVet(slot, vet);
 
-        Visit visit = Visit.create(pet, vet, slot, request.description());
+        LocalDateTime visitStart = LocalDateTime.of(slot.getDate(), slot.getStartTime());
+        LocalDateTime visitEnd = visitStart.plusMinutes(getDurationMinutes(request.visitType()));
+        validateVetAvailability(vet, visitStart, visitEnd);
+        validateVetIsFree(vet, visitStart, visitEnd, null);
+        Room room = allocateRoom(request.visitType(), visitStart, visitEnd, null);
+
+        Visit visit = Visit.create(
+                pet,
+                vet,
+                slot,
+                room,
+                request.visitType(),
+                visitStart,
+                visitEnd,
+                request.description()
+        );
 
         slot.book();
+        slot.setAppointmentType(toAppointmentType(request.visitType()));
 
         Visit savedVisit = visitRepository.save(visit);
 
@@ -186,7 +212,14 @@ public class VisitServiceImpl implements VisitService {
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
         Visit visit = getVisitByUuid(uuid);
         validateCanBeRescheduled(visit);
+        if (request.slotUuid() == null) {
+            throw new ResourceNotFoundException(
+                    "visit.slot.is.required",
+                    "A replacement appointment slot is required"
+            );
+        }
         AppointmentSlot oldSlot = visit.getAppointmentSlot();
+        LocalDateTime oldVisitStart = visit.getVisitStart();
 
         AppointmentSlot newSlot = slotRepository
                 .findAvailableSlotForUpdate(request.slotUuid())
@@ -198,6 +231,12 @@ public class VisitServiceImpl implements VisitService {
 
         validateSlotBelongsToVet(newSlot, visit.getVet());
 
+        LocalDateTime newVisitStart = LocalDateTime.of(newSlot.getDate(), newSlot.getStartTime());
+        LocalDateTime newVisitEnd = newVisitStart.plusMinutes(getDurationMinutes(visit.getVisitType()));
+        validateVetAvailability(visit.getVet(), newVisitStart, newVisitEnd);
+        validateVetIsFree(visit.getVet(), newVisitStart, newVisitEnd, visit.getUuid());
+        Room newRoom = allocateRoom(visit.getVisitType(), newVisitStart, newVisitEnd, visit.getUuid());
+
         /*
          * Release the old slot.
          */
@@ -207,15 +246,19 @@ public class VisitServiceImpl implements VisitService {
          * Book the new slot.
          */
         newSlot.book();
+        newSlot.setAppointmentType(toAppointmentType(visit.getVisitType()));
 
         visit.setAppointmentSlot(newSlot);
+        visit.setRoom(newRoom);
+        visit.setVisitStart(newVisitStart);
+        visit.setVisitEnd(newVisitEnd);
 
         if (request.description() != null) {
             visit.setDescription(request.description());
         }
 
         visitNotificationService.notifyRescheduleVisitParticipants(
-                visit, visit.getPet(), visit.getVet(), null);
+                visit, visit.getPet(), visit.getVet(), oldVisitStart);
 
         log.info(
                 "Visit rescheduled successfully. visitUuid={}, oldSlotUuid={}, newSlotUuid={}",
@@ -265,6 +308,71 @@ public class VisitServiceImpl implements VisitService {
                     "Selected appointment slot does not belong to the requested vet"
             );
         }
+    }
+
+    private void validateVetAvailability(Vet vet, LocalDateTime visitStart, LocalDateTime visitEnd) {
+        if (!availabilityRepository.existsCoveringTime(
+                vet.getUuid(),
+                visitStart.toLocalDate(),
+                visitStart.toLocalTime(),
+                visitEnd.toLocalTime())) {
+            throw new ResourceNotFoundException(
+                    "visit.vet.not.available",
+                    "The selected visit time is outside the vet availability"
+            );
+        }
+    }
+
+    private void validateVetIsFree(Vet vet, LocalDateTime visitStart, LocalDateTime visitEnd, UUID excludedVisitUuid) {
+        if (visitRepository.existsVetReservation(vet.getUuid(), visitStart, visitEnd, excludedVisitUuid)) {
+            throw new ResourceNotFoundException(
+                    "visit.vet.time.not.available",
+                    "The vet is already booked during the selected time"
+            );
+        }
+    }
+
+    private Room allocateRoom(
+            VisitType visitType,
+            LocalDateTime visitStart,
+            LocalDateTime visitEnd,
+            UUID excludedVisitUuid
+    ) {
+        List<String> roomTypeNames = switch (visitType) {
+            case ONSITE -> List.of("examination", "individual");
+            case EMERGENCY -> List.of("surgery", "emergency", "isolation");
+            case ONLINE, OWNERS_PLACE -> List.of();
+        };
+
+        if (roomTypeNames.isEmpty()) {
+            return null;
+        }
+
+        return roomRepository.findActiveRoomsByTypeNamesForUpdate(roomTypeNames)
+                .stream()
+                .filter(room -> !visitRepository.existsRoomReservation(
+                        room, visitStart, visitEnd, excludedVisitUuid))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "visit.room.not.available",
+                        "No room is available for the selected visit type and time"
+                ));
+    }
+
+    private int getDurationMinutes(VisitType visitType) {
+        return switch (visitType) {
+            case ONSITE, ONLINE -> standardDurationMinutes;
+            case OWNERS_PLACE -> ownersPlaceDurationMinutes;
+            case EMERGENCY -> emergencyDurationMinutes;
+        };
+    }
+
+    private AppointmentType toAppointmentType(VisitType visitType) {
+        return switch (visitType) {
+            case ONSITE, EMERGENCY -> AppointmentType.IN_CLINIC;
+            case ONLINE -> AppointmentType.ONLINE;
+            case OWNERS_PLACE -> AppointmentType.HOME_VISIT;
+        };
     }
 
     private void validateCanBeRescheduled(Visit visit) {

@@ -46,7 +46,7 @@ public class AppointmentSlot extends BaseEntity<Long> {
     private Vet vet;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "room_id", nullable = false)
+    @JoinColumn(name = "room_id")
     private Room room;
 
     @Column(nullable = false)
@@ -58,7 +58,7 @@ public class AppointmentSlot extends BaseEntity<Long> {
     @Column(nullable = false)
     private LocalTime endTime;
 
-    @Column(nullable = false)
+    @Column
     @Enumerated(EnumType.STRING)
     private AppointmentType appointmentType;
 

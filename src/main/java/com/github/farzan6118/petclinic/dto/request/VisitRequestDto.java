@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.dto.request;
 
+import com.github.farzan6118.petclinic.model.constant.VisitType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -12,6 +13,8 @@ public record VisitRequestDto(
         UUID vetUuid,
         @NotNull(message = "slot.uuid.is.required")
         UUID slotUuid,
+        @NotNull(message = "visit.type.is.required")
+        VisitType visitType,
         @Size(max = 2048, message = "description.too.long")
         String description
 

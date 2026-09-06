@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum AppointmentDuration {
 
+    TEN_MINUTES(10),
     FIFTEEN_MINUTES(15),
     THIRTY_MINUTES(30),
     FORTY_FIVE_MINUTES(45),
@@ -16,6 +17,15 @@ public enum AppointmentDuration {
 
     AppointmentDuration(int minutes) {
         this.minutes = minutes;
+    }
+
+    public static AppointmentDuration fromMinutes(int minutes) {
+        for (AppointmentDuration duration : values()) {
+            if (duration.minutes == minutes) {
+                return duration;
+            }
+        }
+        throw new IllegalArgumentException("Unsupported appointment duration: " + minutes);
     }
 
 }

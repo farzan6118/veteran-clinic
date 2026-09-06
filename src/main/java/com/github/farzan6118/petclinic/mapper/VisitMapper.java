@@ -17,8 +17,10 @@ public class VisitMapper {
         return new VisitResponseDto(visit.getUuid(),
                 visit.getPet().getUuid(),
                 visit.getVet().getUuid(),
-//                visit.getVisitDateTime(),
-                null,
+                visit.getVisitStart(),
+                visit.getVisitEnd(),
+                visit.getVisitType(),
+                visit.getRoom() == null ? null : visit.getRoom().getUuid(),
                 visit.getDescription(),
                 visit.getStatus()
         );
@@ -29,7 +31,7 @@ public class VisitMapper {
         Visit visit = new Visit();
         visit.setPet(pet);
         visit.setVet(vet);
-//        visit.setVisitDateTime(localDateTime);
+        visit.setVisitType(request.visitType());
         visit.setDescription(request.description());
         visit.setStatus(VisitStatus.SCHEDULED);
         return visit;
