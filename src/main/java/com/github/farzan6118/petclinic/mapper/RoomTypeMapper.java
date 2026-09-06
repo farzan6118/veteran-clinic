@@ -15,7 +15,8 @@ public class RoomTypeMapper {
         return new RoomTypeResponseDto(
                 roomType.getUuid(),
                 roomType.getName(),
-                roomType.getDescription()
+                roomType.getDescription(),
+                roomType.getEntityStatus()
         );
     }
 

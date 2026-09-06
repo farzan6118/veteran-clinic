@@ -59,9 +59,9 @@ public class FillInitialRecords {
             ));
 
             List<Owner> owners = ownerRepository.saveAll(List.of(
-                    owner("Mina", "Rahimi", "200000001", "09120000001", "mina.rahimi@example.com", "Tehran", "Valiasr Street"),
-                    owner("Arman", "Karimi", "200000002", "09120000002", "arman.karimi@example.com", "Shiraz", "Zand Street"),
-                    owner("Niloofar", "Ahmadi", "200000003", "09120000003", "niloofar.ahmadi@example.com", "Tabriz", "Shahrivar Street")
+                    owner("Mina", "Rahimi", "200000001", LocalDate.of(1990, 4, 12), "09120000001", "mina.rahimi@example.com", "Tehran", "Valiasr Street"),
+                    owner("Arman", "Karimi", "200000002", LocalDate.of(1987, 9, 25), "09120000002", "arman.karimi@example.com", "Shiraz", "Zand Street"),
+                    owner("Niloofar", "Ahmadi", "200000003", LocalDate.of(1995, 1, 8), "09120000003", "niloofar.ahmadi@example.com", "Tabriz", "Shahrivar Street")
             ));
 
             petRepository.saveAll(List.of(
@@ -104,6 +104,17 @@ public class FillInitialRecords {
                     availability(vets.get(1), LocalDate.of(2026, 9, 9), LocalTime.of(9, 30), LocalTime.of(12, 30))
             ));
         }
+
+        ownerRepository.findAll().forEach(owner -> {
+            if (owner.getBirthDate() == null) {
+                owner.setBirthDate(switch (owner.getEmail()) {
+                    case "mina.rahimi@example.com" -> LocalDate.of(1990, 4, 12);
+                    case "arman.karimi@example.com" -> LocalDate.of(1987, 9, 25);
+                    case "niloofar.ahmadi@example.com" -> LocalDate.of(1995, 1, 8);
+                    default -> null;
+                });
+            }
+        });
     }
 
     private Species species(String name, String code, String origin, String description) {
@@ -119,6 +130,7 @@ public class FillInitialRecords {
             String firstName,
             String lastName,
             String nationalId,
+            LocalDate birthDate,
             String mobileNumber,
             String email,
             String city,
@@ -128,6 +140,7 @@ public class FillInitialRecords {
         owner.setFirstName(firstName);
         owner.setLastName(lastName);
         owner.setNationalId(nationalId);
+        owner.setBirthDate(birthDate);
         owner.setMobileNumber(mobileNumber);
         owner.setEmail(email);
         owner.setCity(city);

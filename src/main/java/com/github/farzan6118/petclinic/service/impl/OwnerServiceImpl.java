@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,6 +48,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public void create(CreateOwnerRequestDto request) {
         Owner owner = new Owner();
+        validateBirthDate(request.birthDate());
         validateUniqueContactInfo(request.mobileNumber(), request.email());
         ownerMapper.mapToOwner(request, owner);
         ownerRepository.save(owner);
@@ -67,6 +69,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Transactional
     @Override
     public void update(UUID uuid, UpdateOwnerRequestDto request) {
+        validateBirthDate(request.birthDate());
         validateEmailUniqueness(request.email(), uuid);
         validateTelephoneUniqueness(request.mobileNumber(), uuid);
         Owner owner = this.getEntityByUuid(uuid);
@@ -84,6 +87,12 @@ public class OwnerServiceImpl implements OwnerService {
     private void validateTelephoneUniqueness(String telephone, UUID uuid) {
         if (ownerRepository.existsByMobileNumberAndUuidNot(telephone, uuid)) {
             throw new ResourceNotFoundException("owner with this mobileNumber already exists");
+        }
+    }
+
+    private void validateBirthDate(LocalDate birthDate) {
+        if (birthDate != null && birthDate.isAfter(LocalDate.now())) {
+            throw new GenericValidationException("Owner birth date cannot be in the future");
         }
     }
 

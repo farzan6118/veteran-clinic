@@ -1,9 +1,13 @@
 package com.github.farzan6118.petclinic.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record VisitRequestDto(
@@ -11,8 +15,13 @@ public record VisitRequestDto(
         UUID petUuid,
         @NotNull(message = "vet.uuid.is.required")
         UUID vetUuid,
-        @NotNull(message = "slot.uuid.is.required")
-        UUID slotUuid,
+        @NotNull(message = "visit.date.is.required")
+        @FutureOrPresent(message = "visit.date.must.be.in.present.or.future")
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate visitDate,
+        @NotNull(message = "visit.time.is.required")
+        @JsonFormat(pattern = "HH:mm")
+        LocalTime visitTime,
         @NotNull(message = "visit.type.is.required")
         VisitType visitType,
         @Size(max = 2048, message = "description.too.long")

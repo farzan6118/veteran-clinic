@@ -33,6 +33,21 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
             @Param("uuid") UUID uuid
     );
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select s
+            from AppointmentSlot s
+            where s.vet.uuid = :vetUuid
+              and s.date = :date
+              and s.startTime = :startTime
+              and s.status = 'AVAILABLE'
+            """)
+    Optional<AppointmentSlot> findAvailableSlotForUpdate(
+            @Param("vetUuid") UUID vetUuid,
+            @Param("date") LocalDate date,
+            @Param("startTime") LocalTime startTime
+    );
+
     boolean existsByVetUuidAndDateAndStartTime(UUID uuid, LocalDate date, LocalTime startTime);
 
     List<AppointmentSlot> findAllByVetUuidAndDateAndStatusOrderByStartTime(UUID vetUuid, LocalDate date, SlotStatus slotStatus);

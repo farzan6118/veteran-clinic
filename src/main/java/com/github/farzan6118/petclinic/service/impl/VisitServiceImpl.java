@@ -67,13 +67,19 @@ public class VisitServiceImpl implements VisitService {
         Vet vet = getVetByUuid(request.vetUuid());
 
         AppointmentSlot slot = slotRepository
-                .findAvailableSlotForUpdate(request.slotUuid())
+                .findAvailableSlotForUpdate(request.vetUuid(), request.visitDate(), request.visitTime())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "visit.slot.not.available", "Selected appointment slot is not available"));
 
         validateSlotBelongsToVet(slot, vet);
 
-        LocalDateTime visitStart = LocalDateTime.of(slot.getDate(), slot.getStartTime());
+        LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
+        if (!visitStart.isAfter(LocalDateTime.now())) {
+            throw new ResourceNotFoundException(
+                    "visit.time.must.be.in.future",
+                    "The visit date and time must be in the future"
+            );
+        }
         LocalDateTime visitEnd = visitStart.plusMinutes(getDurationMinutes(request.visitType()));
         validateVetAvailability(vet, visitStart, visitEnd);
         validateVetIsFree(vet, visitStart, visitEnd, null);
