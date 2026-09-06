@@ -17,7 +17,7 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/room")
+@RequestMapping("/api/rooms")
 public class RoomController {
 
     private final RoomService roomService;

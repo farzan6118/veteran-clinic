@@ -29,7 +29,7 @@ public class VisitController {
 
     @GetMapping("/vets/{vetUuid}/available-slots")
     public ResponseEntity<List<VetAvailableSlotResponseDto>> getAvailableSlots(
-            @PathVariable UUID vetUuid, @RequestParam LocalDate date) {
+            @PathVariable UUID vetUuid, @RequestParam(required = false) LocalDate date) {
         return ResponseEntity.ok(visitService.getAvailableSlots(vetUuid, date));
     }
 

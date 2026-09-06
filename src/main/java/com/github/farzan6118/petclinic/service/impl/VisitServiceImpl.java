@@ -13,6 +13,7 @@ import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
 import com.github.farzan6118.petclinic.repository.*;
+import com.github.farzan6118.petclinic.service.AppointmentSlotService;
 import com.github.farzan6118.petclinic.service.PetService;
 import com.github.farzan6118.petclinic.service.VisitNotificationService;
 import com.github.farzan6118.petclinic.service.VisitService;
@@ -45,6 +46,7 @@ public class VisitServiceImpl implements VisitService {
     private final VetRepository vetRepository;
     private final VetAvailabilityRepository availabilityRepository;
     private final RoomRepository roomRepository;
+    private final AppointmentSlotService appointmentSlotService;
 
     @Value("${clinic.scheduling.standard-duration-minutes:10}")
     private int standardDurationMinutes;
@@ -276,11 +278,12 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     public List<VetAvailableSlotResponseDto> getAvailableSlots(UUID vetUuid, LocalDate date) {
-
+        LocalDate requestedDate = date != null ? date : LocalDate.now();
         validateVetExists(vetUuid);
+        appointmentSlotService.generateSlotsForDate(vetUuid, requestedDate);
 
         return slotRepository
-                .findAllByVetUuidAndDateAndStatusOrderByStartTime(vetUuid, date, SlotStatus.AVAILABLE)
+                .findAllByVetUuidAndDateAndStatusOrderByStartTime(vetUuid, requestedDate, SlotStatus.AVAILABLE)
                 .stream()
                 .map(slot -> new VetAvailableSlotResponseDto(
                         slot.getUuid(),
