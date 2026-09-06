@@ -310,7 +310,6 @@ public class VisitServiceImpl implements VisitService {
         if (!availabilityRepository.existsCoveringTime(
                 vet.getUuid(),
                 visitStart.toLocalDate(),
-                visitEnd.toLocalDate(),
                 visitStart.toLocalTime(),
                 visitEnd.toLocalTime())) {
             throw new ResourceNotFoundException(
@@ -356,7 +355,6 @@ public class VisitServiceImpl implements VisitService {
                 .filter(room -> !visitRepository.existsRoomReservation(
                         room,
                         visitStart.toLocalDate(),
-                        visitEnd.toLocalDate(),
                         visitStart.toLocalTime(),
                         visitEnd.toLocalTime(),
                         excludedVisitUuid))
