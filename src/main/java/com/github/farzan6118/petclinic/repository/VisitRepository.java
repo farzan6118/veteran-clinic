@@ -1,33 +1,38 @@
 package com.github.farzan6118.petclinic.repository;
 
-import com.github.farzan6118.petclinic.model.AppointmentSlot;
 import com.github.farzan6118.petclinic.model.Room;
 import com.github.farzan6118.petclinic.model.Visit;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface VisitRepository extends JpaRepository<Visit, Long> {
 
-    boolean existsByVetUuidAndAppointmentSlot(UUID vetUuid, AppointmentSlot appointmentSlot);
-
     @EntityGraph(attributePaths = {
             "vet",
             "pet",
             "pet.owner",
             "pet.species",
+            "room",
     })
     Optional<Visit> findByUuid(UUID uuid);
 
-    List<Visit> findAllByPetOwnerUuidOrderByAppointmentSlotDateAsc(UUID currentOwnerUuid);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select v from Visit v where v.uuid = :uuid")
+    Optional<Visit> findByUuidForUpdate(@Param("uuid") UUID uuid);
 
-    List<Visit> findAllByVetUuidOrderByAppointmentSlotDateAsc(UUID currentVetUuid);
+    List<Visit> findAllByPetOwnerUuidOrderByDateAscStartTimeAsc(UUID currentOwnerUuid);
+
+    List<Visit> findAllByVetUuidOrderByDateAscStartTimeAsc(UUID currentVetUuid);
 
     @Query("""
             select case when count(v) > 0 then true else false end
@@ -35,14 +40,15 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             where v.vet.uuid = :vetUuid
               and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
                        com.github.farzan6118.petclinic.model.constant.VisitStatus.NO_SHOW)
-              and v.visitStart < :visitEnd
-              and v.visitEnd > :visitStart
+              and (v.date > :date or (v.date = :date and v.startTime < :endTime))
+              and (v.date < :date or (v.date = :date and v.endTime > :startTime))
               and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsVetReservation(
             @Param("vetUuid") UUID vetUuid,
-            @Param("visitStart") LocalDateTime visitStart,
-            @Param("visitEnd") LocalDateTime visitEnd,
+            @Param("date") LocalDate date,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime,
             @Param("excludedVisitUuid") UUID excludedVisitUuid
     );
 
@@ -52,14 +58,15 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             where v.room = :room
               and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
                                    com.github.farzan6118.petclinic.model.constant.VisitStatus.NO_SHOW)
-              and v.visitStart < :visitEnd
-              and v.visitEnd > :visitStart
+              and (v.date > :date or (v.date = :date and v.startTime < :endTime))
+              and (v.date < :date or (v.date = :date and v.endTime > :startTime))
               and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsRoomReservation(
             @Param("room") Room room,
-            @Param("visitStart") LocalDateTime visitStart,
-            @Param("visitEnd") LocalDateTime visitEnd,
+            @Param("date") LocalDate date,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime,
             @Param("excludedVisitUuid") UUID excludedVisitUuid
     );
 }

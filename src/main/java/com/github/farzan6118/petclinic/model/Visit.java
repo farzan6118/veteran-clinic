@@ -10,7 +10,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Audited;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Getter
@@ -27,10 +28,6 @@ public class Visit extends BaseEntity<Long> {
     @JoinColumn(name = "vet_id", nullable = false)
     private Vet vet;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "appointment_slot_id", nullable = false, unique = true)
-    private AppointmentSlot appointmentSlot;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private Room room;
@@ -40,10 +37,13 @@ public class Visit extends BaseEntity<Long> {
     private VisitType visitType;
 
     @Column(nullable = false)
-    private LocalDateTime visitStart;
+    private LocalTime startTime;
 
     @Column(nullable = false)
-    private LocalDateTime visitEnd;
+    private LocalTime endTime;
+
+    @Column(nullable = false)
+    private LocalDate date;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,24 +56,24 @@ public class Visit extends BaseEntity<Long> {
 
 
     public static Visit create(
-            Pet pet,
             Vet vet,
-            AppointmentSlot slot,
+            Pet pet,
             Room room,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
             VisitType visitType,
-            LocalDateTime visitStart,
-            LocalDateTime visitEnd,
             String description
     ) {
         Visit visit = new Visit();
 
-        visit.pet = pet;
         visit.vet = vet;
-        visit.appointmentSlot = slot;
+        visit.pet = pet;
         visit.room = room;
+        visit.date = date;
+        visit.startTime = startTime;
+        visit.endTime = endTime;
         visit.visitType = visitType;
-        visit.visitStart = visitStart;
-        visit.visitEnd = visitEnd;
         visit.description = description;
         visit.status = VisitStatus.SCHEDULED;
         visit.bookedAt = Instant.now();

@@ -7,8 +7,10 @@ import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
-import com.github.farzan6118.petclinic.model.*;
-import com.github.farzan6118.petclinic.model.constant.AppointmentType;
+import com.github.farzan6118.petclinic.model.Pet;
+import com.github.farzan6118.petclinic.model.Room;
+import com.github.farzan6118.petclinic.model.Vet;
+import com.github.farzan6118.petclinic.model.Visit;
 import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
@@ -66,14 +68,7 @@ public class VisitServiceImpl implements VisitService {
 
         Pet pet = petService.getEntityByUuid(request.petUuid());
 
-        Vet vet = getVetByUuid(request.vetUuid());
-
-        AppointmentSlot slot = slotRepository
-                .findAvailableSlotForUpdate(request.vetUuid(), request.visitDate(), request.visitTime())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "visit.slot.not.available", "Selected appointment slot is not available"));
-
-        validateSlotBelongsToVet(slot, vet);
+        Vet vet = getVetForUpdate(request.vetUuid());
 
         LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
         if (!visitStart.isAfter(LocalDateTime.now())) {
@@ -82,31 +77,27 @@ public class VisitServiceImpl implements VisitService {
                     "The visit date and time must be in the future"
             );
         }
-        LocalDateTime visitEnd = visitStart.plusMinutes(getDurationMinutes(request.visitType()));
-        validateVetAvailability(vet, visitStart, visitEnd);
-        validateVetIsFree(vet, visitStart, visitEnd, null);
-        Room room = allocateRoom(request.visitType(), visitStart, visitEnd, null);
+        LocalDateTime visitEnd = getVisitEnd(visitStart, request.visitType());
+        Room room = reserveResources(vet, request.visitType(), visitStart, visitEnd, null);
 
         Visit visit = Visit.create(
-                pet,
                 vet,
-                slot,
+                pet,
+//                slot,
                 room,
+                visitStart.toLocalDate(),
+                visitStart.toLocalTime(),
+                visitEnd.toLocalTime(),
                 request.visitType(),
-                visitStart,
-                visitEnd,
                 request.description()
         );
-
-        slot.book();
-        slot.setAppointmentType(toAppointmentType(request.visitType()));
 
         Visit savedVisit = visitRepository.save(visit);
 
         visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
 
-        log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}, slotUuid={}",
-                savedVisit.getUuid(), pet.getUuid(), vet.getUuid(), slot.getUuid());
+        log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
+                savedVisit.getUuid(), pet.getUuid(), vet.getUuid());
 
         return savedVisit.getUuid();
     }
@@ -119,7 +110,7 @@ public class VisitServiceImpl implements VisitService {
 
         UUID currentUserUuid = getCurrentUserUuid(jwt);
 
-        return visitRepository.findAllByPetOwnerUuidOrderByAppointmentSlotDateAsc(currentUserUuid)
+        return visitRepository.findAllByPetOwnerUuidOrderByDateAscStartTimeAsc(currentUserUuid)
                 .stream()
                 .map(visitMapper::toResponse)
                 .toList();
@@ -153,19 +144,13 @@ public class VisitServiceImpl implements VisitService {
             throw new ResourceNotFoundException("visit.already.completed", "Completed visit cannot be cancelled");
         }
 
-        AppointmentSlot slot = visit.getAppointmentSlot();
-
         visit.cancel();
-
-        if (slot != null && !slot.isAvailable()) {
-            slot.release();
-        }
 
         visitNotificationService.notifyCancelVisitParticipants(visit, visit.getPet(), visit.getVet(), reason);
 
         log.info(
-                "Visit cancelled. visitUuid={}, slotUuid={}",
-                visit.getUuid(), slot != null ? slot.getUuid() : null
+                "Visit cancelled. visitUuid={}",
+                visit.getUuid()
         );
     }
 
@@ -177,7 +162,7 @@ public class VisitServiceImpl implements VisitService {
 
         UUID currentVetUuid = getCurrentVetUuid();
 
-        return visitRepository.findAllByVetUuidOrderByAppointmentSlotDateAsc(currentVetUuid)
+        return visitRepository.findAllByVetUuidOrderByDateAscStartTimeAsc(currentVetUuid)
                 .stream()
                 .map(visitMapper::toResponse)
                 .toList();
@@ -218,59 +203,36 @@ public class VisitServiceImpl implements VisitService {
     @Override
     @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
-        Visit visit = getVisitByUuid(uuid);
+        Visit visit = visitRepository.findByUuidForUpdate(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + uuid));
         validateCanBeRescheduled(visit);
-        if (request.slotUuid() == null) {
-            throw new ResourceNotFoundException(
-                    "visit.slot.is.required",
-                    "A replacement appointment slot is required"
-            );
-        }
-        AppointmentSlot oldSlot = visit.getAppointmentSlot();
-        LocalDateTime oldVisitStart = visit.getVisitStart();
+        Vet vet = getVetForUpdate(visit.getVet().getUuid());
+        LocalDateTime oldVisitStart = visit.getDate().atTime(visit.getStartTime());
+        LocalDateTime newVisitStart = request.visitDateTime();
+        LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, visit.getVisitType());
+        Room newRoom = reserveResources(
+                vet,
+                visit.getVisitType(),
+                newVisitStart,
+                newVisitEnd,
+                visit.getUuid()
+        );
 
-        AppointmentSlot newSlot = slotRepository
-                .findAvailableSlotForUpdate(request.slotUuid())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "visit.slot.not.available",
-                                "Selected appointment slot is not available"
-                        ));
-
-        validateSlotBelongsToVet(newSlot, visit.getVet());
-
-        LocalDateTime newVisitStart = LocalDateTime.of(newSlot.getDate(), newSlot.getStartTime());
-        LocalDateTime newVisitEnd = newVisitStart.plusMinutes(getDurationMinutes(visit.getVisitType()));
-        validateVetAvailability(visit.getVet(), newVisitStart, newVisitEnd);
-        validateVetIsFree(visit.getVet(), newVisitStart, newVisitEnd, visit.getUuid());
-        Room newRoom = allocateRoom(visit.getVisitType(), newVisitStart, newVisitEnd, visit.getUuid());
-
-        /*
-         * Release the old slot.
-         */
-        oldSlot.release();
-
-        /*
-         * Book the new slot.
-         */
-        newSlot.book();
-        newSlot.setAppointmentType(toAppointmentType(visit.getVisitType()));
-
-        visit.setAppointmentSlot(newSlot);
         visit.setRoom(newRoom);
-        visit.setVisitStart(newVisitStart);
-        visit.setVisitEnd(newVisitEnd);
+        visit.setDate(newVisitStart.toLocalDate());
+        visit.setStartTime(newVisitStart.toLocalTime());
+        visit.setEndTime(newVisitEnd.toLocalTime());
 
         if (request.description() != null) {
             visit.setDescription(request.description());
         }
 
         visitNotificationService.notifyRescheduleVisitParticipants(
-                visit, visit.getPet(), visit.getVet(), oldVisitStart);
+                visit, visit.getPet(), vet, oldVisitStart);
 
         log.info(
-                "Visit rescheduled successfully. visitUuid={}, oldSlotUuid={}, newSlotUuid={}",
-                visit.getUuid(), oldSlot.getUuid(), newSlot.getUuid());
+                "Visit rescheduled successfully. visitUuid={}, oldVisitStart={}, newVisitStart={}",
+                visit.getUuid(), oldVisitStart, newVisitStart);
     }
 
     /**
@@ -304,19 +266,41 @@ public class VisitServiceImpl implements VisitService {
                 .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
     }
 
+    private Vet getVetForUpdate(UUID vetUuid) {
+        return vetRepository.findByUuidForUpdate(vetUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
+    }
+
     private void validateVetExists(UUID vetUuid) {
         if (!vetRepository.existsByUuid(vetUuid)) {
             throw new ResourceNotFoundException("Vet not found: " + vetUuid);
         }
     }
 
-    private void validateSlotBelongsToVet(AppointmentSlot slot, Vet vet) {
-        if (!slot.getVet().getUuid().equals(vet.getUuid())) {
+    private Room reserveResources(
+            Vet vet,
+            VisitType visitType,
+            LocalDateTime visitStart,
+            LocalDateTime visitEnd,
+            UUID excludedVisitUuid
+    ) {
+        validateVisitWindow(visitStart, visitEnd);
+        validateVetAvailability(vet, visitStart, visitEnd);
+        validateVetIsFree(vet, visitStart, visitEnd, excludedVisitUuid);
+        return allocateRoom(visitType, visitStart, visitEnd, excludedVisitUuid);
+    }
+
+    private void validateVisitWindow(LocalDateTime visitStart, LocalDateTime visitEnd) {
+        if (!visitEnd.toLocalDate().equals(visitStart.toLocalDate())) {
             throw new ResourceNotFoundException(
-                    "visit.slot.invalid.vet",
-                    "Selected appointment slot does not belong to the requested vet"
+                    "visit.duration.crosses.date",
+                    "A visit must start and end on the same date"
             );
         }
+    }
+
+    private LocalDateTime getVisitEnd(LocalDateTime visitStart, VisitType visitType) {
+        return visitStart.plusMinutes(getDurationMinutes(visitType));
     }
 
     private void validateVetAvailability(Vet vet, LocalDateTime visitStart, LocalDateTime visitEnd) {
@@ -333,7 +317,13 @@ public class VisitServiceImpl implements VisitService {
     }
 
     private void validateVetIsFree(Vet vet, LocalDateTime visitStart, LocalDateTime visitEnd, UUID excludedVisitUuid) {
-        if (visitRepository.existsVetReservation(vet.getUuid(), visitStart, visitEnd, excludedVisitUuid)) {
+        if (visitRepository.existsVetReservation(
+                vet.getUuid(),
+                visitStart.toLocalDate(),
+                visitStart.toLocalTime(),
+                visitEnd.toLocalTime(),
+                excludedVisitUuid
+        )) {
             throw new ResourceNotFoundException(
                     "visit.vet.time.not.available",
                     "The vet is already booked during the selected time"
@@ -360,7 +350,11 @@ public class VisitServiceImpl implements VisitService {
         return roomRepository.findActiveRoomsByTypeNamesForUpdate(roomTypeNames)
                 .stream()
                 .filter(room -> !visitRepository.existsRoomReservation(
-                        room, visitStart, visitEnd, excludedVisitUuid))
+                        room,
+                        visitStart.toLocalDate(),
+                        visitStart.toLocalTime(),
+                        visitEnd.toLocalTime(),
+                        excludedVisitUuid))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "visit.room.not.available",
@@ -373,14 +367,6 @@ public class VisitServiceImpl implements VisitService {
             case ONSITE, ONLINE -> standardDurationMinutes;
             case OWNERS_PLACE -> ownersPlaceDurationMinutes;
             case EMERGENCY -> emergencyDurationMinutes;
-        };
-    }
-
-    private AppointmentType toAppointmentType(VisitType visitType) {
-        return switch (visitType) {
-            case ONSITE, EMERGENCY -> AppointmentType.IN_CLINIC;
-            case ONLINE -> AppointmentType.ONLINE;
-            case OWNERS_PLACE -> AppointmentType.HOME_VISIT;
         };
     }
 
