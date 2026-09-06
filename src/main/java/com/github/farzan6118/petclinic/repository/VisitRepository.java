@@ -40,13 +40,14 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             where v.vet.uuid = :vetUuid
               and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
                        com.github.farzan6118.petclinic.model.constant.VisitStatus.NO_SHOW)
-              and (v.date > :date or (v.date = :date and v.startTime < :endTime))
-              and (v.date < :date or (v.date = :date and v.endTime > :startTime))
+              and (v.date < :endDate or (v.date = :endDate and v.startTime < :endTime))
+              and (v.endDate > :date or (v.endDate = :date and v.endTime > :startTime))
               and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsVetReservation(
             @Param("vetUuid") UUID vetUuid,
             @Param("date") LocalDate date,
+            @Param("endDate") LocalDate endDate,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime,
             @Param("excludedVisitUuid") UUID excludedVisitUuid
@@ -58,13 +59,14 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             where v.room = :room
               and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
                                    com.github.farzan6118.petclinic.model.constant.VisitStatus.NO_SHOW)
-              and (v.date > :date or (v.date = :date and v.startTime < :endTime))
-              and (v.date < :date or (v.date = :date and v.endTime > :startTime))
+              and (v.date < :endDate or (v.date = :endDate and v.startTime < :endTime))
+              and (v.endDate > :date or (v.endDate = :date and v.endTime > :startTime))
               and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsRoomReservation(
             @Param("room") Room room,
             @Param("date") LocalDate date,
+            @Param("endDate") LocalDate endDate,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime,
             @Param("excludedVisitUuid") UUID excludedVisitUuid

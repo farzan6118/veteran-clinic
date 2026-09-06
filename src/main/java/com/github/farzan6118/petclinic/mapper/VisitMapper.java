@@ -18,7 +18,7 @@ public class VisitMapper {
                 visit.getPet().getUuid(),
                 visit.getVet().getUuid(),
                 visit.getDate().atTime(visit.getStartTime()),
-                visit.getDate().atTime(visit.getEndTime()),
+                visit.getEndDate().atTime(visit.getEndTime()),
                 visit.getVisitType(),
                 visit.getRoom() == null ? null : visit.getRoom().getUuid(),
                 visit.getDescription(),

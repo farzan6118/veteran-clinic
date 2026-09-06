@@ -3,38 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Veterinary Visit Scheduled</title>
-</head>
-<body>
-
-<h2>Veterinary Visit Scheduled</h2>
-
-<p>
-    Dear <strong th:text="${ownerName}">John Doe</strong>,
-</p>
-
-<p>
-    A veterinary visit has been successfully scheduled for your
-    <span th:text="${species}">cat</span>
-    "<strong th:text="${petName}">Jessy</strong>"
-</p>
-
-<p>
-    <strong>Veterinarian:</strong>
-    <span th:text="${vetName}">Dr. Smith</span>
-</p>
-
-<p>
-    <strong>Visit date:</strong>
-    <span th:text="${#temporals.format(visitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Thursday, August 20, 2026 10:00</span>
-</p>
-
-<p>
-    Please arrive a few minutes before the scheduled time.
-</p>
-
-<p>
-    Best regards,<br>
-    PetClinic Farzan6118
+<body style="font-family:Arial,sans-serif;color:#24323d;line-height:1.5;background:#f4f7f8;padding:24px;">
+<main style="max-width:620px;margin:auto;background:#fff;border:1px solid #d9e2e6;padding:28px;">
+    <h2 style="margin-top:0;color:#176b87;">Visit scheduled</h2>
+    <p>Dear <strong th:text="${ownerName}">John Doe</strong>, your pet's visit is confirmed.</p>
+    <table style="width:100%;border-collapse:collapse;margin:22px 0;">
+        <tr>
+            <th style="text-align:left;background:#eaf4f7;padding:10px;">Pet</th>
+            <td style="padding:10px;border-bottom:1px solid #d9e2e6;" th:text="|${petName} (${petType})|">Jessy (Cat)
+            </td>
+        </tr>
+        <tr>
+            <th style="text-align:left;background:#eaf4f7;padding:10px;">Veterinarian</th>
+            <td style="padding:10px;border-bottom:1px solid #d9e2e6;" th:text="${vetName}">Dr. Smith</td>
+        </tr>
+        <tr>
+            <th style="text-align:left;background:#eaf4f7;padding:10px;">Date and time</th>
+            <td style="padding:10px;" th:text="${#temporals.format(visitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Thursday,
+                August 20, 2026 10:00
+            </td>
+        </tr>
+    </table>
+    <p>Please arrive a few minutes before the scheduled time.</p>
+    <p>Best regards,<br>PetClinic Farzan6118</p>
+</main>
 </p>
 
 </body>

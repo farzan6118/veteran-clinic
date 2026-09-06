@@ -86,6 +86,7 @@ public class VisitServiceImpl implements VisitService {
 //                slot,
                 room,
                 visitStart.toLocalDate(),
+                visitEnd.toLocalDate(),
                 visitStart.toLocalTime(),
                 visitEnd.toLocalTime(),
                 request.visitType(),
@@ -174,14 +175,15 @@ public class VisitServiceImpl implements VisitService {
     @Override
     @Transactional
     public VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request) {
-        Visit visit = getVisitByUuid(uuid);
+        Visit visit = visitRepository.findByUuidForUpdate(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + uuid));
         if (visit.getStatus() == VisitStatus.CANCELLED) {
             throw new ResourceNotFoundException("visit.cancelled", "Cancelled visit cannot be completed");
         }
         if (visit.getStatus() == VisitStatus.COMPLETED) {
             throw new ResourceNotFoundException("visit.already.completed", "Visit is already completed");
         }
-        visit.complete();
+        visit.completeAt(LocalDateTime.now());
         log.info("Visit completed. visitUuid={}", visit.getUuid());
         return visitMapper.toResponse(visit);
     }
@@ -220,6 +222,7 @@ public class VisitServiceImpl implements VisitService {
 
         visit.setRoom(newRoom);
         visit.setDate(newVisitStart.toLocalDate());
+        visit.setEndDate(newVisitEnd.toLocalDate());
         visit.setStartTime(newVisitStart.toLocalTime());
         visit.setEndTime(newVisitEnd.toLocalTime());
 
@@ -307,6 +310,7 @@ public class VisitServiceImpl implements VisitService {
         if (!availabilityRepository.existsCoveringTime(
                 vet.getUuid(),
                 visitStart.toLocalDate(),
+                visitEnd.toLocalDate(),
                 visitStart.toLocalTime(),
                 visitEnd.toLocalTime())) {
             throw new ResourceNotFoundException(
@@ -352,6 +356,7 @@ public class VisitServiceImpl implements VisitService {
                 .filter(room -> !visitRepository.existsRoomReservation(
                         room,
                         visitStart.toLocalDate(),
+                        visitEnd.toLocalDate(),
                         visitStart.toLocalTime(),
                         visitEnd.toLocalTime(),
                         excludedVisitUuid))
