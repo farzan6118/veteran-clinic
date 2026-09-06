@@ -5,6 +5,7 @@ import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
+import com.github.farzan6118.petclinic.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.VisitMapper;
 import com.github.farzan6118.petclinic.model.Pet;
@@ -83,10 +84,8 @@ public class VisitServiceImpl implements VisitService {
         Visit visit = Visit.create(
                 vet,
                 pet,
-//                slot,
                 room,
                 visitStart.toLocalDate(),
-                visitEnd.toLocalDate(),
                 visitStart.toLocalTime(),
                 visitEnd.toLocalTime(),
                 request.visitType(),
@@ -175,17 +174,59 @@ public class VisitServiceImpl implements VisitService {
     @Override
     @Transactional
     public VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request) {
-        Visit visit = visitRepository.findByUuidForUpdate(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + uuid));
-        if (visit.getStatus() == VisitStatus.CANCELLED) {
-            throw new ResourceNotFoundException("visit.cancelled", "Cancelled visit cannot be completed");
-        }
-        if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new ResourceNotFoundException("visit.already.completed", "Visit is already completed");
-        }
-        visit.completeAt(LocalDateTime.now());
-        log.info("Visit completed. visitUuid={}", visit.getUuid());
+
+        Visit visit = getVisitForUpdate(uuid);
+
+        validateCompletion(visit);
+
+        visit.complete();
+
+        log.info("Visit completed successfully. visitUuid={}", uuid);
+
         return visitMapper.toResponse(visit);
+    }
+
+    private Visit getVisitForUpdate(UUID uuid) {
+        return visitRepository.findByUuidForUpdate(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
+    }
+
+    private void validateCompletion(Visit visit) {
+        validateStatus(visit);
+        validateScheduledTime(visit);
+    }
+
+    private void validateStatus(Visit visit) {
+
+        switch (visit.getStatus()) {
+
+            case CANCELLED ->
+                    throw new GenericValidationException("visit.cancelled", "Cancelled visit cannot be completed");
+
+            case COMPLETED ->
+                    throw new GenericValidationException("visit.already.completed", "Visit is already completed");
+
+            default -> {
+                // Valid states can continue.
+            }
+        }
+    }
+
+    private void validateScheduledTime(Visit visit) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime startDateTime = LocalDateTime.of(visit.getDate(), visit.getStartTime());
+
+        LocalDateTime endDateTime = LocalDateTime.of(visit.getDate(), visit.getEndTime());
+
+        if (now.isBefore(startDateTime)) {
+            throw new GenericValidationException("visit.not.started", "Visit has not started yet");
+        }
+
+        if (now.isAfter(endDateTime)) {
+            throw new GenericValidationException("visit.already.finished", "Visit has already finished");
+        }
     }
 
     /**
@@ -205,33 +246,37 @@ public class VisitServiceImpl implements VisitService {
     @Override
     @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
-        Visit visit = visitRepository.findByUuidForUpdate(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + uuid));
-        validateCanBeRescheduled(visit);
-        Vet vet = getVetForUpdate(visit.getVet().getUuid());
-        LocalDateTime oldVisitStart = visit.getDate().atTime(visit.getStartTime());
-        LocalDateTime newVisitStart = request.visitDateTime();
-        LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, visit.getVisitType());
-        Room newRoom = reserveResources(
-                vet,
-                visit.getVisitType(),
-                newVisitStart,
-                newVisitEnd,
-                visit.getUuid()
+
+        Visit visit = visitRepository.findByUuidForUpdate(uuid).orElseThrow(() ->
+                new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid)
         );
 
-        visit.setRoom(newRoom);
-        visit.setDate(newVisitStart.toLocalDate());
-        visit.setEndDate(newVisitEnd.toLocalDate());
-        visit.setStartTime(newVisitStart.toLocalTime());
-        visit.setEndTime(newVisitEnd.toLocalTime());
+        validateCanBeRescheduled(visit);
 
-        if (request.description() != null) {
-            visit.setDescription(request.description());
+        Vet vet = getVetForUpdate(visit.getVet().getUuid());
+
+        LocalDateTime oldVisitStart = LocalDateTime.of(visit.getDate(), visit.getStartTime());
+
+        LocalDateTime newVisitStart = LocalDateTime.of(request.Date(), request.startTime());
+
+        if (!newVisitStart.isAfter(LocalDateTime.now())) {
+            throw new ResourceNotFoundException(
+                    "visit.time.must.be.in.future", "The visit date and time must be in the future");
         }
 
-        visitNotificationService.notifyRescheduleVisitParticipants(
-                visit, visit.getPet(), vet, oldVisitStart);
+        LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, visit.getVisitType());
+
+        if (!newVisitEnd.isBefore(LocalDateTime.now())) {
+            throw new ResourceNotFoundException(
+                    "visit.time.must.be.in.future", "The visit date and time must be in the future");
+        }
+
+        Room newRoom = reserveResources(vet, visit.getVisitType(), newVisitStart, newVisitEnd, visit.getUuid());
+
+        visit.reschedule(newVisitStart.toLocalDate(), newVisitStart.toLocalTime(),
+                newVisitEnd.toLocalTime(), newRoom, request.description());
+
+        visitNotificationService.notifyRescheduleVisitParticipants(visit, visit.getPet(), vet, oldVisitStart);
 
         log.info(
                 "Visit rescheduled successfully. visitUuid={}, oldVisitStart={}, newVisitStart={}",

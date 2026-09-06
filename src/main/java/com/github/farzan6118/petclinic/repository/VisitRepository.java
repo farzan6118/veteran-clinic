@@ -41,7 +41,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
               and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
                        com.github.farzan6118.petclinic.model.constant.VisitStatus.NO_SHOW)
               and (v.date < :date or (v.date = :date and v.startTime < :endTime))
-              and (v.endDate > :date or (v.endDate = :date and v.endTime > :startTime))
+              and (v.date > :date or (v.date = :date and v.endTime > :startTime))
               and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsVetReservation(
@@ -59,7 +59,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
               and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
                                    com.github.farzan6118.petclinic.model.constant.VisitStatus.NO_SHOW)
               and (v.date < :date or (v.date = :date and v.startTime < :endTime))
-              and (v.endDate > :date or (v.endDate = :date and v.endTime > :startTime))
+              and (v.date > :date or (v.date = :date and v.endTime > :startTime))
               and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsRoomReservation(

@@ -11,7 +11,6 @@ import org.hibernate.annotations.Audited;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -46,9 +45,6 @@ public class Visit extends BaseEntity<Long> {
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false)
-    private LocalDate endDate;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VisitStatus status;
@@ -64,7 +60,6 @@ public class Visit extends BaseEntity<Long> {
             Pet pet,
             Room room,
             LocalDate date,
-            LocalDate endDate,
             LocalTime startTime,
             LocalTime endTime,
             VisitType visitType,
@@ -76,7 +71,6 @@ public class Visit extends BaseEntity<Long> {
         visit.pet = pet;
         visit.room = room;
         visit.date = date;
-        visit.endDate = endDate;
         visit.startTime = startTime;
         visit.endTime = endTime;
         visit.visitType = visitType;
@@ -85,6 +79,23 @@ public class Visit extends BaseEntity<Long> {
         visit.bookedAt = Instant.now();
 
         return visit;
+    }
+
+    public void reschedule(
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
+            Room room,
+            String description
+    ) {
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.room = room;
+
+        if (description != null) {
+            this.description = description;
+        }
     }
 
     public void cancel() {
@@ -110,12 +121,7 @@ public class Visit extends BaseEntity<Long> {
             throw new StatusInvalidException("Visit is already completed");
         }
 
+        this.endTime = LocalTime.now();
         this.status = VisitStatus.COMPLETED;
-    }
-
-    public void completeAt(LocalDateTime completedAt) {
-        complete();
-        this.endDate = completedAt.toLocalDate();
-        this.endTime = completedAt.toLocalTime();
     }
 }
