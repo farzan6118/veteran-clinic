@@ -21,19 +21,31 @@ import java.util.stream.Stream;
 @Setter
 @Audited
 public class Vet extends BaseEntity<Long> {
+
+    @Size(max = 10)
+    private String title;
+
+    @Size(max = 128)
+    @Column(nullable = false)
     private String firstName;
+
+    @Size(max = 128)
+    @Column(nullable = false)
     private String lastName;
 
-    @Column(unique = true)
+    @NotBlank
+    @Size(max = 20)
+    @Column(nullable = false, unique = true)
     private String nationalId;
 
     @NotBlank
-    @Column(nullable = false, unique = true)
     @Size(max = 20)
+    @Column(nullable = false, unique = true)
     private String mobileNumber;
 
     @Email
     @NotBlank
+    @Size(max = 128)
     @Column(nullable = false, unique = true)
     private String email;
 
