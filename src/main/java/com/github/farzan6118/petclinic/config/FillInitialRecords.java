@@ -143,6 +143,7 @@ public class FillInitialRecords {
             String address
     ) {
         Owner owner = new Owner();
+        owner.setFirstName(title);
         owner.setFirstName(firstName);
         owner.setLastName(lastName);
         owner.setNationalId(nationalId);
@@ -199,6 +200,7 @@ public class FillInitialRecords {
             String nationalId
     ) {
         Vet vet = new Vet();
+        vet.setTitle(title);
         vet.setFirstName(firstName);
         vet.setLastName(lastName);
         vet.setMobileNumber(mobileNumber);
