@@ -69,7 +69,7 @@ public class VisitServiceImpl implements VisitService {
 
         Pet pet = petService.getEntityByUuid(request.petUuid());
 
-        Vet vet = getVetForUpdate(request.vetUuid());
+        Vet vet = getVetWithUuidWithLock(request.vetUuid());
 
         LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
         if (!visitStart.isAfter(LocalDateTime.now())) {
@@ -253,7 +253,7 @@ public class VisitServiceImpl implements VisitService {
 
         validateCanBeRescheduled(visit);
 
-        Vet vet = getVetForUpdate(visit.getVet().getUuid());
+        Vet vet = getVetWithUuidWithLock(visit.getVet().getUuid());
 
         LocalDateTime oldVisitStart = LocalDateTime.of(visit.getDate(), visit.getStartTime());
 
@@ -314,8 +314,8 @@ public class VisitServiceImpl implements VisitService {
                 .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
     }
 
-    private Vet getVetForUpdate(UUID vetUuid) {
-        return vetRepository.findByUuidForUpdate(vetUuid)
+    private Vet getVetWithUuidWithLock(UUID vetUuid) {
+        return vetRepository.findByUuidWithLock(vetUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
     }
 

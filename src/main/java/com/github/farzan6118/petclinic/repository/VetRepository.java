@@ -16,7 +16,7 @@ public interface VetRepository extends JpaRepository<Vet, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select v from Vet v where v.uuid = :uuid")
-    Optional<Vet> findByUuidForUpdate(@Param("uuid") UUID uuid);
+    Optional<Vet> findByUuidWithLock(@Param("uuid") UUID uuid);
 
     Optional<Vet> findByEmail(String email);
 
