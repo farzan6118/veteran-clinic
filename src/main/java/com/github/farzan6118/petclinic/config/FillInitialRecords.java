@@ -59,9 +59,9 @@ public class FillInitialRecords {
             ));
 
             List<Owner> owners = ownerRepository.saveAll(List.of(
-                    owner("Ms.","Mina", "Rahimi", "200000001", LocalDate.of(1990, 4, 12), "09120000001", "mina.rahimi@example.com", "Tehran", "Valiasr Street"),
-                    owner("Mr.","Arman", "Karimi", "200000002", LocalDate.of(1987, 9, 25), "09120000002", "arman.karimi@example.com", "Shiraz", "Zand Street"),
-                    owner("Ms.","Niloofar", "Ahmadi", "200000003", LocalDate.of(1995, 1, 8), "09120000003", "niloofar.ahmadi@example.com", "Tabriz", "Shahrivar Street")
+                    owner("Ms.", "Mina", "Rahimi", "200000001", LocalDate.of(1990, 4, 12), "09120000001", "mina.rahimi@example.com", "Tehran", "Valiasr Street"),
+                    owner("Mr.", "Arman", "Karimi", "200000002", LocalDate.of(1987, 9, 25), "09120000002", "arman.karimi@example.com", "Shiraz", "Zand Street"),
+                    owner("Ms.", "Niloofar", "Ahmadi", "200000003", LocalDate.of(1995, 1, 8), "09120000003", "niloofar.ahmadi@example.com", "Tabriz", "Shahrivar Street")
             ));
 
             petRepository.saveAll(List.of(
@@ -83,13 +83,13 @@ public class FillInitialRecords {
                     room("Isolation Room 2", "ISO-02", roomTypes.get(2))
             ));
 
-            Vet firstVet = vet("Dr.","Sara", "Moradi", "09210000001", "sara.moradi@example.com", "100000001");
+            Vet firstVet = vet("Dr.", "Sara", "Moradi", "09210000001", "sara.moradi@example.com", "100000001");
             firstVet.updateProfile(profile("Tehran", "Mirdamad Boulevard", "Internal medicine", LocalDate.of(1985, 3, 18)));
 
-            Vet secondVet = vet("Vet.","Reza", "Hosseini", "09210000002", "reza.hosseini@example.com", "100000002");
+            Vet secondVet = vet("Vet.", "Reza", "Hosseini", "09210000002", "reza.hosseini@example.com", "100000002");
             secondVet.updateProfile(profile("Shiraz", "Maaliabad Street", "Surgery", LocalDate.of(1982, 11, 2)));
 
-            Vet thirdVet = vet("Dr.","Parisa", "Etemadi", "09210000003", "parisa.etemadi@example.com", "100000003");
+            Vet thirdVet = vet("Dr.", "Parisa", "Etemadi", "09210000003", "parisa.etemadi@example.com", "100000003");
             thirdVet.updateProfile(profile("Tabriz", "Ferdowsi Street", "Dermatology", LocalDate.of(1990, 6, 27)));
 
             vetRepository.saveAll(List.of(firstVet, secondVet, thirdVet));

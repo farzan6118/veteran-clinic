@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.model;
 
+import com.github.farzan6118.petclinic.model.valueObject.DateTimeInterval;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -55,10 +56,6 @@ public class Vet extends BaseEntity<Long> {
     @OneToMany(mappedBy = "vet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VetAvailability> availabilities = new ArrayList<>();
 
-    @OneToMany(mappedBy = "vet")
-    private List<AppointmentSlot> slots = new ArrayList<>();
-
-
     public String getFullName() {
         return Stream.of(firstName, lastName)
                 .filter(StringUtils::hasText)
@@ -74,7 +71,6 @@ public class Vet extends BaseEntity<Long> {
         if (profile == null) {
             updateProfile(new Profile());
         }
-
         profile.setCity(city);
         profile.setAddress(address);
         profile.setBirthDate(birthDate);
@@ -102,10 +98,7 @@ public class Vet extends BaseEntity<Long> {
             LocalTime endTime
     ) {
         VetAvailability availability = new VetAvailability();
-        availability.setDate(date);
-        availability.setStartTime(startTime);
-        availability.setEndTime(endTime);
-
+        availability.setDateTimeInterval(DateTimeInterval.of(date, startTime, endTime));
         addAvailability(availability);
     }
 }

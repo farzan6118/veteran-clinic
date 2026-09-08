@@ -48,7 +48,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             @Param("vetUuid") UUID vetUuid,
             @Param("date") LocalDate date,
             @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime,
+            @Param("end") LocalTime endTime,
             @Param("excludedVisitUuid") UUID excludedVisitUuid
     );
 
@@ -66,7 +66,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             @Param("room") Room room,
             @Param("date") LocalDate date,
             @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime,
+            @Param("end") LocalTime endTime,
             @Param("excludedVisitUuid") UUID excludedVisitUuid
     );
 }

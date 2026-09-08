@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.model;
 import com.github.farzan6118.petclinic.exception.StatusInvalidException;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
+import com.github.farzan6118.petclinic.model.valueObject.DateTimeInterval;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.Audited;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -36,14 +38,9 @@ public class Visit extends BaseEntity<Long> {
     @Column(nullable = false)
     private VisitType visitType;
 
+    @Embedded
     @Column(nullable = false)
-    private LocalTime startTime;
-
-    @Column(nullable = false)
-    private LocalTime endTime;
-
-    @Column(nullable = false)
-    private LocalDate date;
+    private DateTimeInterval dateTimeInterval;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -59,9 +56,7 @@ public class Visit extends BaseEntity<Long> {
             Vet vet,
             Pet pet,
             Room room,
-            LocalDate date,
-            LocalTime startTime,
-            LocalTime endTime,
+            DateTimeInterval dateTimeInterval,
             VisitType visitType,
             String description
     ) {
@@ -70,9 +65,7 @@ public class Visit extends BaseEntity<Long> {
         visit.vet = vet;
         visit.pet = pet;
         visit.room = room;
-        visit.date = date;
-        visit.startTime = startTime;
-        visit.endTime = endTime;
+        visit.dateTimeInterval = DateTimeInterval.of(date, startTime, endTime);
         visit.visitType = visitType;
         visit.description = description;
         visit.status = VisitStatus.SCHEDULED;
@@ -88,9 +81,7 @@ public class Visit extends BaseEntity<Long> {
             Room room,
             String description
     ) {
-        this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.dateTimeInterval = DateTimeInterval.of(date, startTime, endTime);
         this.room = room;
 
         if (description != null) {
@@ -121,7 +112,7 @@ public class Visit extends BaseEntity<Long> {
             throw new StatusInvalidException("Visit is already completed");
         }
 
-        this.endTime = LocalTime.now();
+        this.dateTimeInterval = DateTimeInterval.of(this.dateTimeInterval.getStart(), LocalDateTime.now());
         this.status = VisitStatus.COMPLETED;
     }
 }

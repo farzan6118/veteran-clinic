@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.model;
 
+import com.github.farzan6118.petclinic.model.valueObject.DateTimeInterval;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,14 +17,9 @@ public class VetAvailability extends BaseEntity<Long> {
     @JoinColumn(name = "vet_id", nullable = false)
     private Vet vet;
 
+    @Embedded
     @Column(nullable = false)
-    private LocalDate date;
-
-    @Column(nullable = false)
-    private LocalTime startTime;
-
-    @Column(nullable = false)
-    private LocalTime endTime;
+    private DateTimeInterval dateTimeInterval;
 
     @Column(nullable = false)
     private boolean active = true;
@@ -37,9 +33,7 @@ public class VetAvailability extends BaseEntity<Long> {
         VetAvailability availability = new VetAvailability();
 
         availability.vet = vet;
-        availability.date = date;
-        availability.startTime = startTime;
-        availability.endTime = endTime;
+        availability.dateTimeInterval = DateTimeInterval.of(date, startTime, endTime);
         availability.active = true;
 
         return availability;
@@ -50,9 +44,7 @@ public class VetAvailability extends BaseEntity<Long> {
             LocalTime startTime,
             LocalTime endTime
     ) {
-        this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.dateTimeInterval = DateTimeInterval.of(date, startTime, endTime);
     }
 
 }

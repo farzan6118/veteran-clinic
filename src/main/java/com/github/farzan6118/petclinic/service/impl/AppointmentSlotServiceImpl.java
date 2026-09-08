@@ -86,10 +86,10 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
 
 
     private void generateSlots(Vet vet, VetAvailability availability) {
-        LocalDate date = availability.getDate();
+        LocalDate date = availability.getDateTimeInterval().getStart().toLocalDate();
 
-        LocalTime startTime = availability.getStartTime();
-        LocalTime endTime = availability.getEndTime();
+        LocalTime startTime = availability.getDateTimeInterval().getStart().toLocalTime();
+        LocalTime endTime = availability.getDateTimeInterval().getEnd().toLocalTime();
 
         AppointmentDuration duration = AppointmentDuration.fromMinutes(standardDurationMinutes);
 

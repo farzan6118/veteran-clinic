@@ -12,9 +12,11 @@ import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.Room;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.Visit;
+import com.github.farzan6118.petclinic.model.constant.AppointmentDuration;
 import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
+import com.github.farzan6118.petclinic.model.valueObject.DateTimeInterval;
 import com.github.farzan6118.petclinic.repository.*;
 import com.github.farzan6118.petclinic.service.AppointmentSlotService;
 import com.github.farzan6118.petclinic.service.PetService;
@@ -67,25 +69,20 @@ public class VisitServiceImpl implements VisitService {
     @Transactional
     public UUID bookVisit(VisitRequestDto request) {
 
+        DateTimeInterval visitDateTimeInterval = DateTimeInterval.of(
+                request.visitDate(), request.visitTime(), AppointmentDuration.TEN_MINUTES);
+
         Pet pet = petService.getEntityByUuid(request.petUuid());
 
         Vet vet = getVetWithUuidWithLock(request.vetUuid());
 
-        LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
-        if (!visitStart.isAfter(LocalDateTime.now())) {
-            throw new ResourceNotFoundException(
-                    "visit.time.must.be.in.future",
-                    "The visit date and time must be in the future"
-            );
-        }
-        LocalDateTime visitEnd = getVisitEnd(visitStart, request.visitType());
-        Room room = reserveResources(vet, request.visitType(), visitStart, visitEnd, null);
+        Room room = reserveResources(vet, request.visitType(), visitDateTimeInterval);
 
         Visit visit = Visit.create(
                 vet,
                 pet,
                 room,
-                visitStart.toLocalDate(),
+                d.toLocalDate(),
                 visitStart.toLocalTime(),
                 visitEnd.toLocalTime(),
                 request.visitType(),
@@ -216,15 +213,13 @@ public class VisitServiceImpl implements VisitService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        LocalDateTime startDateTime = LocalDateTime.of(visit.getDate(), visit.getStartTime());
+        DateTimeInterval interval = visit.getDateTimeInterval();
 
-        LocalDateTime endDateTime = LocalDateTime.of(visit.getDate(), visit.getEndTime());
-
-        if (now.isBefore(startDateTime)) {
+        if (!interval.contains(now) && now.isBefore(interval.getStart())) {
             throw new GenericValidationException("visit.not.started", "Visit has not started yet");
         }
 
-        if (now.isAfter(endDateTime)) {
+        if (!interval.contains(now) && now.isAfter(interval.getEnd())) {
             throw new GenericValidationException("visit.already.finished", "Visit has already finished");
         }
     }
@@ -247,40 +242,62 @@ public class VisitServiceImpl implements VisitService {
     @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
 
-        Visit visit = visitRepository.findByUuidForUpdate(uuid).orElseThrow(() ->
-                new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid)
-        );
+        Visit visit = visitRepository.findByUuidForUpdate(uuid)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
 
         validateCanBeRescheduled(visit);
 
         Vet vet = getVetWithUuidWithLock(visit.getVet().getUuid());
 
-        LocalDateTime oldVisitStart = LocalDateTime.of(visit.getDate(), visit.getStartTime());
+        DateTimeInterval oldInterval = visit.getDateTimeInterval();
 
-        LocalDateTime newVisitStart = LocalDateTime.of(request.Date(), request.startTime());
+        LocalDateTime oldVisitStart = oldInterval.getStart();
+
+        LocalDateTime newVisitStart = LocalDateTime.of(
+                request.date(),
+                request.startTime()
+        );
 
         if (!newVisitStart.isAfter(LocalDateTime.now())) {
-            throw new ResourceNotFoundException(
-                    "visit.time.must.be.in.future", "The visit date and time must be in the future");
+            throw new GenericValidationException(
+                    "visit.time.must.be.in.future",
+                    "The visit date and time must be in the future"
+            );
         }
 
-        LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, visit.getVisitType());
+        LocalDateTime newVisitEnd =
+                getVisitEnd(newVisitStart, visit.getVisitType());
 
-        if (!newVisitEnd.isBefore(LocalDateTime.now())) {
-            throw new ResourceNotFoundException(
-                    "visit.time.must.be.in.future", "The visit date and time must be in the future");
-        }
+        DateTimeInterval newInterval =
+                DateTimeInterval.of(newVisitStart, newVisitEnd);
 
-        Room newRoom = reserveResources(vet, visit.getVisitType(), newVisitStart, newVisitEnd, visit.getUuid());
+        Room newRoom = reserveResources(
+                vet,
+                visit.getVisitType(),
+                newInterval,
+                visit.getUuid()
+        );
 
-        visit.reschedule(newVisitStart.toLocalDate(), newVisitStart.toLocalTime(),
-                newVisitEnd.toLocalTime(), newRoom, request.description());
+        visit.reschedule(
+                newInterval,
+                newRoom,
+                request.description()
+        );
 
-        visitNotificationService.notifyRescheduleVisitParticipants(visit, visit.getPet(), vet, oldVisitStart);
+        visitNotificationService.notifyRescheduleVisitParticipants(
+                visit,
+                visit.getPet(),
+                vet,
+                oldVisitStart
+        );
 
         log.info(
                 "Visit rescheduled successfully. visitUuid={}, oldVisitStart={}, newVisitStart={}",
-                visit.getUuid(), oldVisitStart, newVisitStart);
+                visit.getUuid(),
+                oldVisitStart,
+                newVisitStart
+        );
     }
 
     /**
@@ -328,8 +345,7 @@ public class VisitServiceImpl implements VisitService {
     private Room reserveResources(
             Vet vet,
             VisitType visitType,
-            LocalDateTime visitStart,
-            LocalDateTime visitEnd,
+            DateTimeInterval dateTimeInterval,
             UUID excludedVisitUuid
     ) {
         validateVisitWindow(visitStart, visitEnd);

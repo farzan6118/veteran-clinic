@@ -3,8 +3,7 @@ package com.github.farzan6118.petclinic.dto.response;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record VisitResponseDto(
@@ -15,9 +14,8 @@ public record VisitResponseDto(
         String ownerFullName,
         UUID vetUuid,
         String vetFullName,
-        LocalDate date,
-        LocalTime startTime,
-        LocalTime endTime,
+        LocalDateTime start,
+        LocalDateTime end,
         VisitType visitType,
         UUID roomUuid,
         String roomName,

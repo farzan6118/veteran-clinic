@@ -9,7 +9,6 @@ import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.VetAvailability;
 import com.github.farzan6118.petclinic.repository.VetAvailabilityRepository;
 import com.github.farzan6118.petclinic.repository.VetRepository;
-import com.github.farzan6118.petclinic.service.AppointmentSlotService;
 import com.github.farzan6118.petclinic.service.VetAvailabilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ import java.util.UUID;
 public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
     private final VetAvailabilityRepository availabilityRepository;
-    private final AppointmentSlotService appointmentSlotService;
     private final VetRepository vetRepository;
 
     @Override
@@ -39,7 +37,6 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
                 vet, request.date(), request.startTime(), request.endTime());
 
         availabilityRepository.save(availability);
-        appointmentSlotService.generateSlotsForDate(vetUuid, availability.getDate());
     }
 
     private void checkCreateOverlapping(UUID vetUuid, LocalDate date, LocalTime startTime, LocalTime endTime) {
@@ -92,9 +89,9 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     private AvailabilityResponseDto mapToDto(VetAvailability vetAvailability) {
         return new AvailabilityResponseDto(
                 vetAvailability.getUuid(),
-                vetAvailability.getDate(),
-                vetAvailability.getStartTime(),
-                vetAvailability.getEndTime(),
+                vetAvailability.getDateTimeInterval().getStart().toLocalDate(),
+                vetAvailability.getDateTimeInterval().getStart().toLocalTime(),
+                vetAvailability.getDateTimeInterval().getEnd().toLocalTime(),
                 vetAvailability.isActive());
     }
 

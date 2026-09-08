@@ -26,7 +26,7 @@ public interface VetAvailabilityRepository extends JpaRepository<VetAvailability
             @Param("vetUuid") UUID vetUuid,
             @Param("date") LocalDate date,
             @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime
+            @Param("end") LocalTime endTime
     );
 
     List<VetAvailability> findAllByVetUuidAndDateAndActiveTrue(UUID vetUuid, LocalDate date);
@@ -44,7 +44,7 @@ public interface VetAvailabilityRepository extends JpaRepository<VetAvailability
             @Param("vetUuid") UUID vetUuid,
             @Param("date") LocalDate date,
             @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime
+            @Param("end") LocalTime endTime
     );
 
     @Query("""
@@ -62,7 +62,7 @@ public interface VetAvailabilityRepository extends JpaRepository<VetAvailability
             @Param("availabilityUuid") UUID availabilityUuid,
             @Param("date") LocalDate date,
             @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime
+            @Param("end") LocalTime endTime
     );
 
     Optional<VetAvailability> findByUuidAndVetUuid(UUID uuid, UUID vetUuid);
