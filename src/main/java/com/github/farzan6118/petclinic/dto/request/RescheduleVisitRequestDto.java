@@ -12,7 +12,7 @@ public record RescheduleVisitRequestDto(
         @NotNull(message = "visit.date.is.required")
         @FutureOrPresent(message = "visit.date.must.be.in.present.or.future")
         @JsonFormat(pattern = "yyyy-MM-dd")
-        LocalDate Date,
+        LocalDate date,
         @NotNull(message = "visit.time.is.required")
         @JsonFormat(pattern = "HH:mm")
         LocalTime startTime,

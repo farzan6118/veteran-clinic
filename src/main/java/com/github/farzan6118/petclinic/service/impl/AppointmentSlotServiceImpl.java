@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -42,8 +43,7 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
 
         Vet vet = getVet(vetUuid);
 
-        List<VetAvailability> availabilities =
-                availabilityRepository.findAllByVetUuidAndDateAndActiveTrue(vetUuid, date);
+        List<VetAvailability> availabilities = availabilityRepository.findAllByVetUuidAndActiveTrue(vetUuid, date);
 
         if (availabilities.isEmpty()) {
             log.debug("No active availability found. vetUuid={}, date={}", vetUuid, date);
@@ -86,39 +86,33 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
 
 
     private void generateSlots(Vet vet, VetAvailability availability) {
-        LocalDate date = availability.getDateTimeInterval().getStart().toLocalDate();
 
-        LocalTime startTime = availability.getDateTimeInterval().getStart().toLocalTime();
-        LocalTime endTime = availability.getDateTimeInterval().getEnd().toLocalTime();
+        LocalDateTime startTime = availability.getStartTime();
+        LocalDateTime endTime = availability.getEndTime();
 
         AppointmentDuration duration = AppointmentDuration.fromMinutes(standardDurationMinutes);
 
-        LocalTime slotStart = startTime;
+        LocalDateTime slotEnd = startTime.plusMinutes(duration.getMinutes());
 
-        while (!slotStart.plusMinutes(duration.getMinutes()).isAfter(endTime)) {
-
-            LocalTime slotEnd = slotStart.plusMinutes(duration.getMinutes());
+        while (!startTime.plusMinutes(duration.getMinutes()).isAfter(endTime)) {
 
             AppointmentSlot slot = new AppointmentSlot();
             slot.setVet(vet);
-            slot.setDate(date);
-            slot.setStartTime(slotStart);
-            slot.setEndTime(slotEnd);
+            slot.setStartTime(availability.getStartTime());
+            slot.setEndTime(availability.getEndTime());
             slot.setAppointmentDuration(duration);
             slot.setStatus(SlotStatus.AVAILABLE);
 
-            if (!appointmentSlotRepository.existsByVetUuidAndDateAndStartTime(vet.getUuid(), date, slotStart)) {
+            if (!appointmentSlotRepository.existsByVetUuidAndStartTime(vet.getUuid(), startTime)) {
                 appointmentSlotRepository.save(slot);
             }
-
-            slotStart = slotEnd;
         }
     }
 
 
-    private void createSlotIfNotExists(Vet vet, LocalDate date, LocalTime startTime, LocalTime endTime) {
+    private void createSlotIfNotExists(Vet vet, LocalDateTime startTime, LocalDateTime endTime) {
 
-        boolean exists = appointmentSlotRepository.existsByVetUuidAndDateAndStartTime(vet.getUuid(), date, startTime);
+        boolean exists = appointmentSlotRepository.existsByVetUuidAndStartTime(vet.getUuid(), startTime);
 
         if (exists) {
             return;
@@ -127,7 +121,6 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
         AppointmentSlot slot = new AppointmentSlot();
 
         slot.setVet(vet);
-        slot.setDate(date);
         slot.setStartTime(startTime);
         slot.setEndTime(endTime);
         slot.setStatus(SlotStatus.AVAILABLE);

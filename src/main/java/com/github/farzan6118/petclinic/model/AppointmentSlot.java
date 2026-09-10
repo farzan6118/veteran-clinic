@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -18,20 +17,14 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Audited
 @Table(
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_appointment_slot_vet_date_start",
-                        columnNames = {"vet_id", "date", "start_time"}
-                )
-        },
         indexes = {
                 @Index(
                         name = "idx_appointment_slot_vet_date",
-                        columnList = "vet_id,date"
+                        columnList = "vet_id"
                 ),
                 @Index(
                         name = "idx_appointment_slot_room_date",
-                        columnList = "room_id,date"
+                        columnList = "room_id"
                 ),
                 @Index(
                         name = "idx_appointment_slot_status",
@@ -50,13 +43,10 @@ public class AppointmentSlot extends BaseEntity<Long> {
     private Room room;
 
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDateTime startTime;
 
     @Column(nullable = false)
-    private LocalTime startTime;
-
-    @Column(nullable = false)
-    private LocalTime endTime;
+    private LocalDateTime endTime;
 
     @Column
     @Enumerated(EnumType.STRING)

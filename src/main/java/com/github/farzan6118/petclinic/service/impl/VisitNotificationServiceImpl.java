@@ -30,7 +30,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
                     vet.getEmail(),
                     vet.getFullName(),
                     oldVisitDate,
-                    visit.getDateTimeInterval().getStart(),
+                    visit.getStartTime(),
                     pet.getName(),
                     pet.getSpecies().getName(),
                     owner.getFullName()
@@ -41,7 +41,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
                     owner.getFullName(),
                     pet.getName(),
                     oldVisitDate,
-                    visit.getDateTimeInterval().getStart(),
+                    visit.getStartTime(),
                     vet.getFullName()
             );
 
@@ -59,7 +59,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
             emailService.sendVetVisitCancelledEmail(
                     vet.getEmail(),
                     vet.getFullName(),
-                    visit.getDateTimeInterval().getStart(),
+                    visit.getStartTime(),
                     pet.getName(),
                     pet.getSpecies().getName(),
                     owner.getFullName(),
@@ -70,7 +70,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
                     owner.getEmail(),
                     owner.getFullName(),
                     pet.getName(),
-                    visit.getDateTimeInterval().getStart(),
+                    visit.getStartTime(),
                     vet.getFullName(),
                     reason
             );
@@ -89,7 +89,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
             emailService.sendVetVisitScheduledEmail(
                     vet.getEmail(),
                     vet.getFullName(),
-                    visit.getDateTimeInterval().getStart(),
+                    visit.getStartTime(),
                     pet.getName(),
                     pet.getSpecies().getName(),
                     owner.getFullName()
@@ -100,7 +100,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
                     owner.getFullName(),
                     pet.getName(),
                     pet.getSpecies().getName(),
-                    visit.getDateTimeInterval().getStart(),
+                    visit.getStartTime(),
                     vet.getFullName()
             );
 

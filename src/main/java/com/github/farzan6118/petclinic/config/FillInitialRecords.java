@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Configuration
@@ -98,15 +98,15 @@ public class FillInitialRecords {
         List<Vet> vets = vetRepository.findAll();
         if (vetAvailabilityRepository.count() == 0 && vets.size() >= 3) {
             vetAvailabilityRepository.saveAll(List.of(
-                    availability(vets.get(0), LocalDate.of(2026, 9, 7), LocalTime.of(9, 0), LocalTime.of(13, 0)),
-                    availability(vets.get(0), LocalDate.of(2026, 9, 8), LocalTime.of(9, 0), LocalTime.of(12, 20)),
-                    availability(vets.get(1), LocalDate.of(2026, 9, 7), LocalTime.of(10, 0), LocalTime.of(14, 0)),
-                    availability(vets.get(1), LocalDate.of(2026, 9, 8), LocalTime.of(9, 30), LocalTime.of(12, 30)),
-                    availability(vets.get(1), LocalDate.of(2026, 9, 9), LocalTime.of(9, 30), LocalTime.of(12, 30)),
-                    availability(vets.get(2), LocalDate.of(2026, 9, 9), LocalTime.of(8, 0), LocalTime.of(12, 0)),
-                    availability(vets.get(2), LocalDate.of(2026, 9, 10), LocalTime.of(9, 30), LocalTime.of(14, 0)),
-                    availability(vets.get(2), LocalDate.of(2026, 9, 11), LocalTime.of(9, 30), LocalTime.of(14, 0)),
-                    availability(vets.get(2), LocalDate.of(2026, 9, 12), LocalTime.of(9, 30), LocalTime.of(13, 30))
+                    availability(vets.get(0), LocalDateTime.of(2026, 9, 11, 9, 0), LocalDateTime.of(2026,9,11, 13, 0)),
+                    availability(vets.get(0), LocalDateTime.of(2026, 9, 12, 9, 0), LocalDateTime.of(2026,9,12, 12, 20)),
+                    availability(vets.get(1), LocalDateTime.of(2026, 9, 13, 10, 0), LocalDateTime.of(2026,9,13, 14, 0)),
+                    availability(vets.get(1), LocalDateTime.of(2026, 9, 14, 9, 30), LocalDateTime.of(2026,9,14, 12, 30)),
+                    availability(vets.get(1), LocalDateTime.of(2026, 9, 15, 9, 30), LocalDateTime.of(2026,9,15, 12, 30)),
+                    availability(vets.get(2), LocalDateTime.of(2026, 9, 16, 8, 0), LocalDateTime.of(2026,9,16, 12, 0)),
+                    availability(vets.get(2), LocalDateTime.of(2026, 9, 17, 9, 30), LocalDateTime.of(2026,9,17, 14, 0)),
+                    availability(vets.get(2), LocalDateTime.of(2026, 9, 18, 9, 30), LocalDateTime.of(2026,9,18, 14, 0)),
+                    availability(vets.get(2), LocalDateTime.of(2026, 9, 19, 9, 30), LocalDateTime.of(2026,9,19, 13, 30))
             ));
         }
 
@@ -220,10 +220,9 @@ public class FillInitialRecords {
 
     private VetAvailability availability(
             Vet vet,
-            LocalDate date,
-            LocalTime startTime,
-            LocalTime endTime
+            LocalDateTime startTime,
+            LocalDateTime endTime
     ) {
-        return VetAvailability.create(vet, date, startTime, endTime);
+        return new VetAvailability().create(vet, startTime, endTime);
     }
 }

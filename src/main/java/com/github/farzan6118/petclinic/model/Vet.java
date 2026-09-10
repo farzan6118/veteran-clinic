@@ -1,6 +1,5 @@
 package com.github.farzan6118.petclinic.model;
 
-import com.github.farzan6118.petclinic.model.valueObject.DateTimeInterval;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +10,7 @@ import org.hibernate.annotations.Audited;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,13 +92,12 @@ public class Vet extends BaseEntity<Long> {
         availability.setVet(null);
     }
 
-    public void addAvailability(
-            LocalDate date,
-            LocalTime startTime,
-            LocalTime endTime
-    ) {
+    public void addAvailability(LocalDate date, LocalTime startTime, LocalTime endTime) {
         VetAvailability availability = new VetAvailability();
-        availability.setDateTimeInterval(DateTimeInterval.of(date, startTime, endTime));
+        LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+        LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+        availability.setStartTime(startDateTime);
+        availability.setEndTime(endDateTime);
         addAvailability(availability);
     }
 }

@@ -3,17 +3,15 @@ package com.github.farzan6118.petclinic.model;
 import com.github.farzan6118.petclinic.exception.StatusInvalidException;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
-import com.github.farzan6118.petclinic.model.valueObject.DateTimeInterval;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Entity
 @Getter
@@ -38,9 +36,11 @@ public class Visit extends BaseEntity<Long> {
     @Column(nullable = false)
     private VisitType visitType;
 
-    @Embedded
-    @Column(nullable = false)
-    private DateTimeInterval dateTimeInterval;
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -52,37 +52,29 @@ public class Visit extends BaseEntity<Long> {
     private Instant bookedAt;
 
 
-    public static Visit create(
-            Vet vet,
-            Pet pet,
-            Room room,
-            DateTimeInterval dateTimeInterval,
-            VisitType visitType,
-            String description
-    ) {
+    public Visit schedule(Vet vet, Pet pet, Room room, LocalDateTime startTime, LocalDateTime endTime,
+            VisitType visitType, String description) {
+        dateAndTimeValidations(startTime, endTime);
         Visit visit = new Visit();
-
         visit.vet = vet;
         visit.pet = pet;
         visit.room = room;
-        visit.dateTimeInterval = DateTimeInterval.of(date, startTime, endTime);
+        visit.startTime = startTime;
+        visit.endTime = endTime;
         visit.visitType = visitType;
         visit.description = description;
         visit.status = VisitStatus.SCHEDULED;
         visit.bookedAt = Instant.now();
-
         return visit;
     }
 
-    public void reschedule(
-            LocalDate date,
-            LocalTime startTime,
-            LocalTime endTime,
-            Room room,
-            String description
-    ) {
-        this.dateTimeInterval = DateTimeInterval.of(date, startTime, endTime);
+    public void reschedule(Room room, LocalDateTime startTime, LocalDateTime endTime,
+                           VisitType visitType, String description) {
+        dateAndTimeValidations(startTime, endTime);
         this.room = room;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.visitType = visitType;
 
         if (description != null) {
             this.description = description;
@@ -102,7 +94,7 @@ public class Visit extends BaseEntity<Long> {
         this.status = VisitStatus.CANCELLED;
     }
 
-    public void complete() {
+    public void complete(LocalDateTime end) {
 
         if (status == VisitStatus.CANCELLED) {
             throw new StatusInvalidException("Cancelled visit cannot be completed");
@@ -112,7 +104,21 @@ public class Visit extends BaseEntity<Long> {
             throw new StatusInvalidException("Visit is already completed");
         }
 
-        this.dateTimeInterval = DateTimeInterval.of(this.dateTimeInterval.getStart(), LocalDateTime.now());
+        this.endTime = end;
         this.status = VisitStatus.COMPLETED;
+    }
+
+    private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
+        if (endTime.isBefore(startTime)) {
+            throw new IllegalArgumentException("End time cannot be before start time");
+        }
+
+        if (Duration.between(startTime, endTime).toMinutes() < 5) {
+            throw new IllegalArgumentException("duration cannot be less than 5 minutes");
+        }
+
+        if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
+            throw new IllegalArgumentException("the start and end time must be the same day");
+        }
     }
 }

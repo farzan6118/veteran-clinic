@@ -14,8 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,18 +29,18 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     @Override
     @Transactional
     public void createAvailability(UUID vetUuid, CreateVetAvailabilityRequestDto request) {
+        LocalDateTime startDateTime = request.startTime();
+        LocalDateTime endDateTime = request.endTime();
         Vet vet = getVet(vetUuid);
-        validateTimeRange(request.startTime(), request.endTime());
-        checkCreateOverlapping(vetUuid, request.date(), request.startTime(), request.endTime());
-        VetAvailability availability = VetAvailability.create(
-                vet, request.date(), request.startTime(), request.endTime());
+        validateTimeRange(startDateTime, endDateTime);
+        checkCreateOverlapping(vetUuid, startDateTime, endDateTime);
+        VetAvailability availability = new VetAvailability().create(vet, startDateTime, endDateTime);
 
         availabilityRepository.save(availability);
     }
 
-    private void checkCreateOverlapping(UUID vetUuid, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        boolean overlapping = availabilityRepository
-                .existsOverlappingAvailability(vetUuid, date, startTime, endTime);
+    private void checkCreateOverlapping(UUID vetUuid, LocalDateTime startTime, LocalDateTime endTime) {
+        boolean overlapping = availabilityRepository.existsOverlappingAvailability(vetUuid, startTime, endTime);
         if (overlapping) {
             throw new GenericValidationException("Vet already has an availability overlapping this time range");
         }
@@ -52,17 +51,17 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     public void updateAvailability(UUID vetUuid, UUID availabilityUuid, UpdateVetAvailabilityRequestDto request) {
         VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, vetUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Vet availability not found"));
-
-        validateTimeRange(request.startTime(), request.endTime());
-        checkUpdateOverlapping(vetUuid, availabilityUuid, request.date(), request.startTime(), request.endTime());
-
-        availability.updateSchedule(request.date(), request.startTime(), request.endTime());
+        LocalDateTime startDateTime =request.startTime();
+        LocalDateTime endDateTime =  request.endTime();
+        validateTimeRange(startDateTime, endDateTime);
+        checkUpdateOverlapping(vetUuid, availabilityUuid, startDateTime, endDateTime);
+        availability.update(startDateTime, endDateTime);
     }
 
     private void checkUpdateOverlapping(UUID vetUuid, UUID availabilityUuid,
-                                        LocalDate date, LocalTime startTime, LocalTime endTime) {
+                                        LocalDateTime startTime, LocalDateTime endTime) {
         boolean overlapping = availabilityRepository.existsOverlappingAvailabilityForUpdate(
-                vetUuid, availabilityUuid, date, startTime, endTime);
+                vetUuid, availabilityUuid, startTime, endTime);
         if (overlapping) {
             throw new GenericValidationException("Vet already has an availability overlapping this time range");
         }
@@ -89,9 +88,9 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     private AvailabilityResponseDto mapToDto(VetAvailability vetAvailability) {
         return new AvailabilityResponseDto(
                 vetAvailability.getUuid(),
-                vetAvailability.getDateTimeInterval().getStart().toLocalDate(),
-                vetAvailability.getDateTimeInterval().getStart().toLocalTime(),
-                vetAvailability.getDateTimeInterval().getEnd().toLocalTime(),
+                vetAvailability.getStartTime().toLocalDate(),
+                vetAvailability.getStartTime().toLocalTime(),
+                vetAvailability.getEndTime().toLocalTime(),
                 vetAvailability.isActive());
     }
 
@@ -99,7 +98,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
         return vetRepository.findByUuid(vetUuid).orElseThrow(() -> new ResourceNotFoundException("Vet not found"));
     }
 
-    private void validateTimeRange(LocalTime startTime, LocalTime endTime) {
+    private void validateTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         if (!startTime.isBefore(endTime)) {
             throw new GenericValidationException("Start time must be before end time");
         }

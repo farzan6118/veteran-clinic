@@ -9,18 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot, Long> {
-
-    List<AppointmentSlot> findAllByVetUuidAndDateAndStatus(
-            UUID vetUuid,
-            LocalDate date,
-            SlotStatus status
-    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
@@ -38,17 +32,15 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
             select s
             from AppointmentSlot s
             where s.vet.uuid = :vetUuid
-              and s.date = :date
               and s.startTime = :startTime
               and s.status = 'AVAILABLE'
             """)
     Optional<AppointmentSlot> findAvailableSlotForUpdate(
             @Param("vetUuid") UUID vetUuid,
-            @Param("date") LocalDate date,
-            @Param("startTime") LocalTime startTime
+            @Param("startTime") LocalDateTime startTime
     );
 
-    boolean existsByVetUuidAndDateAndStartTime(UUID uuid, LocalDate date, LocalTime startTime);
+    boolean existsByVetUuidAndStartTime(UUID vetUuid, LocalDateTime startTime);
 
-    List<AppointmentSlot> findAllByVetUuidAndDateAndStatusOrderByStartTime(UUID vetUuid, LocalDate date, SlotStatus slotStatus);
+    List<AppointmentSlot> findAllByVetUuidAndStatus(UUID vetUuid, SlotStatus status);
 }
