@@ -53,7 +53,7 @@ public class Visit extends BaseEntity<Long> {
 
 
     public Visit schedule(Vet vet, Pet pet, Room room, LocalDateTime startTime, LocalDateTime endTime,
-            VisitType visitType, String description) {
+                          VisitType visitType, String description) {
         dateAndTimeValidations(startTime, endTime);
         Visit visit = new Visit();
         visit.vet = vet;

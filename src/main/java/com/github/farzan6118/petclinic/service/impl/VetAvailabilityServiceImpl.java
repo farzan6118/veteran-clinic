@@ -51,8 +51,8 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     public void updateAvailability(UUID vetUuid, UUID availabilityUuid, UpdateVetAvailabilityRequestDto request) {
         VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, vetUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Vet availability not found"));
-        LocalDateTime startDateTime =request.startTime();
-        LocalDateTime endDateTime =  request.endTime();
+        LocalDateTime startDateTime = request.startTime();
+        LocalDateTime endDateTime = request.endTime();
         validateTimeRange(startDateTime, endDateTime);
         checkUpdateOverlapping(vetUuid, availabilityUuid, startDateTime, endDateTime);
         availability.update(startDateTime, endDateTime);

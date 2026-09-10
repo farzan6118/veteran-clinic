@@ -9,7 +9,6 @@ import com.github.farzan6118.petclinic.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.VetMapper;
 import com.github.farzan6118.petclinic.model.Vet;
-import com.github.farzan6118.petclinic.model.VetAvailability;
 import com.github.farzan6118.petclinic.model.constant.EntityStatus;
 import com.github.farzan6118.petclinic.repository.VetRepository;
 import com.github.farzan6118.petclinic.service.VetService;

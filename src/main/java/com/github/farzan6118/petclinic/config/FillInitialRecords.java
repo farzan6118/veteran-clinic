@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.config;
 import com.github.farzan6118.petclinic.model.*;
 import com.github.farzan6118.petclinic.model.constant.Sex;
 import com.github.farzan6118.petclinic.repository.*;
+import net.datafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Configuration
 public class FillInitialRecords {
+    private static Faker faker = new Faker();
 
     @Bean
     CommandLineRunner fillInitialRecordsRunner(
@@ -94,19 +96,18 @@ public class FillInitialRecords {
 
             vetRepository.saveAll(List.of(firstVet, secondVet, thirdVet));
         }
-
         List<Vet> vets = vetRepository.findAll();
         if (vetAvailabilityRepository.count() == 0 && vets.size() >= 3) {
             vetAvailabilityRepository.saveAll(List.of(
-                    availability(vets.get(0), LocalDateTime.of(2026, 9, 11, 9, 0), LocalDateTime.of(2026,9,11, 13, 0)),
-                    availability(vets.get(0), LocalDateTime.of(2026, 9, 12, 9, 0), LocalDateTime.of(2026,9,12, 12, 20)),
-                    availability(vets.get(1), LocalDateTime.of(2026, 9, 13, 10, 0), LocalDateTime.of(2026,9,13, 14, 0)),
-                    availability(vets.get(1), LocalDateTime.of(2026, 9, 14, 9, 30), LocalDateTime.of(2026,9,14, 12, 30)),
-                    availability(vets.get(1), LocalDateTime.of(2026, 9, 15, 9, 30), LocalDateTime.of(2026,9,15, 12, 30)),
-                    availability(vets.get(2), LocalDateTime.of(2026, 9, 16, 8, 0), LocalDateTime.of(2026,9,16, 12, 0)),
-                    availability(vets.get(2), LocalDateTime.of(2026, 9, 17, 9, 30), LocalDateTime.of(2026,9,17, 14, 0)),
-                    availability(vets.get(2), LocalDateTime.of(2026, 9, 18, 9, 30), LocalDateTime.of(2026,9,18, 14, 0)),
-                    availability(vets.get(2), LocalDateTime.of(2026, 9, 19, 9, 30), LocalDateTime.of(2026,9,19, 13, 30))
+                    availability(vets.get(0), LocalDateTime.of(2026, 9, 11, 9, 0), LocalDateTime.of(2026, 9, 11, 13, 0)),
+                    availability(vets.get(0), LocalDateTime.of(2026, 9, 12, 9, 0), LocalDateTime.of(2026, 9, 12, 12, 20)),
+                    availability(vets.get(1), LocalDateTime.of(2026, 9, 13, 10, 0), LocalDateTime.of(2026, 9, 13, 14, 0)),
+                    availability(vets.get(1), LocalDateTime.of(2026, 9, 14, 9, 30), LocalDateTime.of(2026, 9, 14, 12, 30)),
+                    availability(vets.get(1), LocalDateTime.of(2026, 9, 15, 9, 30), LocalDateTime.of(2026, 9, 15, 12, 30)),
+                    availability(vets.get(2), LocalDateTime.of(2026, 9, 16, 8, 0), LocalDateTime.of(2026, 9, 16, 12, 0)),
+                    availability(vets.get(2), LocalDateTime.of(2026, 9, 17, 9, 30), LocalDateTime.of(2026, 9, 17, 14, 0)),
+                    availability(vets.get(2), LocalDateTime.of(2026, 9, 18, 9, 30), LocalDateTime.of(2026, 9, 18, 14, 0)),
+                    availability(vets.get(2), LocalDateTime.of(2026, 9, 19, 9, 30), LocalDateTime.of(2026, 9, 19, 13, 30))
             ));
         }
 
