@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface VisitService {
 
-    UUID bookVisit(VisitRequestDto request);
+    void bookVisit(VisitRequestDto request);
 
     List<VisitResponseDto> getMyVisits(Jwt jwt);
 
@@ -23,7 +23,7 @@ public interface VisitService {
 
     List<VisitResponseDto> getVetVisits();
 
-    VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request);
+    void completeVisit(UUID uuid, CompleteVisitRequest request);
 
     List<VisitResponseDto> getAllVisits();
 

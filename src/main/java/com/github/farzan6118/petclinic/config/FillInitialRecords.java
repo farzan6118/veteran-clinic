@@ -15,7 +15,7 @@ import java.util.List;
 
 @Configuration
 public class FillInitialRecords {
-    private static Faker faker = new Faker();
+    private static final Faker faker = new Faker();
 
     @Bean
     CommandLineRunner fillInitialRecordsRunner(

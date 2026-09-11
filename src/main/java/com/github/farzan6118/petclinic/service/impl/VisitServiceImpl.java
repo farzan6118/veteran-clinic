@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.service.impl;
 
+import com.github.farzan6118.petclinic.config.SchedulingProperties;
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
@@ -22,7 +23,6 @@ import com.github.farzan6118.petclinic.service.VisitNotificationService;
 import com.github.farzan6118.petclinic.service.VisitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -30,7 +30,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,22 +51,14 @@ public class VisitServiceImpl implements VisitService {
     private final VetAvailabilityRepository availabilityRepository;
     private final RoomRepository roomRepository;
     private final AppointmentSlotService appointmentSlotService;
-
-    @Value("${clinic.scheduling.standard-duration-minutes:10}")
-    private int standardDurationMinutes;
-
-    @Value("${clinic.scheduling.owners-place-duration-minutes:60}")
-    private int ownersPlaceDurationMinutes;
-
-    @Value("${clinic.scheduling.emergency-duration-minutes:30}")
-    private int emergencyDurationMinutes;
+    private final SchedulingProperties schedulingProperties;
 
     /**
      * Book an available appointment slot for a pet.
      */
     @Override
     @Transactional
-    public UUID bookVisit(VisitRequestDto request) {
+    public void bookVisit(VisitRequestDto request) {
         LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
         LocalDateTime visitEnd = getVisitEnd(visitStart, request.visitType());
         dateAndTimeValidations(visitStart, visitEnd);
@@ -80,7 +71,6 @@ public class VisitServiceImpl implements VisitService {
         visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
         log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
                 savedVisit.getUuid(), pet.getUuid(), vet.getUuid());
-        return savedVisit.getUuid();
     }
 
     private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
@@ -149,17 +139,11 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     @Transactional
-    public VisitResponseDto completeVisit(UUID uuid, CompleteVisitRequest request) {
-
+    public void completeVisit(UUID uuid, CompleteVisitRequest request) {
         Visit visit = getVisitForUpdate(uuid);
-
         validateCompletion(visit);
-
         visit.complete(LocalDateTime.now());
-
         log.info("Visit completed successfully. visitUuid={}", uuid);
-
-        return visitMapper.toResponse(visit);
     }
 
     private Visit getVisitForUpdate(UUID uuid) {
@@ -230,13 +214,13 @@ public class VisitServiceImpl implements VisitService {
         Vet vet = getVetWithUuidWithLock(visit.getVet().getUuid());
 
         LocalDateTime newVisitStart = LocalDateTime.of(request.date(), request.startTime());
-        LocalDateTime newVisitEnd = newVisitStart.plusMinutes(getDurationMinutes(visit.getVisitType()));
+        LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, visit.getVisitType());
 
         LocalDateTime oldVisitStart = visit.getStartTime();
 
         Room newRoom = reserveResources(vet, visit.getVisitType(), newVisitStart, newVisitEnd, visit.getUuid());
 
-        visit.reschedule(newRoom, newVisitStart, visit.getEndTime(), visit.getVisitType(), request.description());
+        visit.reschedule(newRoom, newVisitStart, newVisitEnd, visit.getVisitType(), request.description());
 
         visitNotificationService.notifyRescheduleVisitParticipants(
                 visit, visit.getPet(), vet, oldVisitStart);
@@ -351,9 +335,9 @@ public class VisitServiceImpl implements VisitService {
 
     private int getDurationMinutes(VisitType visitType) {
         return switch (visitType) {
-            case ONSITE, ONLINE -> standardDurationMinutes;
-            case OWNERS_PLACE -> ownersPlaceDurationMinutes;
-            case EMERGENCY -> emergencyDurationMinutes;
+            case ONSITE, ONLINE -> schedulingProperties.standardDurationMinutes();
+            case OWNERS_PLACE -> schedulingProperties.ownersPlaceDurationMinutes();
+            case EMERGENCY -> schedulingProperties.emergencyDurationMinutes();
         };
     }
 

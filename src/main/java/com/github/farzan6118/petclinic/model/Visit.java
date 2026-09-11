@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.EnumSet;
 
 @Entity
 @Getter

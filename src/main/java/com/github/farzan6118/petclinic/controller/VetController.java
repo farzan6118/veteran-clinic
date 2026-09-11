@@ -35,31 +35,31 @@ public class VetController {
     }
 
     @PostMapping
-    public ResponseEntity<VetResponseDto> create(@Valid @RequestBody CreateVetRequestDto request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@Valid @RequestBody CreateVetRequestDto request) {
         vetService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<VetResponseDto> update(
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void update(
             @PathVariable UUID uuid,
             @Valid @RequestBody UpdateVetRequestDto request) {
         vetService.update(uuid, request);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void delete(@PathVariable UUID uuid) {
         vetService.delete(uuid);
-        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{uuid}/profile")
-    public ResponseEntity<VetProfileResponseDto> updateVetProfile(
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void updateVetProfile(
             @Valid @RequestBody VetProfileUpdateRequestDto request,
             @PathVariable UUID uuid) {
         vetService.updateVetProfileByUuid(request, uuid);
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{uuid}/profile")

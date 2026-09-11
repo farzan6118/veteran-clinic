@@ -34,18 +34,16 @@ public class VisitController {
     }
 
     @PostMapping
-    public ResponseEntity<UUID> bookVisit(@Valid @RequestBody VisitRequestDto request) {
-
-        UUID visitUuid = visitService.bookVisit(request);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(visitUuid);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void bookVisit(@Valid @RequestBody VisitRequestDto request) {
+        visitService.bookVisit(request);
     }
 
     @PutMapping("{uuid}")
-    public ResponseEntity<Void> rescheduleVisit(
+    @ResponseStatus(HttpStatus.CREATED)
+    public void rescheduleVisit(
             @PathVariable UUID uuid, @Valid @RequestBody RescheduleVisitRequestDto request) {
         visitService.rescheduleVisit(uuid, request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping
@@ -64,9 +62,9 @@ public class VisitController {
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> cancelVisit(@PathVariable UUID uuid, String reason) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelVisit(@PathVariable UUID uuid, String reason) {
         visitService.cancelVisit(uuid, reason);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/vet")
@@ -75,12 +73,11 @@ public class VisitController {
     }
 
     @PatchMapping("/{uuid}/complete")
-    public ResponseEntity<VisitResponseDto> completeVisit(
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void completeVisit(
             @PathVariable UUID uuid,
             @Valid @RequestBody CompleteVisitRequest request) {
-        return ResponseEntity.ok(
-                visitService.completeVisit(uuid, request)
-        );
+        visitService.completeVisit(uuid, request);
     }
 }
 

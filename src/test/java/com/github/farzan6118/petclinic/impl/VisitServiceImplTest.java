@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.impl;
 
+import com.github.farzan6118.petclinic.config.SchedulingProperties;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
@@ -40,6 +41,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VisitServiceImplTest {
+
+    @Mock
+    private SchedulingProperties schedulingProperties;
 
     @Mock
     private VisitNotificationService visitNotificationService;
@@ -93,6 +97,7 @@ class VisitServiceImplTest {
 
         room = new Room();
         room.setUuid(UUID.randomUUID());
+
     }
 
     // -------------------------------------------------------------------------
