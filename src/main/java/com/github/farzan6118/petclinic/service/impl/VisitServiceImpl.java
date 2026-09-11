@@ -230,17 +230,11 @@ public class VisitServiceImpl implements VisitService {
         Vet vet = getVetWithUuidWithLock(visit.getVet().getUuid());
 
         LocalDateTime newVisitStart = LocalDateTime.of(request.date(), request.startTime());
+        LocalDateTime newVisitEnd = newVisitStart.plusMinutes(getDurationMinutes(visit.getVisitType()));
 
         LocalDateTime oldVisitStart = visit.getStartTime();
 
-        if (!newVisitStart.isAfter(LocalDateTime.now())) {
-            throw new GenericValidationException(
-                    "visit.time.must.be.in.future",
-                    "The visit date and time must be in the future"
-            );
-        }
-
-        Room newRoom = reserveResources(vet, visit.getVisitType(), newVisitStart, visit.getEndTime(), visit.getUuid());
+        Room newRoom = reserveResources(vet, visit.getVisitType(), newVisitStart, newVisitEnd, visit.getUuid());
 
         visit.reschedule(newRoom, newVisitStart, visit.getEndTime(), visit.getVisitType(), request.description());
 
@@ -307,7 +301,12 @@ public class VisitServiceImpl implements VisitService {
     }
 
     private void validateVisitWindow(LocalDateTime visitStart, LocalDateTime visitEnd) {
-        if (!visitEnd.toLocalDate().equals(visitStart.toLocalDate())) {
+
+        if (visitEnd.isBefore(visitStart)) {
+            throw new IllegalArgumentException("End time cannot be before start time");
+        }
+
+        if (!visitStart.toLocalDate().equals(visitEnd.toLocalDate())) {
             throw new ResourceNotFoundException(
                     "visit.duration.crosses.date", "A visit must start and end on the same date");
         }

@@ -83,6 +83,12 @@ springdoc:
       client-id: pet-clinic
       use-pkce-with-authorization-code-grant: true
 
+clinic:
+  scheduling:
+    standard-duration-minutes: 10
+    owners-place-duration-minutes: 60
+    emergency-duration-minutes: 30
+
 system:
   default:
     uuid: 00000000-0000-0000-0000-000000000001

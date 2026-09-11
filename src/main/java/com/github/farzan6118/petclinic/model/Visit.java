@@ -109,7 +109,7 @@ public class Visit extends BaseEntity<Long> {
         this.status = VisitStatus.COMPLETED;
     }
 
-    private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime, VisitType visitType) {
+    public void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime, VisitType visitType) {
         if (endTime.isBefore(startTime)) {
             throw new IllegalArgumentException("End time cannot be before start time");
         }
