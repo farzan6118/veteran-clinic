@@ -16,20 +16,26 @@ public class VisitMapper {
         }
         return new VisitResponseDto(visit.getUuid(),
                 visit.getPet().getUuid(),
+                visit.getPet().getName(),
+                visit.getPet().getSpecies().getName(),
+                visit.getPet().getOwner().getFullName(),
                 visit.getVet().getUuid(),
-//                visit.getVisitDateTime(),
-                null,
+                visit.getVet().getFullName(),
+                visit.getStartTime(),
+                visit.getEndTime(),
+                visit.getVisitType(),
+                visit.getRoom() == null ? null : visit.getRoom().getUuid(),
+                visit.getRoom() == null ? null : visit.getRoom().getName(),
                 visit.getDescription(),
                 visit.getStatus()
         );
     }
 
     public Visit mapToVisitEntity(VisitRequestDto request, Pet pet, Vet vet) {
-//        LocalDateTime localDateTime = request.visitDateTime().truncatedTo(ChronoUnit.MINUTES);
         Visit visit = new Visit();
         visit.setPet(pet);
         visit.setVet(vet);
-//        visit.setVisitDateTime(localDateTime);
+        visit.setVisitType(request.visitType());
         visit.setDescription(request.description());
         visit.setStatus(VisitStatus.SCHEDULED);
         return visit;

@@ -10,6 +10,7 @@ import org.hibernate.annotations.Audited;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,19 +22,31 @@ import java.util.stream.Stream;
 @Setter
 @Audited
 public class Vet extends BaseEntity<Long> {
+
+    @Size(max = 10)
+    private String title;
+
+    @Size(max = 128)
+    @Column(nullable = false)
     private String firstName;
+
+    @Size(max = 128)
+    @Column(nullable = false)
     private String lastName;
 
-    @Column(unique = true)
+    @NotBlank
+    @Size(max = 20)
+    @Column(nullable = false, unique = true)
     private String nationalId;
 
     @NotBlank
-    @Column(nullable = false, unique = true)
     @Size(max = 20)
+    @Column(nullable = false, unique = true)
     private String mobileNumber;
 
     @Email
     @NotBlank
+    @Size(max = 128)
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -42,10 +55,6 @@ public class Vet extends BaseEntity<Long> {
 
     @OneToMany(mappedBy = "vet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VetAvailability> availabilities = new ArrayList<>();
-
-    @OneToMany(mappedBy = "vet")
-    private List<AppointmentSlot> slots = new ArrayList<>();
-
 
     public String getFullName() {
         return Stream.of(firstName, lastName)
@@ -62,7 +71,6 @@ public class Vet extends BaseEntity<Long> {
         if (profile == null) {
             updateProfile(new Profile());
         }
-
         profile.setCity(city);
         profile.setAddress(address);
         profile.setBirthDate(birthDate);
@@ -84,16 +92,12 @@ public class Vet extends BaseEntity<Long> {
         availability.setVet(null);
     }
 
-    public void addAvailability(
-            LocalDate date,
-            LocalTime startTime,
-            LocalTime endTime
-    ) {
+    public void addAvailability(LocalDate date, LocalTime startTime, LocalTime endTime) {
         VetAvailability availability = new VetAvailability();
-        availability.setDate(date);
-        availability.setStartTime(startTime);
-        availability.setEndTime(endTime);
-
+        LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+        LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+        availability.setStartTime(startDateTime);
+        availability.setEndTime(endDateTime);
         addAvailability(availability);
     }
 }

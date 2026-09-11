@@ -58,7 +58,6 @@ public class VetServiceImpl implements VetService {
 
         vetRepository.save(vet);
         log.info("vet created");
-
     }
 
     private void validateUniqueContactInfo(String mobileNumber, String email) {

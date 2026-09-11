@@ -1,6 +1,5 @@
 package com.github.farzan6118.petclinic.dto.response;
 
-import java.time.Duration;
 import java.util.UUID;
 
 public record VetResponseDto(
@@ -8,7 +7,6 @@ public record VetResponseDto(
         String fullName,
         String nationalId,
         String mobileNumber,
-        String email,
-        Duration duration
+        String email
 ) {
 }

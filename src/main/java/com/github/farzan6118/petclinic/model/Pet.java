@@ -2,6 +2,7 @@ package com.github.farzan6118.petclinic.model;
 
 import com.github.farzan6118.petclinic.model.constant.Sex;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,8 +13,11 @@ import java.time.LocalDate;
 @Setter
 public class Pet extends BaseEntity<Long> {
 
+    @Size(max = 128)
     @Column(nullable = false)
     private String name;
+
+    @Size(max = 64)
     private String color;
     private String marks;
 

@@ -2,9 +2,11 @@
 
 A modern **veterinary clinic management platform** built with **Java, Spring Boot, PostgreSQL, and React**.
 
-The project is being developed as a backend-first application with a focus on clean architecture, security, maintainability, and real-world enterprise backend practices.
+The project is being developed as a backend-first application with a focus on clean architecture, security,
+maintainability, and real-world enterprise backend practices.
 
-The backend provides the core domain, security, persistence, and REST API capabilities. A dedicated **React.js administration panel** will be added to provide the user interface for clinic administrators and staff.
+The backend provides the core domain, security, persistence, and REST API capabilities. A dedicated **React.js
+administration panel** will be added to provide the user interface for clinic administrators and staff.
 
 > 🚧 **Project status:** Active development
 > The backend is currently under development. The React administration panel is planned for a future phase.
@@ -30,7 +32,8 @@ The long-term goal is to support:
 * Secure authentication and authorization
 * Administrative dashboards and statistics
 
-The project is also being used as a practical implementation of modern **Spring Boot backend development**, including security, persistence, validation, API design, and application architecture.
+The project is also being used as a practical implementation of modern **Spring Boot backend development**, including
+security, persistence, validation, API design, and application architecture.
 
 ---
 
@@ -70,7 +73,7 @@ The backend is designed so that the frontend remains independent from the domain
 ### Backend
 
 | Technology             | Purpose                         |
-| ---------------------- | ------------------------------- |
+|------------------------|---------------------------------|
 | Java 21                | Programming language            |
 | Spring Boot 4.1        | Application framework           |
 | Spring Web             | REST APIs                       |
@@ -97,7 +100,8 @@ The administration panel is planned to be built with:
 * REST API integration
 * Modern component-based UI
 
-> The React application is intentionally planned as a separate phase so that the backend API and domain model can be developed independently.
+> The React application is intentionally planned as a separate phase so that the backend API and domain model can be
+> developed independently.
 
 ---
 
@@ -207,7 +211,8 @@ This allows the project to avoid creating unnecessary audit tables for every ent
 
 The backend uses **OpenAPI** for API documentation.
 
-Once the application is running, the API documentation will be available through the configured Springdoc/OpenAPI endpoints.
+Once the application is running, the API documentation will be available through the configured Springdoc/OpenAPI
+endpoints.
 
 The exact endpoints and API contract will evolve together with the backend implementation.
 
@@ -320,7 +325,8 @@ or:
 
 Docker Compose is used to simplify local infrastructure setup.
 
-The project includes Spring Boot Docker Compose integration, allowing infrastructure services to be managed alongside local development.
+The project includes Spring Boot Docker Compose integration, allowing infrastructure services to be managed alongside
+local development.
 
 As the infrastructure evolves, the required services will be documented here.
 
@@ -503,9 +509,11 @@ The project will continue to evolve as new backend and frontend capabilities are
 
 **Current status: Backend development**
 
-The project is currently focused on establishing the backend architecture, domain model, persistence layer, security model, and REST API.
+The project is currently focused on establishing the backend architecture, domain model, persistence layer, security
+model, and REST API.
 
-The React administration panel will be introduced after the backend foundation and API contracts become sufficiently mature.
+The React administration panel will be introduced after the backend foundation and API contracts become sufficiently
+mature.
 
 ---
 

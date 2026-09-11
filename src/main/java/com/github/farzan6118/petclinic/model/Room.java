@@ -11,8 +11,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Room extends BaseEntity<Integer> {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false, unique = true)
+    private String code;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_type_id", nullable = false)

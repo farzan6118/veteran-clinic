@@ -1,3 +1,9 @@
 spring:
   profiles:
     active: @spring.profiles.active@
+
+clinic:
+  scheduling:
+    standard-duration-minutes: 10
+    owners-place-duration-minutes: 60
+    emergency-duration-minutes: 30

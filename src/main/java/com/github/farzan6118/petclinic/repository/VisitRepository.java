@@ -1,27 +1,68 @@
 package com.github.farzan6118.petclinic.repository;
 
-import com.github.farzan6118.petclinic.model.AppointmentSlot;
+import com.github.farzan6118.petclinic.model.Room;
 import com.github.farzan6118.petclinic.model.Visit;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface VisitRepository extends JpaRepository<Visit, Long> {
 
-    boolean existsByVetUuidAndAppointmentSlot(UUID vetUuid, AppointmentSlot appointmentSlot);
-
     @EntityGraph(attributePaths = {
             "vet",
             "pet",
             "pet.owner",
-            "pet.petType",
+            "pet.species",
+            "room",
     })
     Optional<Visit> findByUuid(UUID uuid);
 
-    List<Visit> findAllByPetOwnerUuidOrderByAppointmentSlotDateAsc(UUID currentOwnerUuid);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select v from Visit v where v.uuid = :uuid")
+    Optional<Visit> findByUuidForUpdate(@Param("uuid") UUID uuid);
 
-    List<Visit> findAllByVetUuidOrderByAppointmentSlotDateAsc(UUID currentVetUuid);
+    List<Visit> findAllByPetOwnerUuid(UUID currentOwnerUuid);
+
+    List<Visit> findAllByVetUuid(UUID currentVetUuid);
+
+    @Query("""
+            select case when count(v) > 0 then true else false end
+            from Visit v
+            where v.vet.uuid = :vetUuid
+              and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED)
+              and (v.startTime = :visitStart and v.startTime < :endTime)
+              and (v.endTime = :visitEnd and v.endTime > :startTime)
+              and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
+            """)
+    boolean existsVetReservation(
+            @Param("vetUuid") UUID vetUuid,
+            @Param("visitStart") LocalDateTime visitStart,
+            @Param("visitEnd") LocalDateTime visitEnd,
+            @Param("excludedVisitUuid") UUID excludedVisitUuid
+    );
+
+    @Query("""
+            select case when count(v) > 0 then true else false end
+            from Visit v
+            where v.room = :room
+              and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
+                                   com.github.farzan6118.petclinic.model.constant.VisitStatus.NO_SHOW)
+              and (v.startTime = :startTime and v.startTime < :endTime)
+              and (v.endTime = :endTime and v.endTime > :startTime)
+              and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
+            """)
+    boolean existsRoomReservation(
+            @Param("room") Room room,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("excludedVisitUuid") UUID excludedVisitUuid
+    );
 }
