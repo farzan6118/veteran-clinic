@@ -12,6 +12,7 @@ import org.hibernate.annotations.Audited;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 
 @Entity
 @Getter
@@ -54,7 +55,7 @@ public class Visit extends BaseEntity<Long> {
 
     public Visit schedule(Vet vet, Pet pet, Room room, LocalDateTime startTime, LocalDateTime endTime,
                           VisitType visitType, String description) {
-        dateAndTimeValidations(startTime, endTime);
+        dateAndTimeValidations(startTime, endTime, visitType);
         Visit visit = new Visit();
         visit.vet = vet;
         visit.pet = pet;
@@ -70,7 +71,7 @@ public class Visit extends BaseEntity<Long> {
 
     public void reschedule(Room room, LocalDateTime startTime, LocalDateTime endTime,
                            VisitType visitType, String description) {
-        dateAndTimeValidations(startTime, endTime);
+        dateAndTimeValidations(startTime, endTime, visitType);
         this.room = room;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -108,14 +109,16 @@ public class Visit extends BaseEntity<Long> {
         this.status = VisitStatus.COMPLETED;
     }
 
-    private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
+    private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime, VisitType visitType) {
         if (endTime.isBefore(startTime)) {
             throw new IllegalArgumentException("End time cannot be before start time");
         }
 
-        if (Duration.between(startTime, endTime).toMinutes() < 5) {
-            throw new IllegalArgumentException("duration cannot be less than 5 minutes");
-        }
+//        if (!EnumSet.of(VisitType.ONLINE, VisitType.OWNERS_PLACE).contains(visitType)) {
+//            if (Duration.between(startTime, endTime).toMinutes() < 5) {
+//                throw new IllegalArgumentException("duration cannot be less than 5 minutes");
+//            }
+//        }
 
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
             throw new IllegalArgumentException("the start and end time must be the same day");

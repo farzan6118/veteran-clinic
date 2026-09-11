@@ -88,10 +88,6 @@ public class VisitServiceImpl implements VisitService {
             throw new IllegalArgumentException("End time cannot be before start time");
         }
 
-        if (Duration.between(startTime, endTime).toMinutes() < 5) {
-            throw new IllegalArgumentException("duration cannot be less than 5 minutes");
-        }
-
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
             throw new IllegalArgumentException("the start and end time must be the same day");
         }

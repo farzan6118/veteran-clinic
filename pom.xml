@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.github.farzan6118</groupId>
-    <artifactId>pet-clinic</artifactId>
+    <artifactId>veterinary-clinic</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name/>
     <description/>
