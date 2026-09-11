@@ -1,4 +1,4 @@
-package com.github.farzan6118.petshop.impl;
+package com.github.farzan6118.petclinic.impl;
 
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;

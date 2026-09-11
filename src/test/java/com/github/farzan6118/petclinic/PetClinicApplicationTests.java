@@ -1,4 +1,4 @@
-package com.github.farzan6118.petshop;
+package com.github.farzan6118.petclinic;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
