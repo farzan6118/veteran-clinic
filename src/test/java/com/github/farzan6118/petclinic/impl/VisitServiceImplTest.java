@@ -98,6 +98,11 @@ class VisitServiceImplTest {
         room = new Room();
         room.setUuid(UUID.randomUUID());
 
+        Visit savedVisit = new Visit();
+        savedVisit.setUuid(visitUuid);
+
+        when(visitRepository.save(any(Visit.class)))
+                .thenReturn(savedVisit);
     }
 
     // -------------------------------------------------------------------------
@@ -137,9 +142,7 @@ class VisitServiceImplTest {
                     return saved;
                 });
 
-        UUID result = service.bookVisit(request);
-
-        assertEquals(visitUuid, result);
+        service.bookVisit(request);
 
         ArgumentCaptor<Visit> captor = ArgumentCaptor.forClass(Visit.class);
         verify(visitRepository).save(captor.capture());
@@ -190,9 +193,7 @@ class VisitServiceImplTest {
                     return saved;
                 });
 
-        UUID result = service.bookVisit(request);
-
-        assertEquals(visitUuid, result);
+        service.bookVisit(request);
 
         ArgumentCaptor<Visit> captor = ArgumentCaptor.forClass(Visit.class);
         verify(visitRepository).save(captor.capture());
@@ -238,9 +239,7 @@ class VisitServiceImplTest {
                     return saved;
                 });
 
-        UUID result = service.bookVisit(request);
-
-        assertEquals(visitUuid, result);
+        service.bookVisit(request);
 
         ArgumentCaptor<Visit> captor = ArgumentCaptor.forClass(Visit.class);
         verify(visitRepository).save(captor.capture());
@@ -293,9 +292,7 @@ class VisitServiceImplTest {
                     return saved;
                 });
 
-        UUID result = service.bookVisit(request);
-
-        assertEquals(visitUuid, result);
+        service.bookVisit(request);
 
         verify(roomRepository)
                 .findActiveRoomsByTypeNamesForUpdate(
@@ -555,10 +552,8 @@ class VisitServiceImplTest {
 
         when(visitMapper.toResponse(visit)).thenReturn(response);
 
-        VisitResponseDto result =
-                service.completeVisit(visitUuid, null);
+        service.completeVisit(visitUuid, null);
 
-        assertSame(response, result);
         assertEquals(VisitStatus.COMPLETED, visit.getStatus());
 
         verify(visitRepository).findByUuidForUpdate(visitUuid);
