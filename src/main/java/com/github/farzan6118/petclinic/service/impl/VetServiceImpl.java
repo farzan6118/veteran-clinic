@@ -115,5 +115,10 @@ public class VetServiceImpl implements VetService {
         Vet vet = getEntityByUuid(uuid);
         return vetMapper.mapToVetProfileDto(vet);
     }
+
+    @Override
+    public Vet getVetWithUuidLock(UUID vetUuid) {
+        return vetRepository.findByUuidWithLock(vetUuid).orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
+    }
 }
 

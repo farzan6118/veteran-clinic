@@ -27,5 +27,5 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
                 and lower(room.roomType.name) in :roomTypeNames
             order by room.id
             """)
-    List<Room> findActiveRoomsByTypeNamesForUpdate(@Param("roomTypeNames") List<String> roomTypeNames);
+    List<Room> findActiveRoomsByTypeNames(@Param("roomTypeNames") List<String> roomTypeNames);
 }

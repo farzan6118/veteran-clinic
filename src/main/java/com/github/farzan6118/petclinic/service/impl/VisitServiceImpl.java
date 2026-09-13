@@ -5,7 +5,6 @@ import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.DurationTemplateResponseDto;
-import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
@@ -14,17 +13,12 @@ import com.github.farzan6118.petclinic.model.Pet;
 import com.github.farzan6118.petclinic.model.Room;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.Visit;
-import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
-import com.github.farzan6118.petclinic.model.constant.VisitType;
 import com.github.farzan6118.petclinic.repository.*;
 import com.github.farzan6118.petclinic.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +46,8 @@ public class VisitServiceImpl implements VisitService {
     private final DurationTemplateService durationTemplateService;
     private final VetAvailabilityService vetAvailabilityService;
     private final ClinicProperties clinicProperties;
+    private final VetService vetService;
+    private final RoomService roomService;
 
     /**
      * Book an available appointment slot for a pet.
@@ -62,15 +58,13 @@ public class VisitServiceImpl implements VisitService {
         DurationTemplateResponseDto standardDuration = durationTemplateService.findByName("STANDARD");
 
         LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
-
         LocalDateTime visitEnd = getVisitEnd(visitStart, standardDuration);
 
         dateAndTimeValidations(visitStart, visitEnd);
 
-        Vet vet = getVetWithUuidWithLock(request.vetUuid());
+        Vet vet = vetService.getVetWithUuidLock(request.vetUuid());
         Pet pet = petService.getEntityByUuid(request.petUuid());
-
-        Room room = reserveResources(vet, request.visitType(), visitStart, visitEnd, null);
+        Room room = roomService.allocateRoom(request.visitType());
 
         Visit visit = new Visit()
                 .schedule(vet, pet, room, visitStart, visitEnd, request.visitType(), request.description());
@@ -84,7 +78,13 @@ public class VisitServiceImpl implements VisitService {
 
         visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
 
-        log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}, roomUuid={}, startTime={}, endTime={}", savedVisit.getUuid(), pet.getUuid(), vet.getUuid(), room != null ? room.getUuid() : null, visitStart, visitEnd);
+        log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}, roomUuid={}, startTime={}, endTime={}",
+                savedVisit.getUuid(),
+                pet.getUuid(),
+                vet.getUuid(),
+                room != null ? room.getUuid() : null, visitStart,
+                visitEnd
+        );
     }
 
     private void vetAvailabilityValidation(Visit visit) {
@@ -95,12 +95,14 @@ public class VisitServiceImpl implements VisitService {
         String startTime = visit.getStartTime().toString();
         String endTime = visit.getEndTime().toString();
 
-        vetAvailabilityService.findAvailableByUuidAndTimeRange(visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime()).orElseThrow(() -> {
+        vetAvailabilityService.findAvailableByUuidAndTimeRange(
+                visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime()).orElseThrow(() -> {
             String message = String.format("the vet is not available from %s to %s", startTime, endTime);
             return new GenericValidationException(message, message);
         });
 
-        boolean existsVetReservation = visitRepository.existsVetReservation(visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
+        boolean existsVetReservation = visitRepository.existsVetReservation(
+                visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
 
         if (existsVetReservation) {
             String message = String.format("the vet is already booked from %s to %s", startTime, endTime);
@@ -118,9 +120,11 @@ public class VisitServiceImpl implements VisitService {
 
         ClinicProperties.WorkingHours workingHours = clinicProperties.workingHours();
 
-        if (visit.getStartTime().toLocalTime().isBefore(workingHours.start()) || visit.getEndTime().toLocalTime().isAfter(workingHours.end())) {
+        if (visit.getStartTime().toLocalTime().isBefore(workingHours.start()) ||
+                visit.getEndTime().toLocalTime().isAfter(workingHours.end())) {
 
-            String message = String.format("the visit must be scheduled between %s and %s on %s", workingHours.start(), workingHours.end(), visitDate);
+            String message = String.format("the visit must be scheduled between %s and %s on %s",
+                    workingHours.start(), workingHours.end(), visitDate);
 
             throw new GenericValidationException(message, message);
         }
@@ -131,20 +135,24 @@ public class VisitServiceImpl implements VisitService {
             return;
         }
 
-        boolean existsRoomReservation = visitRepository.existsRoomReservation(visit.getRoom().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
+        boolean existsRoomReservation = visitRepository.existsRoomReservation(
+                visit.getRoom().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
 
         if (existsRoomReservation) {
-            String message = String.format("the room %s is already booked from %s to %s", visit.getRoom().getName(), visit.getStartTime(), visit.getEndTime());
+            String message = String.format("the room %s is already booked from %s to %s",
+                    visit.getRoom().getName(), visit.getStartTime(), visit.getEndTime());
 
             throw new GenericValidationException(message, message);
         }
     }
 
     private void petAvailabilityValidation(Visit visit) {
-        boolean existsPetReservation = visitRepository.existsPetReservation(visit.getPet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
+        boolean existsPetReservation = visitRepository.existsPetReservation(
+                visit.getPet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
 
         if (existsPetReservation) {
-            String message = String.format("the pet already has an appointment from %s to %s", visit.getStartTime(), visit.getEndTime());
+            String message = String.format("the pet already has an appointment from %s to %s",
+                    visit.getStartTime(), visit.getEndTime());
 
             throw new GenericValidationException(message, message);
         }
@@ -152,20 +160,16 @@ public class VisitServiceImpl implements VisitService {
 
     private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
         if (!startTime.isBefore(endTime)) {
-            throw new GenericValidationException("visit end time must be after start time", "visit end time must be after start time");
+            throw new GenericValidationException(
+                    "visit end time must be after start time",
+                    "visit end time must be after start time");
         }
 
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
-            throw new GenericValidationException("visit start and end time must be on the same day", "visit start and end time must be on the same day");
+            throw new GenericValidationException(
+                    "visit start and end time must be on the same day",
+                    "visit start and end time must be on the same day");
         }
-    }
-
-    @Override
-    public List<VisitResponseDto> getMyVisits(Jwt jwt) {
-
-        UUID currentUserUuid = getCurrentUserUuid(jwt);
-
-        return visitRepository.findAllByPetOwnerUuid(currentUserUuid).stream().map(visitMapper::toResponse).toList();
     }
 
     @Override
@@ -198,11 +202,27 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
-    public List<VisitResponseDto> getVetVisits() {
+    public List<VisitResponseDto> findAllVisitsByVetUuid(UUID vetUuid, LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+        return visitRepository.findAllVisitsByVetUuidAndStartTimeBetween(vetUuid, startOfDay, endOfDay)
+                .stream().map(visitMapper::toResponse).toList();
+    }
 
-        UUID currentVetUuid = getCurrentVetUuid();
+    @Override
+    public List<VisitResponseDto> findAllVisitsByPetUuid(UUID petUuid, LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+        return visitRepository.findAllVisitsByPetUuidAndStartTimeBetween(petUuid, startOfDay, endOfDay)
+                .stream().map(visitMapper::toResponse).toList();
+    }
 
-        return visitRepository.findAllByVetUuid(currentVetUuid).stream().map(visitMapper::toResponse).toList();
+    @Override
+    public List<VisitResponseDto> findAllVisitsByRoomUuid(UUID RoomUuid, LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+        return visitRepository.findAllVisitsByPetUuidAndStartTimeBetween(RoomUuid, startOfDay, endOfDay)
+                .stream().map(visitMapper::toResponse).toList();
     }
 
     /**
@@ -218,7 +238,8 @@ public class VisitServiceImpl implements VisitService {
     }
 
     private Visit getVisitForUpdate(UUID uuid) {
-        return visitRepository.findByUuidForUpdate(uuid).orElseThrow(() -> new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
+        return visitRepository.findByUuidForUpdate(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
     }
 
     private void validateCompletion(Visit visit) {
@@ -272,75 +293,35 @@ public class VisitServiceImpl implements VisitService {
     @Override
     @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
-        Visit visit = visitRepository.findByUuidForUpdate(uuid).orElseThrow(() -> new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
+        Visit visit = visitRepository.findByUuidForUpdate(uuid).orElseThrow(
+                () -> new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
         validateCanBeRescheduled(visit);
-        Vet vet = getVetWithUuidWithLock(visit.getVet().getUuid());
 
         DurationTemplateResponseDto standardDuration = durationTemplateService.findByName("STANDARD");
-
         LocalDateTime newVisitStart = LocalDateTime.of(request.date(), request.startTime());
         LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, standardDuration);
 
+        Vet vet = vetService.getVetWithUuidLock(visit.getVet().getUuid());
+
         LocalDateTime oldVisitStart = visit.getStartTime();
 
-        Room newRoom = reserveResources(vet, visit.getVisitType(), newVisitStart, newVisitEnd, visit.getUuid());
+        Room newRoom = roomService.allocateRoom(visit.getVisitType());
 
         visit.reschedule(newRoom, newVisitStart, newVisitEnd, visit.getVisitType(), request.description());
 
         visitNotificationService.notifyRescheduleVisitParticipants(visit, visit.getPet(), vet, oldVisitStart);
 
-        log.info("Visit rescheduled successfully. visitUuid={}, oldVisitStart={}, newVisitStart={}", visit.getUuid(), oldVisitStart, newVisitStart);
-    }
-
-    /**
-     * Get available slots for a vet on a specific date.
-     */
-    @Override
-    public List<VetAvailableSlotResponseDto> getAvailableSlots(UUID vetUuid, LocalDate date) {
-        LocalDate requestedDate = date != null ? date : LocalDate.now();
-        validateVetExists(vetUuid);
-        appointmentSlotService.generateSlotsForDate(vetUuid, requestedDate);
-
-        return slotRepository.findAllByVetUuidAndStatus(vetUuid, SlotStatus.AVAILABLE).stream().map(slot -> new VetAvailableSlotResponseDto(slot.getUuid(), slot.getStartTime().toLocalDate(), slot.getStartTime().toLocalTime(), slot.getEndTime().toLocalTime())).toList();
+        log.info("Visit rescheduled successfully. visitUuid={}, oldVisitStart={}, newVisitStart={}",
+                visit.getUuid(), oldVisitStart, newVisitStart);
     }
 
     private Visit getVisitByUuid(UUID uuid) {
-        return visitRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + uuid));
-    }
-
-    private Vet getVetByUuid(UUID vetUuid) {
-        return vetRepository.findByUuid(vetUuid).orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
-    }
-
-    private Vet getVetWithUuidWithLock(UUID vetUuid) {
-        return vetRepository.findByUuidWithLock(vetUuid).orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
-    }
-
-    private void validateVetExists(UUID vetUuid) {
-        if (!vetRepository.existsByUuid(vetUuid)) {
-            throw new ResourceNotFoundException("Vet not found: " + vetUuid);
-        }
-    }
-
-    private Room reserveResources(Vet vet, VisitType visitType, LocalDateTime visitStart, LocalDateTime visitEnd, UUID excludedVisitUuid) {
-        return allocateRoom(visitType, visitStart, visitEnd, excludedVisitUuid);
+        return visitRepository.findByUuid(uuid).orElseThrow(
+                () -> new ResourceNotFoundException("Visit not found: " + uuid));
     }
 
     private LocalDateTime getVisitEnd(LocalDateTime visitStart, DurationTemplateResponseDto duration) {
         return visitStart.plusMinutes(duration.durationMinutes());
-    }
-
-    private Room allocateRoom(VisitType visitType, LocalDateTime visitStart, LocalDateTime visitEnd, UUID excludedVisitUuid) {
-        List<String> roomTypeNames = switch (visitType) {
-            case ONSITE -> List.of("examination", "individual");
-            case ONLINE, OFFSITE -> List.of();
-        };
-
-        if (roomTypeNames.isEmpty()) {
-            return null;
-        }
-
-        return roomRepository.findActiveRoomsByTypeNamesForUpdate(roomTypeNames).stream().filter(room -> !visitRepository.existsRoomReservation(room.getUuid(), visitStart, visitEnd, excludedVisitUuid)).findFirst().orElseThrow(() -> new ResourceNotFoundException("visit.room.not.available", "No room is available for the selected visit type and time"));
     }
 
     private void validateCanBeRescheduled(Visit visit) {
@@ -357,11 +338,4 @@ public class VisitServiceImpl implements VisitService {
         return UUID.fromString(Objects.requireNonNull(jwt.getSubject()));
     }
 
-    private UUID getCurrentVetUuid() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof JwtAuthenticationToken jwtAuthentication) {
-            return UUID.fromString(Objects.requireNonNull(jwtAuthentication.getToken().getSubject()));
-        }
-        throw new IllegalStateException("Authenticated JWT user not found");
-    }
 }

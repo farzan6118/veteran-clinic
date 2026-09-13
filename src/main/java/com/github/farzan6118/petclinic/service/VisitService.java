@@ -15,20 +15,20 @@ public interface VisitService {
 
     void bookVisit(VisitRequestDto request);
 
-    List<VisitResponseDto> getMyVisits(Jwt jwt);
-
     VisitResponseDto getByUuid(UUID uuid);
 
     void cancelVisit(UUID uuid, String reason);
 
-    List<VisitResponseDto> getVetVisits();
+    List<VisitResponseDto> findAllVisitsByVetUuid(UUID vetUuid, LocalDate date);
+
+    List<VisitResponseDto> findAllVisitsByPetUuid(UUID petUuid, LocalDate date);
+
+    List<VisitResponseDto> findAllVisitsByRoomUuid(UUID RoomUuid, LocalDate date);
 
     void completeVisit(UUID uuid, CompleteVisitRequestDto request);
 
     List<VisitResponseDto> getAllVisits();
 
     void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request);
-
-    List<VetAvailableSlotResponseDto> getAvailableSlots(UUID vetUuid, LocalDate date);
 
 }

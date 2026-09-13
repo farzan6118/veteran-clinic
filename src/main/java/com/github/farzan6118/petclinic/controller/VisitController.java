@@ -3,7 +3,6 @@ package com.github.farzan6118.petclinic.controller;
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
-import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.service.VisitService;
 import jakarta.validation.Valid;
@@ -27,12 +26,6 @@ public class VisitController {
 
     private final VisitService visitService;
 
-    @GetMapping("/vets/{vetUuid}/available-slots")
-    public ResponseEntity<List<VetAvailableSlotResponseDto>> getAvailableSlots(
-            @PathVariable UUID vetUuid, @RequestParam(required = false) LocalDate date) {
-        return ResponseEntity.ok(visitService.getAvailableSlots(vetUuid, date));
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void bookVisit(@Valid @RequestBody VisitRequestDto request) {
@@ -51,11 +44,6 @@ public class VisitController {
         return ResponseEntity.ok(visitService.getAllVisits());
     }
 
-    @GetMapping("/my")
-    public ResponseEntity<List<VisitResponseDto>> getMyVisits(@AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(visitService.getMyVisits(jwt));
-    }
-
     @GetMapping("/{uuid}")
     public ResponseEntity<VisitResponseDto> getByUuid(@PathVariable UUID uuid) {
         return ResponseEntity.ok(visitService.getByUuid(uuid));
@@ -67,16 +55,28 @@ public class VisitController {
         visitService.cancelVisit(uuid, reason);
     }
 
-    @GetMapping("/vet")
-    public ResponseEntity<List<VisitResponseDto>> getVetVisits() {
-        return ResponseEntity.ok(visitService.getVetVisits());
+    @GetMapping("/vet/{vetUuid}")
+    public ResponseEntity<List<VisitResponseDto>> getVetVisits(
+            @PathVariable UUID vetUuid, @RequestParam LocalDate date) {
+        return ResponseEntity.ok(visitService.findAllVisitsByVetUuid(vetUuid, date));
+    }
+
+    @GetMapping("/pet/{petUuid}")
+    public ResponseEntity<List<VisitResponseDto>> getPetVisits(
+            @PathVariable UUID petUuid, @RequestParam LocalDate date) {
+        return ResponseEntity.ok(visitService.findAllVisitsByPetUuid(petUuid, date));
+    }
+
+    @GetMapping("/room/{roomUuid}")
+    public ResponseEntity<List<VisitResponseDto>> getRoomVisits(
+            @PathVariable UUID roomUuid, @RequestParam LocalDate date) {
+        return ResponseEntity.ok(visitService.findAllVisitsByRoomUuid(roomUuid, date));
     }
 
     @PatchMapping("/{uuid}/complete")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void completeVisit(
-            @PathVariable UUID uuid,
-            @Valid @RequestBody CompleteVisitRequestDto request) {
+            @PathVariable UUID uuid, @Valid @RequestBody CompleteVisitRequestDto request) {
         visitService.completeVisit(uuid, request);
     }
 }

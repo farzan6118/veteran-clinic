@@ -4,6 +4,7 @@ import com.github.farzan6118.petclinic.dto.request.CreateRoomRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdateRoomRequestDto;
 import com.github.farzan6118.petclinic.dto.response.RoomResponseDto;
 import com.github.farzan6118.petclinic.model.Room;
+import com.github.farzan6118.petclinic.model.constant.VisitType;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,4 +24,6 @@ public interface RoomService {
     void delete(UUID uuid);
 
     RoomResponseDto getRoomByUuid(UUID uuid);
+
+    Room allocateRoom(VisitType visitType);
 }

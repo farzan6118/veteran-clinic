@@ -8,6 +8,7 @@ import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.mapper.RoomMapper;
 import com.github.farzan6118.petclinic.model.Room;
 import com.github.farzan6118.petclinic.model.constant.EntityStatus;
+import com.github.farzan6118.petclinic.model.constant.VisitType;
 import com.github.farzan6118.petclinic.repository.RoomRepository;
 import com.github.farzan6118.petclinic.service.RoomService;
 import lombok.RequiredArgsConstructor;
@@ -96,6 +97,25 @@ public class RoomServiceImpl implements RoomService {
     public RoomResponseDto getRoomByUuid(UUID uuid) {
         Room room = getEntityByUuid(uuid);
         return roomMapper.mapToDto(room);
+    }
+
+    @Override
+    public Room allocateRoom(VisitType visitType) {
+        List<String> roomTypeNames = switch (visitType) {
+            case ONSITE -> List.of("examination", "individual");
+            case ONLINE, OFFSITE -> List.of();
+        };
+
+        if (roomTypeNames.isEmpty()) {
+            return null;
+        }
+
+        return roomRepository.findActiveRoomsByTypeNames(roomTypeNames)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "visit.room.not.available",
+                        "No room is available for the selected visit type and time"));
     }
 }
 

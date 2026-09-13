@@ -27,4 +27,6 @@ public interface VetService {
     void delete(UUID uuid);
 
     VetProfileResponseDto getVetProfileByUuid(UUID uuid);
+
+    Vet getVetWithUuidLock(UUID vetUuid);
 }

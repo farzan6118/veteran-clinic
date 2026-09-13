@@ -82,4 +82,31 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             @Param("visitEnd") LocalDateTime visitEnd,
             @Param("excludedVisitUuid") UUID excludedVisitUuid
     );
+
+    @Query("""
+            select v
+            from Visit v
+            where v.vet.uuid = :vetUuid
+              and v.startTime >= :startOfDay
+              and v.startTime < :endOfDay
+            """)
+    List<Visit> findAllVisitsByVetUuidAndStartTimeBetween(UUID vetUuid, LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+    @Query("""
+            select v
+            from Visit v
+            where v.pet.uuid = :petUuid
+              and v.startTime >= :startOfDay
+              and v.startTime < :endOfDay
+            """)
+    List<Visit> findAllVisitsByPetUuidAndStartTimeBetween(UUID petUuid, LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+    @Query("""
+            select v
+            from Visit v
+            where v.room.uuid = :roomUuid
+              and v.startTime >= :startOfDay
+              and v.startTime < :endOfDay
+            """)
+    List<Visit> findAllVisitsByRoomUuidAndStartTimeBetween(UUID roomUuid, LocalDateTime startOfDay, LocalDateTime endOfDay);
 }
