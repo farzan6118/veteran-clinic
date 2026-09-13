@@ -33,10 +33,6 @@ public class Visit extends BaseEntity<Long> {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private VisitType visitLocation;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private VisitType visitType;
 
     @Column(name = "start_time", nullable = false)

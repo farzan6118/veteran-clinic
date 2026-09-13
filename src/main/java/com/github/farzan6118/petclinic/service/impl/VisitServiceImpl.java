@@ -49,6 +49,7 @@ public class VisitServiceImpl implements VisitService {
     private final RoomRepository roomRepository;
     private final AppointmentSlotService appointmentSlotService;
     private final DurationTemplateService durationTemplateService;
+    private final VetAvailabilityService vetAvailabilityService;
 
     /**
      * Book an available appointment slot for a pet.
@@ -66,10 +67,28 @@ public class VisitServiceImpl implements VisitService {
         Room room = reserveResources(vet, request.visitType(), visitStart, visitEnd, null);
         Visit visit = new Visit()
                 .schedule(vet, pet, room, visitStart, visitEnd, request.visitType(), request.description());
+        overLapChecking(visit);
         Visit savedVisit = visitRepository.save(visit);
         visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
         log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
                 savedVisit.getUuid(), pet.getUuid(), vet.getUuid());
+    }
+
+    private void overLapChecking(Visit visit) {
+        boolean existsVetReservation = visitRepository.existsVetReservation(visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
+        if (existsVetReservation) {
+            throw new GenericValidationException("the vet is busy", "the vet is not available at this time");
+        }
+        if (visit.getRoom() != null) {
+            boolean existsRoomReservation = visitRepository.existsRoomReservation(visit.getRoom().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
+            if (existsRoomReservation) {
+                throw new GenericValidationException("the room is full", "the room is already booked at this time");
+            }
+        }
+        boolean existsPetReservation = visitRepository.existsPetReservation(visit.getPet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
+        if (existsPetReservation) {
+            throw new GenericValidationException("the pet is busy", "the pet is already have appointment at this time");
+        }
     }
 
     private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
@@ -324,7 +343,7 @@ public class VisitServiceImpl implements VisitService {
         return roomRepository.findActiveRoomsByTypeNamesForUpdate(roomTypeNames)
                 .stream()
                 .filter(room -> !visitRepository
-                        .existsRoomReservation(room, visitStart, visitEnd, excludedVisitUuid))
+                        .existsRoomReservation(room.getUuid(), visitStart, visitEnd, excludedVisitUuid))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "visit.room.not.available", "No room is available for the selected visit type and time"));

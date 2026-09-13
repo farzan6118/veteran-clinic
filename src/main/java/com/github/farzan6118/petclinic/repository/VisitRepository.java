@@ -1,6 +1,5 @@
 package com.github.farzan6118.petclinic.repository;
 
-import com.github.farzan6118.petclinic.model.Room;
 import com.github.farzan6118.petclinic.model.Visit;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -36,11 +35,29 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
     @Query("""
             select case when count(v) > 0 then true else false end
             from Visit v
+            where v.pet.uuid = :petUuid
+            and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
+                                 com.github.farzan6118.petclinic.model.constant.VisitStatus.COMPLETED)
+            and v.startTime < :visitEnd
+            and v.endTime > :visitStart
+            and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
+            """)
+    boolean existsPetReservation(
+            @Param("petUuid") UUID petUuid,
+            @Param("visitStart") LocalDateTime visitStart,
+            @Param("visitEnd") LocalDateTime visitEnd,
+            @Param("excludedVisitUuid") UUID excludedVisitUuid
+    );
+
+    @Query("""
+            select case when count(v) > 0 then true else false end
+            from Visit v
             where v.vet.uuid = :vetUuid
-              and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED)
-              and (v.startTime = :visitStart and v.startTime < :endTime)
-              and (v.endTime = :visitEnd and v.endTime > :startTime)
-              and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
+            and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
+                                 com.github.farzan6118.petclinic.model.constant.VisitStatus.COMPLETED)
+            and v.startTime < :visitEnd
+            and v.endTime > :visitStart
+            and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsVetReservation(
             @Param("vetUuid") UUID vetUuid,
@@ -52,17 +69,17 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
     @Query("""
             select case when count(v) > 0 then true else false end
             from Visit v
-            where v.room = :room
-              and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
-                                   com.github.farzan6118.petclinic.model.constant.VisitStatus.NO_SHOW)
-              and (v.startTime = :startTime and v.startTime < :endTime)
-              and (v.endTime = :endTime and v.endTime > :startTime)
-              and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
+            where v.room.uuid = :roomUuid
+            and v.status not in (com.github.farzan6118.petclinic.model.constant.VisitStatus.CANCELLED,
+                                 com.github.farzan6118.petclinic.model.constant.VisitStatus.COMPLETED)
+            and v.startTime < :visitEnd
+            and v.endTime > :visitStart
+            and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsRoomReservation(
-            @Param("room") Room room,
-            @Param("startTime") LocalDateTime startTime,
-            @Param("endTime") LocalDateTime endTime,
+            @Param("roomUuid") UUID roomUuid,
+            @Param("visitStart") LocalDateTime visitStart,
+            @Param("visitEnd") LocalDateTime visitEnd,
             @Param("excludedVisitUuid") UUID excludedVisitUuid
     );
 }
