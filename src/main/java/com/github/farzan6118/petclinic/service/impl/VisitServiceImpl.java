@@ -1,9 +1,9 @@
 package com.github.farzan6118.petclinic.service.impl;
 
-import com.github.farzan6118.petclinic.config.SchedulingProperties;
-import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
+import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
+import com.github.farzan6118.petclinic.dto.response.DurationTemplateResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
 import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.exception.GenericValidationException;
@@ -17,10 +17,7 @@ import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
 import com.github.farzan6118.petclinic.repository.*;
-import com.github.farzan6118.petclinic.service.AppointmentSlotService;
-import com.github.farzan6118.petclinic.service.PetService;
-import com.github.farzan6118.petclinic.service.VisitNotificationService;
-import com.github.farzan6118.petclinic.service.VisitService;
+import com.github.farzan6118.petclinic.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -51,7 +48,7 @@ public class VisitServiceImpl implements VisitService {
     private final VetAvailabilityRepository availabilityRepository;
     private final RoomRepository roomRepository;
     private final AppointmentSlotService appointmentSlotService;
-    private final SchedulingProperties schedulingProperties;
+    private final DurationTemplateService durationTemplateService;
 
     /**
      * Book an available appointment slot for a pet.
@@ -59,8 +56,10 @@ public class VisitServiceImpl implements VisitService {
     @Override
     @Transactional
     public void bookVisit(VisitRequestDto request) {
+        // todo: later work on the business
+        DurationTemplateResponseDto standardDuration = durationTemplateService.findByName("STANDARD");
         LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
-        LocalDateTime visitEnd = getVisitEnd(visitStart, request.visitType());
+        LocalDateTime visitEnd = getVisitEnd(visitStart, standardDuration);
         dateAndTimeValidations(visitStart, visitEnd);
         Pet pet = petService.getEntityByUuid(request.petUuid());
         Vet vet = getVetWithUuidWithLock(request.vetUuid());
@@ -139,7 +138,7 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     @Transactional
-    public void completeVisit(UUID uuid, CompleteVisitRequest request) {
+    public void completeVisit(UUID uuid, CompleteVisitRequestDto request) {
         Visit visit = getVisitForUpdate(uuid);
         validateCompletion(visit);
         visit.complete(LocalDateTime.now());
@@ -205,16 +204,15 @@ public class VisitServiceImpl implements VisitService {
     @Override
     @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
-
         Visit visit = visitRepository.findByUuidForUpdate(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
-
         validateCanBeRescheduled(visit);
-
         Vet vet = getVetWithUuidWithLock(visit.getVet().getUuid());
 
+        DurationTemplateResponseDto standardDuration = durationTemplateService.findByName("STANDARD");
+
         LocalDateTime newVisitStart = LocalDateTime.of(request.date(), request.startTime());
-        LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, visit.getVisitType());
+        LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, standardDuration);
 
         LocalDateTime oldVisitStart = visit.getStartTime();
 
@@ -291,13 +289,13 @@ public class VisitServiceImpl implements VisitService {
         }
 
         if (!visitStart.toLocalDate().equals(visitEnd.toLocalDate())) {
-            throw new ResourceNotFoundException(
+            throw new GenericValidationException(
                     "visit.duration.crosses.date", "A visit must start and end on the same date");
         }
     }
 
-    private LocalDateTime getVisitEnd(LocalDateTime visitStart, VisitType visitType) {
-        return visitStart.plusMinutes(getDurationMinutes(visitType));
+    private LocalDateTime getVisitEnd(LocalDateTime visitStart, DurationTemplateResponseDto duration) {
+        return visitStart.plusMinutes(duration.durationMinutes());
     }
 
     private void validateVetAvailability(Vet vet, LocalDateTime visitStart, LocalDateTime visitEnd) {
@@ -316,8 +314,7 @@ public class VisitServiceImpl implements VisitService {
     ) {
         List<String> roomTypeNames = switch (visitType) {
             case ONSITE -> List.of("examination", "individual");
-            case EMERGENCY -> List.of("surgery", "emergency", "isolation");
-            case ONLINE, OWNERS_PLACE -> List.of();
+            case ONLINE, OFFSITE -> List.of();
         };
 
         if (roomTypeNames.isEmpty()) {
@@ -331,14 +328,6 @@ public class VisitServiceImpl implements VisitService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "visit.room.not.available", "No room is available for the selected visit type and time"));
-    }
-
-    private int getDurationMinutes(VisitType visitType) {
-        return switch (visitType) {
-            case ONSITE, ONLINE -> schedulingProperties.standardDurationMinutes();
-            case OWNERS_PLACE -> schedulingProperties.ownersPlaceDurationMinutes();
-            case EMERGENCY -> schedulingProperties.emergencyDurationMinutes();
-        };
     }
 
     private void validateCanBeRescheduled(Visit visit) {

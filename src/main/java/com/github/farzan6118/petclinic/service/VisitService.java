@@ -1,6 +1,6 @@
 package com.github.farzan6118.petclinic.service;
 
-import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequest;
+import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
@@ -23,7 +23,7 @@ public interface VisitService {
 
     List<VisitResponseDto> getVetVisits();
 
-    void completeVisit(UUID uuid, CompleteVisitRequest request);
+    void completeVisit(UUID uuid, CompleteVisitRequestDto request);
 
     List<VisitResponseDto> getAllVisits();
 

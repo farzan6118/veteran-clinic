@@ -4,6 +4,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(SchedulingProperties.class)
-public class SchedulingPropertiesConfig {
+@EnableConfigurationProperties(ClinicProperties.class)
+public class ClinicConfiguration {
 }

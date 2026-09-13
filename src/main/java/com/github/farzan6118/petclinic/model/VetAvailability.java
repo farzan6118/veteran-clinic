@@ -47,7 +47,7 @@ public class VetAvailability extends BaseEntity<Long> {
             throw new IllegalArgumentException("End time cannot be before start time");
         }
 
-        if (Duration.between(startTime, endTime).toMinutes() < 5) {
+        if (Duration.between(startTime, endTime).toMinutes() < 2) {
             throw new IllegalArgumentException("duration cannot be less than 5 minutes");
         }
 

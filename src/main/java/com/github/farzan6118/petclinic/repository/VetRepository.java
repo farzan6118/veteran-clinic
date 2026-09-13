@@ -1,12 +1,14 @@
 package com.github.farzan6118.petclinic.repository;
 
 import com.github.farzan6118.petclinic.model.Vet;
+import com.github.farzan6118.petclinic.model.VetAvailability;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,4 +33,6 @@ public interface VetRepository extends JpaRepository<Vet, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByUuid(UUID vetUuid);
+
+    List<Vet> findByAvailabilities(List<VetAvailability> availabilities);
 }

@@ -25,7 +25,9 @@ public class FillInitialRecords {
             RoomRepository roomRepository,
             RoomTypeRepository roomTypeRepository,
             VetRepository vetRepository,
-            VetAvailabilityRepository vetAvailabilityRepository
+            VetAvailabilityRepository vetAvailabilityRepository,
+            DurationTemplateRepository durationTemplateRepository
+
     ) {
         return args -> fillInitialRecords(
                 ownerRepository,
@@ -34,7 +36,8 @@ public class FillInitialRecords {
                 roomRepository,
                 roomTypeRepository,
                 vetRepository,
-                vetAvailabilityRepository
+                vetAvailabilityRepository,
+                durationTemplateRepository
         );
     }
 
@@ -46,14 +49,26 @@ public class FillInitialRecords {
             RoomRepository roomRepository,
             RoomTypeRepository roomTypeRepository,
             VetRepository vetRepository,
-            VetAvailabilityRepository vetAvailabilityRepository
+            VetAvailabilityRepository vetAvailabilityRepository,
+            DurationTemplateRepository durationTemplateRepository
     ) {
         if (ownerRepository.count() == 0
                 && speciesRepository.count() == 0
                 && petRepository.count() == 0
                 && roomRepository.count() == 0
                 && roomTypeRepository.count() == 0
-                && vetRepository.count() == 0) {
+                && vetRepository.count() == 0
+                && durationTemplateRepository.count() == 0) {
+
+            List<DurationTemplate> durationTemplate = durationTemplateRepository.saveAll(List.of(
+                    durationTemplate("QUICK", 15, "Quick visit"),
+                    durationTemplate("SHORT", 20, "Short visit"),
+                    durationTemplate("STANDARD", 30, "Standard visit"),
+                    durationTemplate("EXTENDED", 45, "Extended visit"),
+                    durationTemplate("LONG", 60, "Long visit"),
+                    durationTemplate("VERY_LONG", 120, "Very long visit")
+            ));
+
             List<Species> species = speciesRepository.saveAll(List.of(
                     species("Dog", "DOG", "Domestic dog", "Common companion animal"),
                     species("Cat", "CAT", "Domestic cat", "Common companion animal"),
@@ -123,6 +138,14 @@ public class FillInitialRecords {
         });
     }
 
+    private DurationTemplate durationTemplate(String name, Integer durationMinutes, String description) {
+        DurationTemplate template = new DurationTemplate();
+        template.setName(name);
+        template.setDurationMinutes(durationMinutes);
+        template.setDescription(description);
+        return template;
+    }
+
     private Species species(String name, String code, String origin, String description) {
         Species species = new Species();
         species.setName(name);
@@ -144,7 +167,7 @@ public class FillInitialRecords {
             String address
     ) {
         Owner owner = new Owner();
-        owner.setFirstName(title);
+        owner.setTitle(title);
         owner.setFirstName(firstName);
         owner.setLastName(lastName);
         owner.setNationalId(nationalId);

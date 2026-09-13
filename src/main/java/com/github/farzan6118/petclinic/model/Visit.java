@@ -33,6 +33,10 @@ public class Visit extends BaseEntity<Long> {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private VisitType visitLocation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private VisitType visitType;
 
     @Column(name = "start_time", nullable = false)
@@ -53,7 +57,7 @@ public class Visit extends BaseEntity<Long> {
 
     public Visit schedule(Vet vet, Pet pet, Room room, LocalDateTime startTime, LocalDateTime endTime,
                           VisitType visitType, String description) {
-        dateAndTimeValidations(startTime, endTime, visitType);
+        dateAndTimeValidations(startTime, endTime);
         Visit visit = new Visit();
         visit.vet = vet;
         visit.pet = pet;
@@ -69,7 +73,7 @@ public class Visit extends BaseEntity<Long> {
 
     public void reschedule(Room room, LocalDateTime startTime, LocalDateTime endTime,
                            VisitType visitType, String description) {
-        dateAndTimeValidations(startTime, endTime, visitType);
+        dateAndTimeValidations(startTime, endTime);
         this.room = room;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -107,16 +111,10 @@ public class Visit extends BaseEntity<Long> {
         this.status = VisitStatus.COMPLETED;
     }
 
-    public void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime, VisitType visitType) {
+    public void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
         if (endTime.isBefore(startTime)) {
             throw new IllegalArgumentException("End time cannot be before start time");
         }
-
-//        if (!EnumSet.of(VisitType.ONLINE, VisitType.OWNERS_PLACE).contains(visitType)) {
-//            if (Duration.between(startTime, endTime).toMinutes() < 5) {
-//                throw new IllegalArgumentException("duration cannot be less than 5 minutes");
-//            }
-//        }
 
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
             throw new IllegalArgumentException("the start and end time must be the same day");
