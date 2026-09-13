@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,4 +36,15 @@ public interface VetRepository extends JpaRepository<Vet, Long> {
     boolean existsByUuid(UUID vetUuid);
 
     List<Vet> findByAvailabilities(List<VetAvailability> availabilities);
+
+    @Query("""
+            select va from VetAvailability va
+                join fetch va.vet v
+                where va.uuid = :uuid
+                and (:startTime >= va.startTime
+                and :endTime <= va.endTime)
+            """
+    )
+    void findAvailableByUuidAndTimeRange(
+            UUID uuid, LocalDateTime startTime, LocalDateTime endTime);
 }

@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.service.impl;
 
+import com.github.farzan6118.petclinic.config.ClinicProperties;
 import com.github.farzan6118.petclinic.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
@@ -50,6 +51,7 @@ public class VisitServiceImpl implements VisitService {
     private final AppointmentSlotService appointmentSlotService;
     private final DurationTemplateService durationTemplateService;
     private final VetAvailabilityService vetAvailabilityService;
+    private final ClinicProperties clinicProperties;
 
     /**
      * Book an available appointment slot for a pet.
@@ -67,24 +69,48 @@ public class VisitServiceImpl implements VisitService {
         Room room = reserveResources(vet, request.visitType(), visitStart, visitEnd, null);
         Visit visit = new Visit()
                 .schedule(vet, pet, room, visitStart, visitEnd, request.visitType(), request.description());
-        overLapChecking(visit);
-        Visit savedVisit = visitRepository.save(visit);
-        visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
-        log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
-                savedVisit.getUuid(), pet.getUuid(), vet.getUuid());
+        roomAvailabilityValidation(visit);
+        vetAvailabilityValidation(visit);
+        petAvailabilityValidation(visit);
+//        Visit savedVisit = visitRepository.save(visit);
+//        visitNotificationService.notifyBookVisitParticipants(savedVisit, pet, vet);
+//        log.info("Visit booked successfully. visitUuid={}, petUuid={}, vetUuid={}",
+//                savedVisit.getUuid(), pet.getUuid(), vet.getUuid());
     }
 
-    private void overLapChecking(Visit visit) {
-        boolean existsVetReservation = visitRepository.existsVetReservation(visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
+    private void vetAvailabilityValidation(Visit visit) {
+        vetAvailabilityService.findAvailableByUuidAndTimeRange(
+                        visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime())
+                .orElseThrow(() -> new GenericValidationException(
+                        "the vet has not attended", "the vet has not attended"));
+        boolean existsVetReservation = visitRepository
+                .existsVetReservation(visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
         if (existsVetReservation) {
             throw new GenericValidationException("the vet is busy", "the vet is not available at this time");
         }
+    }
+
+    private void roomAvailabilityValidation(Visit visit) {
         if (visit.getRoom() != null) {
             boolean existsRoomReservation = visitRepository.existsRoomReservation(visit.getRoom().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
             if (existsRoomReservation) {
                 throw new GenericValidationException("the room is full", "the room is already booked at this time");
             }
+            if (visit.getStartTime().toLocalTime().isBefore(clinicProperties.workingHours().start())
+                    || (visit.getEndTime().toLocalTime().isAfter(clinicProperties.workingHours().end()))) {
+                throw new GenericValidationException("clinic is closed in that time", "clinic is closed in that time");
+            }
+            LocalDate visitDate = visit.getStartTime().toLocalDate();
+            if (clinicProperties.closeDays().contains(visitDate.getDayOfWeek())) {
+                throw new GenericValidationException(
+                        "clinic is closed",
+                        "clinic is closed on this day"
+                );
+            }
         }
+    }
+
+    private void petAvailabilityValidation(Visit visit) {
         boolean existsPetReservation = visitRepository.existsPetReservation(visit.getPet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
         if (existsPetReservation) {
             throw new GenericValidationException("the pet is busy", "the pet is already have appointment at this time");
@@ -296,33 +322,11 @@ public class VisitServiceImpl implements VisitService {
             LocalDateTime visitEnd,
             UUID excludedVisitUuid
     ) {
-        validateVisitWindow(visitStart, visitEnd);
-        validateVetAvailability(vet, visitStart, visitEnd);
         return allocateRoom(visitType, visitStart, visitEnd, excludedVisitUuid);
-    }
-
-    private void validateVisitWindow(LocalDateTime visitStart, LocalDateTime visitEnd) {
-
-        if (visitEnd.isBefore(visitStart)) {
-            throw new IllegalArgumentException("End time cannot be before start time");
-        }
-
-        if (!visitStart.toLocalDate().equals(visitEnd.toLocalDate())) {
-            throw new GenericValidationException(
-                    "visit.duration.crosses.date", "A visit must start and end on the same date");
-        }
     }
 
     private LocalDateTime getVisitEnd(LocalDateTime visitStart, DurationTemplateResponseDto duration) {
         return visitStart.plusMinutes(duration.durationMinutes());
-    }
-
-    private void validateVetAvailability(Vet vet, LocalDateTime visitStart, LocalDateTime visitEnd) {
-        if (!availabilityRepository.existsCoveringTime(vet.getUuid(), visitStart, visitEnd)) {
-            throw new ResourceNotFoundException(
-                    "visit.vet.not.available", "The selected visit time is outside the vet availability"
-            );
-        }
     }
 
     private Room allocateRoom(

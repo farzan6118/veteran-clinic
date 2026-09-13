@@ -9,7 +9,7 @@ import java.util.Set;
 @ConfigurationProperties(prefix = "clinic.availibility")
 public record ClinicProperties(
         WorkingHours workingHours,
-        Set<DayOfWeek> weekends
+        Set<DayOfWeek> closeDays
 ) {
     public record WorkingHours(
             LocalTime start,

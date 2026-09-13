@@ -4,7 +4,9 @@ import com.github.farzan6118.petclinic.dto.request.CreateVetAvailabilityRequestD
 import com.github.farzan6118.petclinic.dto.request.UpdateVetAvailabilityRequestDto;
 import com.github.farzan6118.petclinic.dto.response.AvailabilityResponseDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface VetAvailabilityService {
@@ -16,4 +18,7 @@ public interface VetAvailabilityService {
     void deleteAvailability(UUID vetUuid, UUID availabilityUuid);
 
     List<AvailabilityResponseDto> getVetAvailability(UUID vetUuid);
+
+    Optional<AvailabilityResponseDto> findAvailableByUuidAndTimeRange(UUID uuid, LocalDateTime StartTime, LocalDateTime EndTime);
+
 }

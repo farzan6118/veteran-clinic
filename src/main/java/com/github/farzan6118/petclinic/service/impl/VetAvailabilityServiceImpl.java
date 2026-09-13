@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -102,5 +103,12 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
         if (!startTime.isBefore(endTime)) {
             throw new GenericValidationException("Start time must be before end time");
         }
+    }
+
+    @Override
+    public Optional<AvailabilityResponseDto> findAvailableByUuidAndTimeRange(
+            UUID uuid, LocalDateTime StartTime, LocalDateTime EndTime) {
+        vetRepository.findAvailableByUuidAndTimeRange(uuid, StartTime, EndTime);
+        return Optional.empty();
     }
 }
