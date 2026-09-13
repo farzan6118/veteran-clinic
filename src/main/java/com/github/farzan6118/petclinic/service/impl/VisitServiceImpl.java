@@ -83,11 +83,14 @@ public class VisitServiceImpl implements VisitService {
         vetAvailabilityService.findAvailableByUuidAndTimeRange(
                         visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime())
                 .orElseThrow(() -> new GenericValidationException(
-                        "the vet has not attended", "the vet has not attended"));
+                        "the vet is not available from" + visit.getStartTime() + " to " + visit.getEndTime(),
+                        "the vet is not available from" + visit.getStartTime() + " to " + visit.getEndTime()));
         boolean existsVetReservation = visitRepository
                 .existsVetReservation(visit.getVet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
         if (existsVetReservation) {
-            throw new GenericValidationException("the vet is busy", "the vet is not available at this time");
+            throw new GenericValidationException(
+                    "the vet is is booked already",
+                    "the vet is is booked already");
         }
     }
 
