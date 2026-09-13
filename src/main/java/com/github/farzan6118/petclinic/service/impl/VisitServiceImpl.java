@@ -14,7 +14,7 @@ import com.github.farzan6118.petclinic.model.Room;
 import com.github.farzan6118.petclinic.model.Vet;
 import com.github.farzan6118.petclinic.model.Visit;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
-import com.github.farzan6118.petclinic.repository.*;
+import com.github.farzan6118.petclinic.repository.VisitRepository;
 import com.github.farzan6118.petclinic.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
