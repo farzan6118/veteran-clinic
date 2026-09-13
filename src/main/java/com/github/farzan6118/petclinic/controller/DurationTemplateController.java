@@ -55,4 +55,10 @@ public class DurationTemplateController {
     public void inactivate(@PathVariable UUID uuid) {
         durationTemplateService.inactivate(uuid);
     }
+
+    @DeleteMapping("/{uuid}/delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID uuid) {
+        durationTemplateService.delete(uuid);
+    }
 }

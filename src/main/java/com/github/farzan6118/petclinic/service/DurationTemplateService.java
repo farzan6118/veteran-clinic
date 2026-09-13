@@ -26,4 +26,6 @@ public interface DurationTemplateService {
     void inactivate(UUID uuid);
 
     void activate(UUID uuid);
+
+    void delete(UUID uuid);
 }

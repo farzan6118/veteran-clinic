@@ -136,4 +136,18 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
         durationTemplate.setEntityStatus(EntityStatus.ACTIVE);
         log.info("Duration template activated: {}", uuid);
     }
+
+    @Transactional
+    @Override
+    public void delete(UUID uuid) {
+        DurationTemplate entityByUuid = this.getEntityByUuid(uuid);
+        if (!entityByUuid.getEntityStatus().equals(EntityStatus.ACTIVE)) {
+            throw new GenericValidationException(
+                    "duration.template.is.deleted",
+                    "Duration template already deleted");
+        }
+        entityByUuid.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        log.info("duration template deleted");
+    }
+
 }
