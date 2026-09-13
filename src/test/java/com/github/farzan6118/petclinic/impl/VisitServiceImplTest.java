@@ -15,7 +15,6 @@ import com.github.farzan6118.petclinic.model.constant.SlotStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitStatus;
 import com.github.farzan6118.petclinic.model.constant.VisitType;
 import com.github.farzan6118.petclinic.repository.*;
-import com.github.farzan6118.petclinic.service.AppointmentSlotService;
 import com.github.farzan6118.petclinic.service.PetService;
 import com.github.farzan6118.petclinic.service.VisitNotificationService;
 import com.github.farzan6118.petclinic.service.impl.VisitServiceImpl;

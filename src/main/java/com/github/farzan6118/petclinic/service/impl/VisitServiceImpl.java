@@ -34,20 +34,15 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class VisitServiceImpl implements VisitService {
 
-    private final VisitNotificationService visitNotificationService;
-    private final VisitRepository visitRepository;
-    private final AppointmentSlotRepository slotRepository;
-    private final PetService petService;
-    private final VisitMapper visitMapper;
-    private final VetRepository vetRepository;
-    private final VetAvailabilityRepository availabilityRepository;
-    private final RoomRepository roomRepository;
-    private final AppointmentSlotService appointmentSlotService;
-    private final DurationTemplateService durationTemplateService;
-    private final VetAvailabilityService vetAvailabilityService;
     private final ClinicProperties clinicProperties;
-    private final VetService vetService;
+    private final VisitRepository visitRepository;
     private final RoomService roomService;
+    private final VisitMapper visitMapper;
+    private final PetService petService;
+    private final VetService vetService;
+    private final VetAvailabilityService vetAvailabilityService;
+    private final DurationTemplateService durationTemplateService;
+    private final VisitNotificationService visitNotificationService;
 
     /**
      * Book an available appointment slot for a pet.
