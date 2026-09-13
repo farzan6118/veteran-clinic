@@ -106,9 +106,8 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     }
 
     @Override
-    public Optional<AvailabilityResponseDto> findAvailableByUuidAndTimeRange(
+    public Optional<Vet> findAvailableByUuidAndTimeRange(
             UUID uuid, LocalDateTime StartTime, LocalDateTime EndTime) {
-        vetRepository.findAvailableByUuidAndTimeRange(uuid, StartTime, EndTime);
-        return Optional.empty();
+        return vetRepository.findAvailableByUuidAndTimeRange(uuid, StartTime, EndTime);
     }
 }

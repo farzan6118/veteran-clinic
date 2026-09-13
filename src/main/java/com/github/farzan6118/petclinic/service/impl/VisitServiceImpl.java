@@ -64,12 +64,13 @@ public class VisitServiceImpl implements VisitService {
         LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
         LocalDateTime visitEnd = getVisitEnd(visitStart, standardDuration);
         dateAndTimeValidations(visitStart, visitEnd);
-        Pet pet = petService.getEntityByUuid(request.petUuid());
         Vet vet = getVetWithUuidWithLock(request.vetUuid());
+        Pet pet = petService.getEntityByUuid(request.petUuid());
         Room room = reserveResources(vet, request.visitType(), visitStart, visitEnd, null);
         Visit visit = new Visit()
                 .schedule(vet, pet, room, visitStart, visitEnd, request.visitType(), request.description());
-        roomAvailabilityValidation(visit);
+        validateVisitTime(visit);
+        validateRoomAvailability(visit);
         vetAvailabilityValidation(visit);
         petAvailabilityValidation(visit);
 //        Visit savedVisit = visitRepository.save(visit);
@@ -90,26 +91,48 @@ public class VisitServiceImpl implements VisitService {
         }
     }
 
-    private void roomAvailabilityValidation(Visit visit) {
-        if (visit.getRoom() != null) {
-            boolean existsRoomReservation = visitRepository.existsRoomReservation(visit.getRoom().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
-            if (existsRoomReservation) {
-                throw new GenericValidationException("the room is full", "the room is already booked at this time");
-            }
-            if (visit.getStartTime().toLocalTime().isBefore(clinicProperties.workingHours().start())
-                    || (visit.getEndTime().toLocalTime().isAfter(clinicProperties.workingHours().end()))) {
-                throw new GenericValidationException("clinic is closed in that time", "clinic is closed in that time");
-            }
-            LocalDate visitDate = visit.getStartTime().toLocalDate();
-            if (clinicProperties.closeDays().contains(visitDate.getDayOfWeek())) {
-                throw new GenericValidationException(
-                        "clinic is closed",
-                        "clinic is closed on this day"
-                );
-            }
+    private void validateVisitTime(Visit visit) {
+        LocalDate visitDate = visit.getStartTime().toLocalDate();
+
+        if (clinicProperties.closeDays().contains(visitDate.getDayOfWeek())) {
+            throw new GenericValidationException(
+                    "clinic is closed on " + visitDate.getDayOfWeek() + " " + visitDate,
+                    "clinic is closed on " + visitDate.getDayOfWeek() + " " + visitDate
+            );
+        }
+
+        ClinicProperties.WorkingHours workingHours = clinicProperties.workingHours();
+        if (visit.getStartTime().toLocalTime().isBefore(workingHours.start())
+                || visit.getEndTime().toLocalTime().isAfter(workingHours.end())) {
+            String message = "clinic is open from " + workingHours.start() + " to " + workingHours.end() + " in " + visit.getStartTime().toLocalDate();
+            throw new GenericValidationException(
+                    message,
+                    message
+            );
         }
     }
 
+    private void validateRoomAvailability(Visit visit) {
+        if (visit.getRoom() == null) {
+            return;
+        }
+
+        boolean existsRoomReservation = visitRepository.existsRoomReservation(
+                visit.getRoom().getUuid(),
+                visit.getStartTime(),
+                visit.getEndTime(),
+                null
+        );
+
+        if (existsRoomReservation) {
+            throw new GenericValidationException(
+                    "the " + visit.getRoom().getName() + " is booked from "
+                            + visit.getStartTime() + " to " + visit.getEndTime(),
+                    "the " + visit.getRoom().getName() + " is booked from "
+                            + visit.getStartTime() + " to " + visit.getEndTime()
+            );
+        }
+    }
     private void petAvailabilityValidation(Visit visit) {
         boolean existsPetReservation = visitRepository.existsPetReservation(visit.getPet().getUuid(), visit.getStartTime(), visit.getEndTime(), null);
         if (existsPetReservation) {

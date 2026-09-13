@@ -45,6 +45,6 @@ public interface VetRepository extends JpaRepository<Vet, Long> {
                 and :endTime <= va.endTime)
             """
     )
-    void findAvailableByUuidAndTimeRange(
+    Optional<Vet> findAvailableByUuidAndTimeRange(
             UUID uuid, LocalDateTime startTime, LocalDateTime endTime);
 }

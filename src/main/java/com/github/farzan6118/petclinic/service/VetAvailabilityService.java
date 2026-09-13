@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.service;
 import com.github.farzan6118.petclinic.dto.request.CreateVetAvailabilityRequestDto;
 import com.github.farzan6118.petclinic.dto.request.UpdateVetAvailabilityRequestDto;
 import com.github.farzan6118.petclinic.dto.response.AvailabilityResponseDto;
+import com.github.farzan6118.petclinic.model.Vet;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,6 @@ public interface VetAvailabilityService {
 
     List<AvailabilityResponseDto> getVetAvailability(UUID vetUuid);
 
-    Optional<AvailabilityResponseDto> findAvailableByUuidAndTimeRange(UUID uuid, LocalDateTime StartTime, LocalDateTime EndTime);
+    Optional<Vet> findAvailableByUuidAndTimeRange(UUID uuid, LocalDateTime StartTime, LocalDateTime EndTime);
 
 }
