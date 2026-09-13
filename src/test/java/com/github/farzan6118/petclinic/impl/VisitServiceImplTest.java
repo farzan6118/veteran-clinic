@@ -42,9 +42,6 @@ import static org.mockito.Mockito.*;
 class VisitServiceImplTest {
 
     @Mock
-    private SchedulingProperties schedulingProperties;
-
-    @Mock
     private VisitNotificationService visitNotificationService;
 
     @Mock
@@ -128,7 +125,7 @@ class VisitServiceImplTest {
                 .thenReturn(List.of(room));
 
         when(visitRepository.existsRoomReservation(
-                eq(room),
+                eq(room.getUuid()),
                 any(LocalDateTime.class),
                 any(LocalDateTime.class),
                 isNull()
@@ -219,7 +216,7 @@ class VisitServiceImplTest {
                 vetUuid,
                 date,
                 time,
-                VisitType.OWNERS_PLACE,
+                VisitType.OFFSITE,
                 "Home visit"
         );
 
@@ -244,7 +241,7 @@ class VisitServiceImplTest {
         verify(visitRepository).save(captor.capture());
 
         assertNull(captor.getValue().getRoom());
-        assertEquals(VisitType.OWNERS_PLACE, captor.getValue().getVisitType());
+        assertEquals(VisitType.OFFSITE, captor.getValue().getVisitType());
 
         verify(roomRepository, never())
                 .findActiveRoomsByTypeNamesForUpdate(anyList());
@@ -260,7 +257,7 @@ class VisitServiceImplTest {
                 vetUuid,
                 date,
                 time,
-                VisitType.EMERGENCY,
+                VisitType.ONSITE,
                 "Emergency"
         );
 
@@ -278,7 +275,7 @@ class VisitServiceImplTest {
         )).thenReturn(List.of(room));
 
         when(visitRepository.existsRoomReservation(
-                eq(room),
+                eq(room.getUuid()),
                 any(LocalDateTime.class),
                 any(LocalDateTime.class),
                 isNull()
@@ -302,7 +299,7 @@ class VisitServiceImplTest {
         verify(visitRepository).save(captor.capture());
 
         assertEquals(room, captor.getValue().getRoom());
-        assertEquals(VisitType.EMERGENCY, captor.getValue().getVisitType());
+        assertEquals(VisitType.ONSITE, captor.getValue().getVisitType());
     }
 
     @Test
@@ -419,7 +416,7 @@ class VisitServiceImplTest {
         )).thenReturn(List.of(room));
 
         when(visitRepository.existsRoomReservation(
-                eq(room),
+                eq(room.getUuid()),
                 any(LocalDateTime.class),
                 any(LocalDateTime.class),
                 isNull()
