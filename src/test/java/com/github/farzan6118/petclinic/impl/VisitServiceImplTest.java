@@ -1,23 +1,24 @@
 package com.github.farzan6118.petclinic.impl;
 
-import com.github.farzan6118.petclinic.dto.request.RescheduleVisitRequestDto;
-import com.github.farzan6118.petclinic.dto.request.VisitRequestDto;
-import com.github.farzan6118.petclinic.dto.response.VetAvailableSlotResponseDto;
-import com.github.farzan6118.petclinic.dto.response.VisitResponseDto;
-import com.github.farzan6118.petclinic.exception.GenericValidationException;
-import com.github.farzan6118.petclinic.exception.ResourceNotFoundException;
-import com.github.farzan6118.petclinic.mapper.VisitMapper;
-import com.github.farzan6118.petclinic.model.Pet;
-import com.github.farzan6118.petclinic.model.Room;
-import com.github.farzan6118.petclinic.model.Vet;
-import com.github.farzan6118.petclinic.model.Visit;
-import com.github.farzan6118.petclinic.model.constant.SlotStatus;
-import com.github.farzan6118.petclinic.model.constant.VisitStatus;
-import com.github.farzan6118.petclinic.model.constant.VisitType;
-import com.github.farzan6118.petclinic.repository.*;
-import com.github.farzan6118.petclinic.service.PetService;
-import com.github.farzan6118.petclinic.service.VisitNotificationService;
-import com.github.farzan6118.petclinic.service.impl.VisitServiceImpl;
+import com.github.farzan6118.petclinic.common.enums.VisitStatus;
+import com.github.farzan6118.petclinic.common.enums.VisitType;
+import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
+import com.github.farzan6118.petclinic.pet.model.Pet;
+import com.github.farzan6118.petclinic.pet.service.PetService;
+import com.github.farzan6118.petclinic.room.model.Room;
+import com.github.farzan6118.petclinic.room.repository.RoomRepository;
+import com.github.farzan6118.petclinic.vet.model.Vet;
+import com.github.farzan6118.petclinic.vet.repository.VetAvailabilityRepository;
+import com.github.farzan6118.petclinic.vet.repository.VetRepository;
+import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.request.VisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
+import com.github.farzan6118.petclinic.visit.mapper.VisitMapper;
+import com.github.farzan6118.petclinic.visit.model.Visit;
+import com.github.farzan6118.petclinic.visit.repository.VisitRepository;
+import com.github.farzan6118.petclinic.visit.service.VisitServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,9 +48,6 @@ class VisitServiceImplTest {
     private VisitRepository visitRepository;
 
     @Mock
-    private AppointmentSlotRepository slotRepository;
-
-    @Mock
     private PetService petService;
 
     @Mock
@@ -63,9 +61,6 @@ class VisitServiceImplTest {
 
     @Mock
     private RoomRepository roomRepository;
-
-    @Mock
-    private AppointmentSlotService appointmentSlotService;
 
     @InjectMocks
     private VisitServiceImpl service;
@@ -120,7 +115,7 @@ class VisitServiceImplTest {
                 eq(LocalDateTime.of(date, time.plusMinutes(10)))
         )).thenReturn(true);
 
-        when(roomRepository.findActiveRoomsByTypeNamesForUpdate(List.of("examination", "individual")))
+        when(roomRepository.findActiveRoomsByTypeNames(List.of("examination", "individual")))
                 .thenReturn(List.of(room));
 
         when(visitRepository.existsRoomReservation(
@@ -199,7 +194,7 @@ class VisitServiceImplTest {
         assertEquals(VisitType.ONLINE, savedVisit.getVisitType());
 
         verify(roomRepository, never())
-                .findActiveRoomsByTypeNamesForUpdate(anyList());
+                .findActiveRoomsByTypeNames(anyList());
 
         verify(visitNotificationService)
                 .notifyBookVisitParticipants(savedVisit, pet, vet);
@@ -243,7 +238,7 @@ class VisitServiceImplTest {
         assertEquals(VisitType.OFFSITE, captor.getValue().getVisitType());
 
         verify(roomRepository, never())
-                .findActiveRoomsByTypeNamesForUpdate(anyList());
+                .findActiveRoomsByTypeNames(anyList());
     }
 
     @Test
@@ -269,7 +264,7 @@ class VisitServiceImplTest {
                 any(LocalDateTime.class)
         )).thenReturn(true);
 
-        when(roomRepository.findActiveRoomsByTypeNamesForUpdate(
+        when(roomRepository.findActiveRoomsByTypeNames(
                 List.of("surgery", "emergency", "isolation")
         )).thenReturn(List.of(room));
 
@@ -290,7 +285,7 @@ class VisitServiceImplTest {
         service.bookVisit(request);
 
         verify(roomRepository)
-                .findActiveRoomsByTypeNamesForUpdate(
+                .findActiveRoomsByTypeNames(
                         List.of("surgery", "emergency", "isolation")
                 );
 
@@ -410,7 +405,7 @@ class VisitServiceImplTest {
                 any(LocalDateTime.class)
         )).thenReturn(true);
 
-        when(roomRepository.findActiveRoomsByTypeNamesForUpdate(
+        when(roomRepository.findActiveRoomsByTypeNames(
                 List.of("examination", "individual")
         )).thenReturn(List.of(room));
 
@@ -873,78 +868,6 @@ class VisitServiceImplTest {
                 ResourceNotFoundException.class,
                 () -> service.rescheduleVisit(visitUuid, request)
         );
-    }
-
-    // -------------------------------------------------------------------------
-    // getAvailableSlots
-    // -------------------------------------------------------------------------
-
-    @Test
-    void shouldReturnAvailableSlotsForVet() {
-        LocalDate date = LocalDate.now().plusDays(1);
-
-        UUID slotUuid = UUID.randomUUID();
-
-        var slot = mock(com.github.farzan6118.petclinic.model.AppointmentSlot.class);
-
-        when(slot.getUuid()).thenReturn(slotUuid);
-        when(slot.getStartTime())
-                .thenReturn(LocalDateTime.of(date, LocalTime.of(10, 0)));
-        when(slot.getEndTime())
-                .thenReturn(LocalDateTime.of(date, LocalTime.of(10, 10)));
-
-        when(vetRepository.existsByUuid(vetUuid)).thenReturn(true);
-
-        when(slotRepository.findAllByVetUuidAndStatus(
-                vetUuid,
-                SlotStatus.AVAILABLE
-        )).thenReturn(List.of(slot));
-
-        List<VetAvailableSlotResponseDto> result =
-                service.getAvailableSlots(vetUuid, date);
-
-        assertEquals(1, result.size());
-
-        VetAvailableSlotResponseDto dto = result.getFirst();
-
-        assertEquals(slotUuid, dto.uuid());
-        assertEquals(date, dto.date());
-        assertEquals(LocalTime.of(10, 0), dto.startTime());
-        assertEquals(LocalTime.of(10, 10), dto.endTime());
-
-        verify(appointmentSlotService)
-                .generateSlotsForDate(vetUuid, date);
-    }
-
-    @Test
-    void shouldUseTodayWhenRequestedDateIsNull() {
-        when(vetRepository.existsByUuid(vetUuid)).thenReturn(true);
-
-        when(slotRepository.findAllByVetUuidAndStatus(
-                vetUuid,
-                SlotStatus.AVAILABLE
-        )).thenReturn(List.of());
-
-        service.getAvailableSlots(vetUuid, null);
-
-        verify(appointmentSlotService)
-                .generateSlotsForDate(eq(vetUuid), eq(LocalDate.now()));
-    }
-
-    @Test
-    void shouldRejectAvailableSlotsForUnknownVet() {
-        when(vetRepository.existsByUuid(vetUuid)).thenReturn(false);
-
-        assertThrows(
-                ResourceNotFoundException.class,
-                () -> service.getAvailableSlots(
-                        vetUuid,
-                        LocalDate.now().plusDays(1)
-                )
-        );
-
-        verify(appointmentSlotService, never())
-                .generateSlotsForDate(any(), any());
     }
 
     // -------------------------------------------------------------------------
