@@ -227,7 +227,7 @@ public class VisitServiceImpl implements VisitService {
     public List<VisitResponseDto> findAllVisitsByRoomUuid(UUID RoomUuid, LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
-        return visitRepository.findAllVisitsByPetUuidAndStartTimeBetween(RoomUuid, startOfDay, endOfDay)
+        return visitRepository.findAllVisitsByRoomUuidAndStartTimeBetween(RoomUuid, startOfDay, endOfDay)
                 .stream().map(visitMapper::toResponse).toList();
     }
 
