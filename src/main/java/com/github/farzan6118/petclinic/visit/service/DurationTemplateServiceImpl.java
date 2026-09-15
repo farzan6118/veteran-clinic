@@ -24,6 +24,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class DurationTemplateServiceImpl implements DurationTemplateService {
 
+
     private final DurationTemplateRepository durationTemplateRepository;
     private final DurationTemplateMapper durationTemplateMapper;
 
