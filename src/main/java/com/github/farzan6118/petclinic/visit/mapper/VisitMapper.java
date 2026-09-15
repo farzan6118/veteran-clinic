@@ -24,8 +24,6 @@ public class VisitMapper {
                 visit.getStartTime(),
                 visit.getEndTime(),
                 visit.getVisitType(),
-                visit.getRoom() == null ? null : visit.getRoom().getUuid(),
-                visit.getRoom() == null ? null : visit.getRoom().getName(),
                 visit.getDescription(),
                 visit.getStatus()
         );
