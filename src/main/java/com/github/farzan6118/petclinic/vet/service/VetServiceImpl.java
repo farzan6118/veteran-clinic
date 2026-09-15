@@ -121,7 +121,8 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public Vet getVetWithUuidLock(UUID vetUuid) {
-        return vetRepository.findByUuidWithLock(vetUuid).orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
+        return vetRepository.findByUuidWithLock(vetUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
     }
 }
 

@@ -1,6 +1,7 @@
 package com.github.farzan6118.petclinic.visit.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.github.farzan6118.petclinic.common.enums.VisitType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +19,7 @@ public record RescheduleVisitRequestDto(
         @JsonFormat(pattern = "HH:mm")
         @Schema(example = "09:30")
         LocalTime visitTime,
+        VisitType visitType,
         @Size(max = 2048, message = "description.too.long")
         String description,
         @Size(max = 255, message = "reason.too.long")
