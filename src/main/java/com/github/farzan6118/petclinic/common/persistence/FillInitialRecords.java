@@ -85,10 +85,15 @@ public class FillInitialRecords {
             ));
 
             List<Species> species = speciesRepository.saveAll(List.of(
-                    species("Dog", "DOG", "Domestic dog", "Common companion animal"),
-                    species("Cat", "CAT", "Domestic cat", "Common companion animal"),
-                    species("Rabbit", "RABBIT", "Domestic rabbit", "Small companion animal")
-            ));
+                    species("Dog", "DOG", "Canis lupus familiaris",
+                            "Common companion animal."),
+                    species("Cat", "CAT", "Felis catus",
+                            "Common companion animal."),
+                    species("Rabbit", "RABBIT", "Oryctolagus cuniculus",
+                            "Common companion animal."),
+                    species("Hamster", "HAMSTER", "Cricetinae",
+                            "Small companion animal."))
+            );
 
             List<Owner> owners = ownerRepository.saveAll(List.of(
                     owner("Ms.", "Mina", "Rahimi", "200000001", LocalDate.of(1990, 4, 12), "09120000001", "mina.rahimi@example.com", "Tehran", "Valiasr Street"),
@@ -103,16 +108,64 @@ public class FillInitialRecords {
             ));
 
             List<RoomType> roomTypes = roomTypeRepository.saveAll(List.of(
-                    roomType("Examination", "General examination room"),
-                    roomType("Surgery", "Surgical procedure room"),
-                    roomType("Isolation", "Isolation and observation room")
+                    roomType(
+                            "Examination",
+                            "General-purpose veterinary examination room used for routine physical examinations, "
+                                    + "follow-up visits, illness assessment, consultations, vaccinations, injections, "
+                                    + "basic diagnostic procedures, and other non-surgical patient assessments."
+                    ),
+                    roomType(
+                            "Treatment",
+                            "Veterinary treatment room used for non-surgical procedures and patient care such as "
+                                    + "wound care, bandaging, injections, fluid therapy, medication administration, "
+                                    + "minor procedures, and routine treatments that do not require a surgical suite."
+                    ),
+                    roomType(
+                            "Surgery",
+                            "Dedicated veterinary surgical room used for surgical procedures and other invasive interventions "
+                                    + "that require a controlled and appropriately equipped surgical environment."
+                    ),
+                    roomType(
+                            "Dental",
+                            "Dedicated veterinary dental treatment room used for dental examinations, dental cleaning, "
+                                    + "oral procedures, dental surgery, and other procedures involving the teeth and oral cavity."
+                    ),
+                    roomType(
+                            "Imaging",
+                            "Diagnostic imaging room used for veterinary imaging procedures such as X-ray, ultrasound, "
+                                    + "and other diagnostic imaging examinations requiring dedicated imaging equipment."
+                    ),
+                    roomType(
+                            "Physiotherapy",
+                            "Veterinary rehabilitation room used for physiotherapy, physical rehabilitation, mobility exercises, "
+                                    + "post-operative rehabilitation, and other non-surgical rehabilitation treatments."
+                    ),
+                    roomType(
+                            "Isolation",
+                            "Dedicated isolation room used for patients suspected or confirmed to have contagious or infectious "
+                                    + "conditions and requiring separation from other patients for infection-control purposes."
+                    )
             ));
 
             roomRepository.saveAll(List.of(
-                    room("Examination Room 1", "EXAM-01", roomTypes.get(0)),
-                    room("Surgery Room 1", "SURG-01", roomTypes.get(1)),
-                    room("Isolation Room 1", "ISO-01", roomTypes.get(2)),
-                    room("Isolation Room 2", "ISO-02", roomTypes.get(2))
+                    room("Examination Room 1", "EXAM-01", roomTypes.getFirst()),
+                    room("Examination Room 2", "EXAM-02", roomTypes.getFirst()),
+                    room("Examination Room 3", "EXAM-03", roomTypes.getFirst()),
+
+                    room("Treatment Room 1", "TREAT-01", roomTypes.get(1)),
+                    room("Treatment Room 2", "TREAT-02", roomTypes.get(1)),
+
+                    room("Surgery Room 1", "SURG-01", roomTypes.get(2)),
+                    room("Surgery Room 2", "SURG-02", roomTypes.get(2)),
+
+                    room("Dental Room 1", "DENT-01", roomTypes.get(3)),
+
+                    room("Imaging Room 1", "IMG-01", roomTypes.get(4)),
+
+                    room("Physiotherapy Room 1", "PHYSIO-01", roomTypes.get(5)),
+
+                    room("Isolation Room 1", "ISO-01", roomTypes.get(6)),
+                    room("Isolation Room 2", "ISO-02", roomTypes.get(6))
             ));
 
             Vet firstVet = vet("Dr.", "Sara", "Moradi", "09210000001", "sara.moradi@example.com", "100000001");
