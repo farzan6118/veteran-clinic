@@ -17,6 +17,7 @@ public record VisitResponseDto(
         LocalDateTime start,
         LocalDateTime end,
         VisitType visitType,
+        UUID roomUuid,
         String description,
         VisitStatus status
 ) {
