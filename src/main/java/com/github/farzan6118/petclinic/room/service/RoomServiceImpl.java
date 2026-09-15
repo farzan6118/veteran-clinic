@@ -1,10 +1,13 @@
 package com.github.farzan6118.petclinic.room.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
 import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.room.dto.request.CreateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.request.UpdateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.response.RoomResponseDto;
@@ -13,6 +16,8 @@ import com.github.farzan6118.petclinic.room.model.Room;
 import com.github.farzan6118.petclinic.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +33,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
     private final RoomTypeService roomTypeService;
+    private final PageMapper pageMapper;
 
     @Override
     public RoomResponseDto getByUuid(UUID uuid) {
@@ -42,11 +48,10 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<RoomResponseDto> findAll() {
-        return roomRepository.findAll()
-                .stream()
-                .map(roomMapper::mapToDto)
-                .toList();
+    public PageResponseDto<RoomResponseDto> findAll(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<Room> roomPage = roomRepository.findAll(pageable);
+        return pageMapper.toPageResponse(roomPage, roomMapper::mapToDto);
     }
 
     @Transactional

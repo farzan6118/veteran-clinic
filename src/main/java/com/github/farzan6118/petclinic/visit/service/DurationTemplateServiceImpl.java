@@ -1,8 +1,11 @@
 package com.github.farzan6118.petclinic.visit.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.visit.dto.request.CreateDurationTemplateRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.UpdateDurationTemplateRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.response.DurationTemplateResponseDto;
@@ -11,10 +14,11 @@ import com.github.farzan6118.petclinic.visit.model.DurationTemplate;
 import com.github.farzan6118.petclinic.visit.repository.DurationTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -27,6 +31,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
 
     private final DurationTemplateRepository durationTemplateRepository;
     private final DurationTemplateMapper durationTemplateMapper;
+    private final PageMapper pageMapper;
 
     @Override
     public DurationTemplateResponseDto getByUuid(UUID uuid) {
@@ -41,11 +46,11 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     }
 
     @Override
-    public List<DurationTemplateResponseDto> findAll() {
-        return durationTemplateRepository.findAllByEntityStatus(EntityStatus.ACTIVE)
-                .stream()
-                .map(durationTemplateMapper::mapToDto)
-                .toList();
+    public PageResponseDto<DurationTemplateResponseDto> findAllPageable(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<DurationTemplate> durationTemplatePage = durationTemplateRepository
+                .findAllByEntityStatus(EntityStatus.ACTIVE, pageable);
+        return pageMapper.toPageResponse(durationTemplatePage, durationTemplateMapper::mapToDto);
     }
 
     @Override

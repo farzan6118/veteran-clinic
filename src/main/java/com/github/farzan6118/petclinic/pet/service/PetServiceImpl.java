@@ -1,8 +1,11 @@
 package com.github.farzan6118.petclinic.pet.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.owner.service.OwnerService;
 import com.github.farzan6118.petclinic.pet.dto.request.CreatePetRequestDto;
@@ -14,6 +17,8 @@ import com.github.farzan6118.petclinic.pet.model.Species;
 import com.github.farzan6118.petclinic.pet.repository.PetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +35,7 @@ public class PetServiceImpl implements PetService {
     private final SpeciesService speciesService;
     private final OwnerService ownerService;
     private final PetMapper petMapper;
+    private final PageMapper pageMapper;
 
     @Override
     public PetResponseDto getByUuid(UUID uuid) {
@@ -39,11 +45,10 @@ public class PetServiceImpl implements PetService {
 
 
     @Override
-    public List<PetResponseDto> findAll() {
-        return petRepository.findAll()
-                .stream()
-                .map(petMapper::mapToDto)
-                .toList();
+    public PageResponseDto<PetResponseDto> findAll(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<Pet> petPage = petRepository.findAll(pageable);
+        return pageMapper.toPageResponse(petPage, petMapper::mapToDto);
     }
 
     @Override

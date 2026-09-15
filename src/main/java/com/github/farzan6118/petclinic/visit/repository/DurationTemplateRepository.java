@@ -2,9 +2,10 @@ package com.github.farzan6118.petclinic.visit.repository;
 
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.visit.model.DurationTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,5 +27,5 @@ public interface DurationTemplateRepository extends JpaRepository<DurationTempla
 
     boolean existsByDurationMinutesAndUuidNot(Integer duration, UUID uuid);
 
-    List<DurationTemplate> findAllByEntityStatus(EntityStatus entityStatus);
+    Page<DurationTemplate> findAllByEntityStatus(EntityStatus entityStatus, Pageable pageable);
 }

@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.room.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.room.dto.request.CreateRoomTypeRequestDto;
@@ -38,7 +39,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     }
 
     @Override
-    public List<RoomTypeResponseDto> findAll() {
+    public List<RoomTypeResponseDto> findAll(PageAndSortRequestDto requestDto) {
         return roomTypeRepository.findAll()
                 .stream()
                 .map(roomTypeMapper::mapToDto)

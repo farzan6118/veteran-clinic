@@ -1,5 +1,7 @@
 package com.github.farzan6118.petclinic.visit.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.VisitRequestDto;
@@ -37,9 +39,10 @@ public class VisitController {
         visitService.rescheduleVisit(uuid, request);
     }
 
-    @GetMapping
-    public ResponseEntity<List<VisitResponseDto>> getAllVisits() {
-        return ResponseEntity.ok(visitService.getAllVisits());
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDto<VisitResponseDto>> findAll(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(visitService.findAll(requestDto));
     }
 
     @GetMapping("/{uuid}")

@@ -1,8 +1,11 @@
 package com.github.farzan6118.petclinic.vet.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.vet.dto.request.CreateVetRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetProfileUpdateRequestDto;
@@ -13,10 +16,11 @@ import com.github.farzan6118.petclinic.vet.model.Vet;
 import com.github.farzan6118.petclinic.vet.repository.VetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -27,6 +31,7 @@ public class VetServiceImpl implements VetService {
 
     private final VetRepository vetRepository;
     private final VetMapper vetMapper;
+    private final PageMapper pageMapper;
 
     @Override
     public VetResponseDto getByUuid(UUID uuid) {
@@ -41,11 +46,10 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public List<VetResponseDto> findAll() {
-        return vetRepository.findAll()
-                .stream()
-                .map(vetMapper::mapToDto)
-                .toList();
+    public PageResponseDto<VetResponseDto> findAllPageable(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<Vet> vetPage = vetRepository.findAll(pageable);
+        return pageMapper.toPageResponse(vetPage, vetMapper::mapToDto);
     }
 
     @Transactional

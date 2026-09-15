@@ -1,9 +1,12 @@
 package com.github.farzan6118.petclinic.visit.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.config.ClinicProperties;
 import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
 import com.github.farzan6118.petclinic.pet.model.Pet;
@@ -23,6 +26,8 @@ import com.github.farzan6118.petclinic.visit.model.Visit;
 import com.github.farzan6118.petclinic.visit.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +53,7 @@ public class VisitServiceImpl implements VisitService {
     private final VetAvailabilityService vetAvailabilityService;
     private final DurationTemplateService durationTemplateService;
     private final VisitNotificationService visitNotificationService;
+    private final PageMapper pageMapper;
 
     /**
      * Book an available appointment slot for a pet.
@@ -283,8 +289,10 @@ public class VisitServiceImpl implements VisitService {
      * Get all visits.
      */
     @Override
-    public List<VisitResponseDto> getAllVisits() {
-        return visitRepository.findAll().stream().map(visitMapper::toResponse).toList();
+    public PageResponseDto<VisitResponseDto> findAll(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<Visit> visitPage = visitRepository.findAll(pageable);
+        return pageMapper.toPageResponse(visitPage, visitMapper::toResponse);
     }
 
     /**

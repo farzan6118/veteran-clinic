@@ -902,7 +902,7 @@ class VisitServiceImplTest {
         when(visitMapper.toResponse(second))
                 .thenReturn(secondResponse);
 
-        List<VisitResponseDto> result = service.getAllVisits();
+        List<VisitResponseDto> result = service.findAll();
 
         assertEquals(
                 List.of(firstResponse, secondResponse),

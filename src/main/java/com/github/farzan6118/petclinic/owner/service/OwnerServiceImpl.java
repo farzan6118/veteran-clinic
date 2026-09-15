@@ -1,10 +1,13 @@
 package com.github.farzan6118.petclinic.owner.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.EmailAlreadyExistsException;
 import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.common.exception.PhoneAlreadyExistsException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.owner.dto.request.CreateOwnerRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.request.UpdateOwnerRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.response.OwnerResponseDto;
@@ -13,11 +16,12 @@ import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.owner.repository.OwnerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -28,6 +32,7 @@ public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerRepository ownerRepository;
     private final OwnerMapper ownerMapper;
+    private final PageMapper pageMapper;
 
     @Override
     public OwnerResponseDto getByUuid(UUID uuid) {
@@ -36,11 +41,10 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public List<OwnerResponseDto> findAll() {
-        return ownerRepository.findAll()
-                .stream()
-                .map(ownerMapper::mapToDto)
-                .toList();
+    public PageResponseDto<OwnerResponseDto> findAll(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<Owner> ownerPage = ownerRepository.findAll(pageable);
+        return pageMapper.toPageResponse(ownerPage, ownerMapper::mapToDto);
     }
 
     @Transactional
