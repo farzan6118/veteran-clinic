@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.visit.service;
 
+import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
@@ -63,7 +64,7 @@ public class VisitServiceImpl implements VisitService {
 
         Vet vet = vetService.getVetWithUuidLock(request.vetUuid());
         Pet pet = petService.getEntityByUuid(request.petUuid());
-        Room room = roomService.allocateRoom(request.visitType());
+        Room room = roomService.getAvailableRoomByVisitTypeAndVisitCategory(request.visitType(), VisitCategory.ROUTINE);
 
         Visit visit = new Visit()
                 .schedule(vet, pet, room, visitStart, visitEnd, request.visitType(), request.description());
@@ -304,7 +305,7 @@ public class VisitServiceImpl implements VisitService {
 
         LocalDateTime oldVisitStart = visit.getStartTime();
 
-        Room newRoom = roomService.allocateRoom(visit.getVisitType());
+        Room newRoom = roomService.getAvailableRoomByVisitTypeAndVisitCategory(visit.getVisitType(), VisitCategory.ROUTINE);
 
         visit.reschedule(newRoom, newVisitStart, newVisitEnd, visit.getVisitType(), request.description());
 

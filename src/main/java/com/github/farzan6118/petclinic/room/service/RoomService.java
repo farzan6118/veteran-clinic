@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.room.service;
 
+import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
 import com.github.farzan6118.petclinic.room.dto.request.CreateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.request.UpdateRoomRequestDto;
@@ -25,5 +26,5 @@ public interface RoomService {
 
     RoomResponseDto getRoomByUuid(UUID uuid);
 
-    Room allocateRoom(VisitType visitType);
+    Room getAvailableRoomByVisitTypeAndVisitCategory(VisitType visitType, VisitCategory visitCategory);
 }

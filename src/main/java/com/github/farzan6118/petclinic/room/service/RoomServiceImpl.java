@@ -1,6 +1,7 @@
 package com.github.farzan6118.petclinic.room.service;
 
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
+import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
 import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
@@ -26,6 +27,7 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
+    private final RoomTypeService roomTypeService;
 
     @Override
     public RoomResponseDto getByUuid(UUID uuid) {
@@ -99,7 +101,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room allocateRoom(VisitType visitType) {
+    public Room getAvailableRoomByVisitTypeAndVisitCategory(VisitType visitType, VisitCategory visitCategory) {
         List<String> roomTypeNames = switch (visitType) {
             case ONSITE -> List.of("examination", "individual");
             case ONLINE, OFFSITE -> List.of();
