@@ -12,8 +12,8 @@ import com.github.farzan6118.petclinic.room.repository.RoomRepository;
 import com.github.farzan6118.petclinic.vet.model.Vet;
 import com.github.farzan6118.petclinic.vet.repository.VetAvailabilityRepository;
 import com.github.farzan6118.petclinic.vet.repository.VetRepository;
+import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
-import com.github.farzan6118.petclinic.visit.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.visit.mapper.VisitMapper;
 import com.github.farzan6118.petclinic.visit.model.Visit;
@@ -101,7 +101,7 @@ class VisitServiceImplTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(10, 0);
 
-        VisitRequestDto request = new VisitRequestDto(
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
                 petUuid, vetUuid, date, time, VisitType.ONSITE, "General examination");
 
         when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
@@ -156,7 +156,7 @@ class VisitServiceImplTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(10, 0);
 
-        VisitRequestDto request = new VisitRequestDto(
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
                 petUuid,
                 vetUuid,
                 date,
@@ -202,7 +202,7 @@ class VisitServiceImplTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(10, 0);
 
-        VisitRequestDto request = new VisitRequestDto(
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
                 petUuid,
                 vetUuid,
                 date,
@@ -243,7 +243,7 @@ class VisitServiceImplTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(10, 0);
 
-        VisitRequestDto request = new VisitRequestDto(
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
                 petUuid,
                 vetUuid,
                 date,
@@ -297,7 +297,7 @@ class VisitServiceImplTest {
     void shouldRejectBookingWhenPetDoesNotExist() {
         LocalDate date = LocalDate.now().plusDays(1);
 
-        VisitRequestDto request = new VisitRequestDto(
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
                 petUuid,
                 vetUuid,
                 date,
@@ -322,7 +322,7 @@ class VisitServiceImplTest {
     void shouldRejectBookingWhenVetDoesNotExist() {
         LocalDate date = LocalDate.now().plusDays(1);
 
-        VisitRequestDto request = new VisitRequestDto(
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
                 petUuid,
                 vetUuid,
                 date,
@@ -351,7 +351,7 @@ class VisitServiceImplTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(10, 0);
 
-        VisitRequestDto request = new VisitRequestDto(
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
                 petUuid,
                 vetUuid,
                 date,
@@ -384,7 +384,7 @@ class VisitServiceImplTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(10, 0);
 
-        VisitRequestDto request = new VisitRequestDto(
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
                 petUuid,
                 vetUuid,
                 date,

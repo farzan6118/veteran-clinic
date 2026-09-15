@@ -17,8 +17,8 @@ import com.github.farzan6118.petclinic.vet.model.Vet;
 import com.github.farzan6118.petclinic.vet.service.VetAvailabilityService;
 import com.github.farzan6118.petclinic.vet.service.VetService;
 import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
-import com.github.farzan6118.petclinic.visit.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.response.DurationTemplateResponseDto;
 import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.visit.mapper.VisitMapper;
@@ -60,7 +60,7 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     @Transactional
-    public void bookVisit(VisitRequestDto request) {
+    public void bookVisit(CreateVisitRequestDto request) {
         DurationTemplateResponseDto standardDuration = durationTemplateService.findByName("STANDARD");
 
         LocalDateTime visitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
@@ -306,7 +306,7 @@ public class VisitServiceImpl implements VisitService {
         validateCanBeRescheduled(visit);
 
         DurationTemplateResponseDto standardDuration = durationTemplateService.findByName("STANDARD");
-        LocalDateTime newVisitStart = LocalDateTime.of(request.date(), request.startTime());
+        LocalDateTime newVisitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
         LocalDateTime newVisitEnd = getVisitEnd(newVisitStart, standardDuration);
 
         Vet vet = vetService.getVetWithUuidLock(visit.getVet().getUuid());

@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-public record VisitRequestDto(
+public record CreateVisitRequestDto(
         @NotNull(message = "pet.uuid.is.required")
         UUID petUuid,
         @NotNull(message = "vet.uuid.is.required")
