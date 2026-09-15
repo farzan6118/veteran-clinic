@@ -1,7 +1,5 @@
-package com.github.farzan6118.petclinic.visit.service;
+package com.github.farzan6118.petclinic.infrastructure.email;
 
-import com.github.farzan6118.petclinic.infrastructure.email.EmailService;
-import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.vet.model.Vet;

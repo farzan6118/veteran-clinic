@@ -90,9 +90,6 @@ class VisitServiceImplTest {
 
         Visit savedVisit = new Visit();
         savedVisit.setUuid(visitUuid);
-
-        when(visitRepository.save(any(Visit.class)))
-                .thenReturn(savedVisit);
     }
 
     // -------------------------------------------------------------------------
