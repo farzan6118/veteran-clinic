@@ -98,7 +98,7 @@ public class FillInitialRecords {
 
             petRepository.saveAll(List.of(
                     pet("Luna", "White", "Small black mark", Sex.FEMALE, species.get(0), owners.get(0), LocalDate.of(2021, 5, 12)),
-                    pet("Milo", "Orange", "White paws", Sex.MAIL, species.get(1), owners.get(1), LocalDate.of(2022, 2, 8)),
+                    pet("Milo", "Orange", "White paws", Sex.MALE, species.get(1), owners.get(1), LocalDate.of(2022, 2, 8)),
                     pet("Coco", "Brown", "Long ears", Sex.FEMALE, species.get(2), owners.get(2), LocalDate.of(2023, 7, 21))
             ));
 
