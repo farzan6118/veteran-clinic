@@ -2,8 +2,8 @@ package com.github.farzan6118.petclinic.impl;
 
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
-import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
-import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.exception.NotFoundException;
+import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.pet.service.PetService;
@@ -307,10 +307,10 @@ class VisitServiceImplTest {
         );
 
         when(petService.getEntityByUuid(petUuid))
-                .thenThrow(new ResourceNotFoundException("pet.not.found"));
+                .thenThrow(new NotFoundException("pet.not.found"));
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.bookVisit(request)
         );
 
@@ -336,7 +336,7 @@ class VisitServiceImplTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.bookVisit(request)
         );
 
@@ -370,7 +370,7 @@ class VisitServiceImplTest {
         )).thenReturn(false);
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.bookVisit(request)
         );
 
@@ -414,7 +414,7 @@ class VisitServiceImplTest {
         )).thenReturn(true);
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.bookVisit(request)
         );
 
@@ -495,7 +495,7 @@ class VisitServiceImplTest {
                 .thenReturn(Optional.of(visit));
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.cancelVisit(visitUuid, "Too late")
         );
 
@@ -509,7 +509,7 @@ class VisitServiceImplTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.cancelVisit(visitUuid, "reason")
         );
     }
@@ -565,7 +565,7 @@ class VisitServiceImplTest {
                 .thenReturn(Optional.of(visit));
 
         assertThrows(
-                GenericValidationException.class,
+                ValidationException.class,
                 () -> service.completeVisit(visitUuid, null)
         );
     }
@@ -588,7 +588,7 @@ class VisitServiceImplTest {
                 .thenReturn(Optional.of(visit));
 
         assertThrows(
-                GenericValidationException.class,
+                ValidationException.class,
                 () -> service.completeVisit(visitUuid, null)
         );
     }
@@ -609,7 +609,7 @@ class VisitServiceImplTest {
                 .thenReturn(Optional.of(visit));
 
         assertThrows(
-                GenericValidationException.class,
+                ValidationException.class,
                 () -> service.completeVisit(visitUuid, null)
         );
     }
@@ -630,7 +630,7 @@ class VisitServiceImplTest {
                 .thenReturn(Optional.of(visit));
 
         assertThrows(
-                GenericValidationException.class,
+                ValidationException.class,
                 () -> service.completeVisit(visitUuid, null)
         );
     }
@@ -663,6 +663,7 @@ class VisitServiceImplTest {
                 new RescheduleVisitRequestDto(
                         newDate,
                         newTime,
+                        VisitType.ONLINE,
                         "new description",
                         "customer request"
                 );
@@ -700,10 +701,11 @@ class VisitServiceImplTest {
 
         verify(visitNotificationService)
                 .notifyRescheduleVisitParticipants(
+                        eq(oldStart),
                         eq(visit),
                         eq(pet),
                         eq(vet),
-                        eq(oldStart)
+                        eq(LocalDateTime.of(newDate, newTime))
                 );
     }
 
@@ -716,12 +718,13 @@ class VisitServiceImplTest {
                 new RescheduleVisitRequestDto(
                         LocalDate.now().plusDays(2),
                         LocalTime.of(10, 0),
+                        VisitType.ONLINE,
                         "new",
                         "reason"
                 );
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.rescheduleVisit(visitUuid, request)
         );
     }
@@ -747,12 +750,13 @@ class VisitServiceImplTest {
                 new RescheduleVisitRequestDto(
                         LocalDate.now().plusDays(2),
                         LocalTime.of(10, 0),
+                        VisitType.ONLINE,
                         null,
                         null
                 );
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.rescheduleVisit(visitUuid, request)
         );
 
@@ -780,12 +784,13 @@ class VisitServiceImplTest {
                 new RescheduleVisitRequestDto(
                         LocalDate.now().plusDays(2),
                         LocalTime.of(10, 0),
+                        VisitType.ONLINE,
                         null,
                         null
                 );
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.rescheduleVisit(visitUuid, request)
         );
     }
@@ -814,12 +819,13 @@ class VisitServiceImplTest {
                 new RescheduleVisitRequestDto(
                         LocalDate.now().minusDays(1),
                         LocalTime.of(10, 0),
+                        VisitType.ONLINE,
                         null,
                         null
                 );
 
         assertThrows(
-                GenericValidationException.class,
+                ValidationException.class,
                 () -> service.rescheduleVisit(visitUuid, request)
         );
 
@@ -857,12 +863,13 @@ class VisitServiceImplTest {
                 new RescheduleVisitRequestDto(
                         LocalDate.now().plusDays(2),
                         LocalTime.of(10, 0),
+                        VisitType.ONLINE,
                         null,
                         null
                 );
 
         assertThrows(
-                ResourceNotFoundException.class,
+                NotFoundException.class,
                 () -> service.rescheduleVisit(visitUuid, request)
         );
     }

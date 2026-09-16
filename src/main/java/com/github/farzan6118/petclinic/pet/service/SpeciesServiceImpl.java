@@ -3,8 +3,8 @@ package com.github.farzan6118.petclinic.pet.service;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
-import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
-import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.exception.NotFoundException;
+import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.pet.dto.request.CreateSpeciesRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.request.UpdateSpeciesRequestDto;
@@ -40,7 +40,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     @Override
     public Species getEntityByUuid(UUID uuid) {
         return speciesRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("species not found"));
+                .orElseThrow(() -> new NotFoundException("species not found"));
     }
 
     @Override
@@ -62,7 +62,7 @@ public class SpeciesServiceImpl implements SpeciesService {
 
     private void validateUniqueContactInfo(String code) {
         if (speciesRepository.existsByCode(code)) {
-            throw new GenericValidationException("species exists",
+            throw new ValidationException("species exists",
                     "species with code: '" + code + "' already exists");
         }
     }
@@ -78,7 +78,7 @@ public class SpeciesServiceImpl implements SpeciesService {
 
     private void validateEmailUniqueness(String code, UUID uuid) {
         if (speciesRepository.existsByCodeAndUuidNot(code, uuid)) {
-            throw new ResourceNotFoundException("species with this code already exists");
+            throw new NotFoundException("species with this code already exists");
         }
     }
 

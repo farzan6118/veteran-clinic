@@ -2,7 +2,7 @@ package com.github.farzan6118.petclinic.visit.model;
 
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
-import com.github.farzan6118.petclinic.common.exception.StatusInvalidException;
+import com.github.farzan6118.petclinic.common.exception.ForbiddenException;
 import com.github.farzan6118.petclinic.common.persistence.BaseEntity;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.room.model.Room;
@@ -87,7 +87,7 @@ public class Visit extends BaseEntity<Long> {
     public void cancel() {
 
         if (status == VisitStatus.COMPLETED) {
-            throw new StatusInvalidException("Completed visit cannot be cancelled");
+            throw new ForbiddenException("Completed visit cannot be cancelled");
         }
 
         if (status == VisitStatus.CANCELLED) {
@@ -100,11 +100,11 @@ public class Visit extends BaseEntity<Long> {
     public void complete(LocalDateTime end) {
 
         if (status == VisitStatus.CANCELLED) {
-            throw new StatusInvalidException("Cancelled visit cannot be completed");
+            throw new ForbiddenException("Cancelled visit cannot be completed");
         }
 
         if (status == VisitStatus.COMPLETED) {
-            throw new StatusInvalidException("Visit is already completed");
+            throw new ForbiddenException("Visit is already completed");
         }
 
         this.endTime = end;

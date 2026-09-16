@@ -15,7 +15,7 @@ public abstract class BaseAppException extends RuntimeException {
             String userMessage,
             String logMessage
     ) {
-        super(logMessage);
+        super(userMessage);
         this.status = status;
         this.userMessage = userMessage;
         this.logMessage = logMessage;

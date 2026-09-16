@@ -3,8 +3,8 @@ package com.github.farzan6118.petclinic.visit.service;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
-import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
-import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.exception.NotFoundException;
+import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.visit.dto.request.CreateDurationTemplateRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.UpdateDurationTemplateRequestDto;
@@ -42,7 +42,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     @Override
     public DurationTemplate getEntityByUuid(UUID uuid) {
         return durationTemplateRepository.findByUuidAndEntityStatus(uuid, EntityStatus.ACTIVE)
-                .orElseThrow(() -> new ResourceNotFoundException("duration template not found"));
+                .orElseThrow(() -> new NotFoundException("duration template not found"));
     }
 
     @Override
@@ -56,14 +56,14 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     @Override
     public DurationTemplateResponseDto findByName(String name) {
         DurationTemplate durationTemplate = durationTemplateRepository.findByNameIgnoreCase(name)
-                .orElseThrow(() -> new ResourceNotFoundException("duration template not found"));
+                .orElseThrow(() -> new NotFoundException("duration template not found"));
         return durationTemplateMapper.mapToDto(durationTemplate);
     }
 
     @Override
     public DurationTemplateResponseDto findByDuration(Integer duration) {
         DurationTemplate durationTemplate = durationTemplateRepository.findByDurationMinutes(duration)
-                .orElseThrow(() -> new ResourceNotFoundException("duration template not found"));
+                .orElseThrow(() -> new NotFoundException("duration template not found"));
         return durationTemplateMapper.mapToDto(durationTemplate);
     }
 
@@ -80,12 +80,12 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     private void validateUniqueContactInfo(String name, Integer duration) {
         String nameUpperCase = name.toUpperCase(Locale.ROOT);
         if (durationTemplateRepository.existsByName(nameUpperCase)) {
-            throw new GenericValidationException(
+            throw new ValidationException(
                     "durationTemplate exists", "name: " + nameUpperCase + " already exists");
         }
 
         if (durationTemplateRepository.existsByDurationMinutes(duration)) {
-            throw new GenericValidationException(
+            throw new ValidationException(
                     "durationTemplate exists", "duration " + duration + " already exists");
         }
     }
@@ -103,13 +103,13 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     private void validateNameUniqueness(String name, UUID uuid) {
         String nameUpperCase = name.toUpperCase(Locale.ROOT);
         if (durationTemplateRepository.existsByNameAndUuidNot(nameUpperCase, uuid)) {
-            throw new GenericValidationException("duration.exists", "duration template with name: '" + nameUpperCase + "' already exists");
+            throw new ValidationException("duration.exists", "duration template with name: '" + nameUpperCase + "' already exists");
         }
     }
 
     private void validateDurationUniqueness(Integer duration, UUID uuid) {
         if (durationTemplateRepository.existsByDurationMinutesAndUuidNot(duration, uuid)) {
-            throw new GenericValidationException("duration.exists", "duration template with duration: '" + duration + "' already exists");
+            throw new ValidationException("duration.exists", "duration template with duration: '" + duration + "' already exists");
         }
     }
 
@@ -118,7 +118,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     public void inactivate(UUID uuid) {
         DurationTemplate durationTemplate = getEntityByUuid(uuid);
         if (durationTemplate.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new GenericValidationException(
+            throw new ValidationException(
                     "duration.template.is.inactive",
                     "Duration template already inactive"
             );
@@ -131,9 +131,9 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     @Override
     public void activate(UUID uuid) {
         DurationTemplate durationTemplate = durationTemplateRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("duration template not found"));
+                .orElseThrow(() -> new NotFoundException("duration template not found"));
         if (durationTemplate.getEntityStatus() != EntityStatus.INACTIVE_NOT_DELETED) {
-            throw new GenericValidationException(
+            throw new ValidationException(
                     "duration.template.cannot.be.activated",
                     "Duration template cannot be activated"
             );
@@ -147,7 +147,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     public void delete(UUID uuid) {
         DurationTemplate entityByUuid = this.getEntityByUuid(uuid);
         if (!entityByUuid.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new GenericValidationException(
+            throw new ValidationException(
                     "duration.template.is.deleted",
                     "Duration template already deleted");
         }
