@@ -1,9 +1,13 @@
 package com.github.farzan6118.petclinic.room.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
+import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
-import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
-import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.exception.NotFoundException;
+import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.room.dto.request.CreateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.request.UpdateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.response.RoomResponseDto;
@@ -12,6 +16,8 @@ import com.github.farzan6118.petclinic.room.model.Room;
 import com.github.farzan6118.petclinic.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +32,8 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
+    private final RoomTypeService roomTypeService;
+    private final PageMapper pageMapper;
 
     @Override
     public RoomResponseDto getByUuid(UUID uuid) {
@@ -36,15 +44,14 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Room getEntityByUuid(UUID uuid) {
         return roomRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("room not found"));
+                .orElseThrow(() -> new NotFoundException("room not found"));
     }
 
     @Override
-    public List<RoomResponseDto> findAll() {
-        return roomRepository.findAll()
-                .stream()
-                .map(roomMapper::mapToDto)
-                .toList();
+    public PageResponseDto<RoomResponseDto> findAll(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<Room> roomPage = roomRepository.findAll(pageable);
+        return pageMapper.toPageResponse(roomPage, roomMapper::mapToDto);
     }
 
     @Transactional
@@ -62,7 +69,7 @@ public class RoomServiceImpl implements RoomService {
 
     private void validateUniqueContactInfo(String code) {
         if (roomRepository.existsByCode(code)) {
-            throw new GenericValidationException("room exists", "room code'" + code + "' exists");
+            throw new ValidationException("room exists", "room code'" + code + "' exists");
         }
     }
 
@@ -77,7 +84,7 @@ public class RoomServiceImpl implements RoomService {
 
     private void validateCodeUniqueness(String code, UUID roomUuid) {
         if (roomRepository.existsByCodeAndUuidNot(code, roomUuid)) {
-            throw new GenericValidationException("Room with this email already exists");
+            throw new ValidationException("Room with this email already exists");
         }
     }
 
@@ -86,7 +93,7 @@ public class RoomServiceImpl implements RoomService {
     public void delete(UUID uuid) {
         Room room = this.getEntityByUuid(uuid);
         if (!room.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new GenericValidationException("room is already inactive");
+            throw new ValidationException("room is already inactive");
         }
         room.setEntityStatus(EntityStatus.INACTIVE_DELETED);
         log.info("room inactivated");
@@ -99,7 +106,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room allocateRoom(VisitType visitType) {
+    public Room getAvailableRoomByVisitTypeAndVisitCategory(VisitType visitType, VisitCategory visitCategory) {
         List<String> roomTypeNames = switch (visitType) {
             case ONSITE -> List.of("examination", "individual");
             case ONLINE, OFFSITE -> List.of();
@@ -112,7 +119,7 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.findActiveRoomsByTypeNames(roomTypeNames)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException(
+                .orElseThrow(() -> new NotFoundException(
                         "visit.room.not.available",
                         "No room is available for the selected visit type and time"));
     }

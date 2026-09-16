@@ -1,8 +1,11 @@
 package com.github.farzan6118.petclinic.vet.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
-import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
-import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.exception.NotFoundException;
+import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.vet.dto.request.CreateVetRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetProfileUpdateRequestDto;
@@ -13,10 +16,11 @@ import com.github.farzan6118.petclinic.vet.model.Vet;
 import com.github.farzan6118.petclinic.vet.repository.VetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -27,6 +31,7 @@ public class VetServiceImpl implements VetService {
 
     private final VetRepository vetRepository;
     private final VetMapper vetMapper;
+    private final PageMapper pageMapper;
 
     @Override
     public VetResponseDto getByUuid(UUID uuid) {
@@ -37,15 +42,14 @@ public class VetServiceImpl implements VetService {
     @Override
     public Vet getEntityByUuid(UUID uuid) {
         return vetRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("vet not found"));
+                .orElseThrow(() -> new NotFoundException("vet not found"));
     }
 
     @Override
-    public List<VetResponseDto> findAll() {
-        return vetRepository.findAll()
-                .stream()
-                .map(vetMapper::mapToDto)
-                .toList();
+    public PageResponseDto<VetResponseDto> findAllPageable(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<Vet> vetPage = vetRepository.findAll(pageable);
+        return pageMapper.toPageResponse(vetPage, vetMapper::mapToDto);
     }
 
     @Transactional
@@ -61,10 +65,10 @@ public class VetServiceImpl implements VetService {
 
     private void validateUniqueContactInfo(String mobileNumber, String email) {
         if (vetRepository.existsByEmail(email)) {
-            throw new GenericValidationException("email exists", "vet email " + email + " exists");
+            throw new ValidationException("email exists", "vet email " + email + " exists");
         }
         if (vetRepository.existsByMobileNumber(mobileNumber)) {
-            throw new GenericValidationException("mobileNumber exists", "vet mobileNumber " + mobileNumber + " exists");
+            throw new ValidationException("mobileNumber exists", "vet mobileNumber " + mobileNumber + " exists");
         }
     }
 
@@ -88,13 +92,13 @@ public class VetServiceImpl implements VetService {
 
     private void validateEmailUniqueness(String email, UUID vetUuid) {
         if (vetRepository.existsByEmailAndUuidNot(email, vetUuid)) {
-            throw new GenericValidationException("Vet with this email already exists");
+            throw new ValidationException("Vet with this email already exists");
         }
     }
 
     private void validateTelephoneUniqueness(String mobileNumber, UUID vetUuid) {
         if (vetRepository.existsByMobileNumberAndUuidNot(mobileNumber, vetUuid)) {
-            throw new GenericValidationException("Vet with this mobileNumber already exists");
+            throw new ValidationException("Vet with this mobileNumber already exists");
         }
     }
 
@@ -103,7 +107,7 @@ public class VetServiceImpl implements VetService {
     public void delete(UUID uuid) {
         Vet vet = this.getEntityByUuid(uuid);
         if (!vet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new GenericValidationException("vet is already inactive");
+            throw new ValidationException("vet is already inactive");
         }
         vet.setEntityStatus(EntityStatus.INACTIVE_DELETED);
         log.info("vet inactivated");
@@ -117,7 +121,8 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public Vet getVetWithUuidLock(UUID vetUuid) {
-        return vetRepository.findByUuidWithLock(vetUuid).orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
+        return vetRepository.findByUuidWithLock(vetUuid)
+                .orElseThrow(() -> new NotFoundException("Vet not found: " + vetUuid));
     }
 }
 

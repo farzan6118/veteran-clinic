@@ -25,7 +25,12 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
     Optional<Visit> findByUuid(UUID uuid);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select v from Visit v where v.uuid = :uuid")
+    @Query("""
+            select v from Visit v
+            where v.uuid = :uuid
+            and v.status not in (VisitStatus.CANCELLED,
+                                 VisitStatus.COMPLETED)
+            """)
     Optional<Visit> findByUuidForUpdate(@Param("uuid") UUID uuid);
 
     List<Visit> findAllByPetOwnerUuid(UUID currentOwnerUuid);
@@ -36,8 +41,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             select case when count(v) > 0 then true else false end
             from Visit v
             where v.pet.uuid = :petUuid
-            and v.status not in (com.github.farzan6118.petclinic.common.enums.VisitStatus.CANCELLED,
-                                 com.github.farzan6118.petclinic.common.enums.VisitStatus.COMPLETED)
+            and v.status not in (VisitStatus.CANCELLED,
+                                 VisitStatus.COMPLETED)
             and v.startTime < :visitEnd
             and v.endTime > :visitStart
             and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
@@ -53,8 +58,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             select case when count(v) > 0 then true else false end
             from Visit v
             where v.vet.uuid = :vetUuid
-            and v.status not in (com.github.farzan6118.petclinic.common.enums.VisitStatus.CANCELLED,
-                                 com.github.farzan6118.petclinic.common.enums.VisitStatus.COMPLETED)
+            and v.status not in (VisitStatus.CANCELLED,
+                                 VisitStatus.COMPLETED)
             and v.startTime < :visitEnd
             and v.endTime > :visitStart
             and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
@@ -70,9 +75,9 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             select case when count(v) > 0 then true else false end
             from Visit v
             where v.room.uuid = :roomUuid
-            and v.status not in (com.github.farzan6118.petclinic.common.enums.VisitStatus.CANCELLED,
-                                 com.github.farzan6118.petclinic.common.enums.VisitStatus.COMPLETED)
-            and v.startTime < :visitEnd
+            and v.status not in (VisitStatus.CANCELLED,
+                                 VisitStatus.COMPLETED)
+            and v.startTime <= :visitEnd
             and v.endTime > :visitStart
             and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)

@@ -1,12 +1,14 @@
 package com.github.farzan6118.petclinic.room.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
 import com.github.farzan6118.petclinic.room.dto.request.CreateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.request.UpdateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.response.RoomResponseDto;
 import com.github.farzan6118.petclinic.room.model.Room;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface RoomService {
@@ -15,7 +17,7 @@ public interface RoomService {
 
     Room getEntityByUuid(UUID uuid);
 
-    List<RoomResponseDto> findAll();
+    PageResponseDto<RoomResponseDto> findAll(PageAndSortRequestDto requestDto);
 
     void create(CreateRoomRequestDto request);
 
@@ -25,5 +27,5 @@ public interface RoomService {
 
     RoomResponseDto getRoomByUuid(UUID uuid);
 
-    Room allocateRoom(VisitType visitType);
+    Room getAvailableRoomByVisitTypeAndVisitCategory(VisitType visitType, VisitCategory visitCategory);
 }

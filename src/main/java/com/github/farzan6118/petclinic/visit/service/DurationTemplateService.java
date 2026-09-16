@@ -1,11 +1,12 @@
 package com.github.farzan6118.petclinic.visit.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CreateDurationTemplateRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.UpdateDurationTemplateRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.response.DurationTemplateResponseDto;
 import com.github.farzan6118.petclinic.visit.model.DurationTemplate;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface DurationTemplateService {
@@ -13,7 +14,7 @@ public interface DurationTemplateService {
 
     DurationTemplate getEntityByUuid(UUID uuid);
 
-    List<DurationTemplateResponseDto> findAll();
+    PageResponseDto<DurationTemplateResponseDto> findAllPageable(PageAndSortRequestDto requestDto);
 
     DurationTemplateResponseDto findByName(String name);
 

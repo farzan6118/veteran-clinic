@@ -1,8 +1,10 @@
 package com.github.farzan6118.petclinic.visit.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
-import com.github.farzan6118.petclinic.visit.dto.request.VisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.visit.service.VisitService;
 import jakarta.validation.Valid;
@@ -26,7 +28,7 @@ public class VisitController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void bookVisit(@Valid @RequestBody VisitRequestDto request) {
+    public void bookVisit(@Valid @RequestBody CreateVisitRequestDto request) {
         visitService.bookVisit(request);
     }
 
@@ -37,9 +39,10 @@ public class VisitController {
         visitService.rescheduleVisit(uuid, request);
     }
 
-    @GetMapping
-    public ResponseEntity<List<VisitResponseDto>> getAllVisits() {
-        return ResponseEntity.ok(visitService.getAllVisits());
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDto<VisitResponseDto>> findAll(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(visitService.findAll(requestDto));
     }
 
     @GetMapping("/{uuid}")
