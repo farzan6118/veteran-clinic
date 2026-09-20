@@ -5,6 +5,7 @@ import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.request.VisitAdvancedSearch;
 import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
 
 import java.time.LocalDate;
@@ -31,4 +32,5 @@ public interface VisitService {
 
     void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request);
 
+    PageResponseDto<VisitResponseDto> advancedSearch(VisitAdvancedSearch request);
 }

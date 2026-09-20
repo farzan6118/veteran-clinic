@@ -43,5 +43,17 @@ public class PageMapper {
                 Sort.by(requestDto.sortDirection(), requestDto.sortBy())
         );
     }
+
+    public Pageable getPageable(
+            Integer pageNumber,
+            Integer pageSize,
+            String sortBy,
+            Sort.Direction sortDirection) {
+        return PageRequest.of(
+                pageNumber,
+                pageSize,
+                Sort.by(sortDirection, sortBy)
+        );
+    }
 }
 

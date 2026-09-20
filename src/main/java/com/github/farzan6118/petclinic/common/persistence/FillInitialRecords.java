@@ -18,7 +18,6 @@ import com.github.farzan6118.petclinic.vet.repository.VetAvailabilityRepository;
 import com.github.farzan6118.petclinic.vet.repository.VetRepository;
 import com.github.farzan6118.petclinic.visit.model.DurationTemplate;
 import com.github.farzan6118.petclinic.visit.repository.DurationTemplateRepository;
-import net.datafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +29,6 @@ import java.util.List;
 
 @Configuration
 public class FillInitialRecords {
-    private static final Faker faker = new Faker();
 
     @Bean
     CommandLineRunner fillInitialRecordsRunner(

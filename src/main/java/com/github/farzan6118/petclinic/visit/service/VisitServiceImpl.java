@@ -20,6 +20,7 @@ import com.github.farzan6118.petclinic.vet.service.VetService;
 import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.request.VisitAdvancedSearch;
 import com.github.farzan6118.petclinic.visit.dto.response.DurationTemplateResponseDto;
 import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.visit.mapper.VisitMapper;
@@ -90,7 +91,6 @@ public class VisitServiceImpl implements VisitService {
                 room != null ? room.getUuid() : null, visitStart,
                 visitEnd
         );
-        throw new RuntimeException("Visit booked successfully. visitUuid");
     }
 
     private void vetAvailabilityValidation(Vet vet, LocalDateTime visitStart, LocalDateTime visitEnd, UUID visitUuid) {
@@ -213,6 +213,18 @@ public class VisitServiceImpl implements VisitService {
                 .stream().map(visitMapper::toResponse).toList();
     }
 
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponseDto<VisitResponseDto> advancedSearch(
+            VisitAdvancedSearch request) {
+        Pageable pageable = pageMapper.getPageable(
+                request.pageNumber(), request.pageSize(),
+                request.sortBy(), request.sortDirection());
+        Page<Visit> pagedVisit = visitRepository.advancedSearch(request, pageable);
+        return pageMapper.toPageResponse(pagedVisit, visitMapper::toResponse);
+    }
+
     @Override
     public List<VisitResponseDto> findAllVisitsByPetUuid(UUID petUuid, LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
@@ -324,7 +336,6 @@ public class VisitServiceImpl implements VisitService {
         visitRepository.save(visit);
         log.info("Visit rescheduled successfully. visitUuid={}, oldVisitStart={}, newVisitStart={}",
                 visit.getUuid(), oldVisitStart, newVisitStart);
-//        throw new RuntimeException("for test");
     }
 
     private Visit getVisitByUuid(UUID uuid) {

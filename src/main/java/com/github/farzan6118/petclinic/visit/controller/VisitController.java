@@ -5,6 +5,7 @@ import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.request.VisitAdvancedSearch;
 import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.visit.service.VisitService;
 import jakarta.validation.Valid;
@@ -56,10 +57,10 @@ public class VisitController {
         visitService.cancelVisit(uuid, reason);
     }
 
-    @GetMapping("/vet/{vetUuid}")
-    public ResponseEntity<List<VisitResponseDto>> getVetVisits(
-            @PathVariable UUID vetUuid, @RequestParam LocalDate date) {
-        return ResponseEntity.ok(visitService.findAllVisitsByVetUuid(vetUuid, date));
+    @GetMapping("/search")
+    public ResponseEntity<PageResponseDto<VisitResponseDto>> advancedSearch(
+            @ModelAttribute("request") @Valid VisitAdvancedSearch request) {
+        return ResponseEntity.ok(visitService.advancedSearch(request));
     }
 
     @GetMapping("/pet/{petUuid}")
