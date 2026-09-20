@@ -15,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -61,18 +59,6 @@ public class VisitController {
     public ResponseEntity<PageResponseDto<VisitResponseDto>> advancedSearch(
             @ModelAttribute("request") @Valid VisitAdvancedSearch request) {
         return ResponseEntity.ok(visitService.advancedSearch(request));
-    }
-
-    @GetMapping("/pet/{petUuid}")
-    public ResponseEntity<List<VisitResponseDto>> getPetVisits(
-            @PathVariable UUID petUuid, @RequestParam LocalDate date) {
-        return ResponseEntity.ok(visitService.findAllVisitsByPetUuid(petUuid, date));
-    }
-
-    @GetMapping("/room/{roomUuid}")
-    public ResponseEntity<List<VisitResponseDto>> getRoomVisits(
-            @PathVariable UUID roomUuid, @RequestParam LocalDate date) {
-        return ResponseEntity.ok(visitService.findAllVisitsByRoomUuid(roomUuid, date));
     }
 
     @PatchMapping("/{uuid}/complete")

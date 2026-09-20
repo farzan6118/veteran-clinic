@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -206,15 +205,6 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
-    public List<VisitResponseDto> findAllVisitsByVetUuid(UUID vetUuid, LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
-        return visitRepository.findAllVisitsByVetUuidAndStartTimeBetween(vetUuid, startOfDay, endOfDay)
-                .stream().map(visitMapper::toResponse).toList();
-    }
-
-
-    @Override
     @Transactional(readOnly = true)
     public PageResponseDto<VisitResponseDto> advancedSearch(
             VisitAdvancedSearch request) {
@@ -243,22 +233,6 @@ public class VisitServiceImpl implements VisitService {
                 );
             }
         }
-    }
-
-    @Override
-    public List<VisitResponseDto> findAllVisitsByPetUuid(UUID petUuid, LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
-        return visitRepository.findAllVisitsByPetUuidAndStartTimeBetween(petUuid, startOfDay, endOfDay)
-                .stream().map(visitMapper::toResponse).toList();
-    }
-
-    @Override
-    public List<VisitResponseDto> findAllVisitsByRoomUuid(UUID RoomUuid, LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
-        return visitRepository.findAllVisitsByRoomUuidAndStartTimeBetween(RoomUuid, startOfDay, endOfDay)
-                .stream().map(visitMapper::toResponse).toList();
     }
 
     /**

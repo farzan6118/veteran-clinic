@@ -8,8 +8,6 @@ import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestD
 import com.github.farzan6118.petclinic.visit.dto.request.VisitAdvancedSearch;
 import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 public interface VisitService {
@@ -19,12 +17,6 @@ public interface VisitService {
     VisitResponseDto getByUuid(UUID uuid);
 
     void cancelVisit(UUID uuid, String reason);
-
-    List<VisitResponseDto> findAllVisitsByVetUuid(UUID vetUuid, LocalDate date);
-
-    List<VisitResponseDto> findAllVisitsByPetUuid(UUID petUuid, LocalDate date);
-
-    List<VisitResponseDto> findAllVisitsByRoomUuid(UUID RoomUuid, LocalDate date);
 
     void completeVisit(UUID uuid, CompleteVisitRequestDto request);
 
