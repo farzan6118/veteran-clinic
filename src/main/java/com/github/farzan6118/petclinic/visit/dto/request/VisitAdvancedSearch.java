@@ -24,12 +24,25 @@ public record VisitAdvancedSearch(
         @Schema(example = "10")
         Integer pageSize,
 
-        @Schema(description = "Sort field", defaultValue = "startTime",
-                allowableValues = {"startTime", "endTime", "createdDate", "lastModifiedDate"})
+        @Schema(
+                description = "Sort field",
+                defaultValue = "startTime",
+                allowableValues = {
+                        "startTime",
+                        "endTime",
+                        "createdDate",
+                        "status",
+                        "visitType",
+                        "lastModifiedDate"
+                }
+        )
         String sortBy,
 
-        @Schema(description = "Sort direction",
-                allowableValues = {"ASC", "DESC"})
+        @Schema(
+                description = "Sort direction",
+                defaultValue = "ASC",
+                allowableValues = {"ASC", "DESC"}
+        )
         Sort.Direction sortDirection,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -48,5 +61,4 @@ public record VisitAdvancedSearch(
         UUID petUuid,
         UUID roomUuid
 ) {
-
 }

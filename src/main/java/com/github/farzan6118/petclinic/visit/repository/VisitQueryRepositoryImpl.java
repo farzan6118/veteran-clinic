@@ -126,26 +126,25 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
 
     private OrderSpecifier<?> getOrderSpecifier(QVisit visit, Pageable pageable) {
 
-        Sort.Order sortOrder = pageable.getSort().stream()
+        Sort.Order sortOrder = pageable.getSort()
+                .stream()
                 .findFirst()
                 .orElse(null);
 
         if (sortOrder == null) {
-            return new OrderSpecifier<>(Order.DESC, visit.createdDate);
+            return new OrderSpecifier<>(Order.ASC, visit.startTime);
         }
 
         Order order = sortOrder.isAscending() ? Order.ASC : Order.DESC;
 
         return switch (sortOrder.getProperty()) {
             case "startTime" -> new OrderSpecifier<>(order, visit.startTime);
-
             case "endTime" -> new OrderSpecifier<>(order, visit.endTime);
-
             case "createdDate" -> new OrderSpecifier<>(order, visit.createdDate);
-
             case "lastModifiedDate" -> new OrderSpecifier<>(order, visit.lastModifiedDate);
-
-            default -> new OrderSpecifier<>(Order.DESC, visit.createdDate);
+            case "status" -> new OrderSpecifier<>(order, visit.status);
+            case "visitType" -> new OrderSpecifier<>(order, visit.visitType);
+            default -> new OrderSpecifier<>(Order.ASC, visit.startTime);
         };
     }
 }
