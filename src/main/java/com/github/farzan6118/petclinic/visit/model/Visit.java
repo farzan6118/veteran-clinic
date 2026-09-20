@@ -113,11 +113,11 @@ public class Visit extends BaseEntity<Long> {
 
     public void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
         if (endTime.isBefore(startTime)) {
-            throw new IllegalArgumentException("End time cannot be before start time");
+            throw new IllegalArgumentException("End time cannot be before visitDateFrom time");
         }
 
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
-            throw new IllegalArgumentException("the start and end time must be the same day");
+            throw new IllegalArgumentException("the visitDateFrom and visitDateTo time must be the same day");
         }
     }
 }

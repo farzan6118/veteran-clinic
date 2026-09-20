@@ -99,7 +99,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
     private void validateTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         if (!startTime.isBefore(endTime)) {
-            throw new ValidationException("Start time must be before end time");
+            throw new ValidationException("Start time must be before visitDateTo time");
         }
     }
 

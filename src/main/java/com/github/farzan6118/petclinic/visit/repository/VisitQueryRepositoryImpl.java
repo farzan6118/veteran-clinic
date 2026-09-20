@@ -6,6 +6,7 @@ import com.github.farzan6118.petclinic.visit.model.Visit;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -34,25 +36,37 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
 
         BooleanBuilder predicate = new BooleanBuilder();
 
-        addDateRangePredicate(
+        // Visit visitDateFrom time
+        addLocalDateTimeRangePredicate(
                 predicate,
-                visit,
-                request.startDateTime(),
-                request.endDateTime()
+                visit.startTime,
+                request.visitDateFrom(),
+                request.visitDateTo()
         );
 
+        // Visit created date
+        addInstantRangePredicate(
+                predicate,
+                visit.createdDate,
+                request.createdDateFrom(),
+                request.createdDateTo()
+        );
+
+        // Vet
         addUuidPredicate(
                 predicate,
                 visit.vet.uuid,
                 request.vetUuid()
         );
 
+        // Pet
         addUuidPredicate(
                 predicate,
                 visit.pet.uuid,
                 request.petUuid()
         );
 
+        // Room
         addUuidPredicate(
                 predicate,
                 visit.room.uuid,
@@ -73,21 +87,40 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        return new PageImpl<>(content, pageable, total != null ? total : 0L);
+        return new PageImpl<>(
+                content,
+                pageable,
+                total != null ? total : 0L
+        );
     }
 
-    private void addDateRangePredicate(
+    private void addLocalDateTimeRangePredicate(
             BooleanBuilder predicate,
-            QVisit visit,
-            LocalDateTime startDateTime,
-            LocalDateTime endDateTime) {
+            DateTimeExpression<LocalDateTime> path,
+            LocalDateTime from,
+            LocalDateTime to) {
 
-        if (startDateTime != null) {
-            predicate.and(visit.startTime.goe(startDateTime));
+        if (from != null) {
+            predicate.and(path.goe(from));
         }
 
-        if (endDateTime != null) {
-            predicate.and(visit.startTime.lt(endDateTime));
+        if (to != null) {
+            predicate.and(path.lt(to));
+        }
+    }
+
+    private void addInstantRangePredicate(
+            BooleanBuilder predicate,
+            DateTimeExpression<Instant> path,
+            Instant from,
+            Instant to) {
+
+        if (from != null) {
+            predicate.and(path.goe(from));
+        }
+
+        if (to != null) {
+            predicate.and(path.lt(to));
         }
     }
 
@@ -103,7 +136,7 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
 
     private OrderSpecifier<?> getOrderSpecifier(QVisit visit, Pageable pageable) {
 
-        Sort.Order sortOrder = pageable.getSort().getOrderFor("createdDate");
+        Sort.Order sortOrder = pageable.getSort().getOrderFor("startTime");
 
         if (sortOrder != null) {
             return new OrderSpecifier<>(
@@ -114,7 +147,8 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
             );
         }
 
-        sortOrder = pageable.getSort().getOrderFor("lastModifiedDate");
+        sortOrder =
+                pageable.getSort().getOrderFor("lastModifiedDate");
 
         if (sortOrder != null) {
             return new OrderSpecifier<>(
@@ -125,38 +159,9 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
             );
         }
 
-        return new OrderSpecifier<>(Order.DESC, visit.createdDate);
-    }
-
-    @Override
-    public List<Visit> findAllByDateAndTimeBetween(
-            UUID vetUuid,
-            LocalDateTime startOfDay,
-            LocalDateTime endOfDay) {
-
-        return queryFactory
-                .selectFrom(QVisit.visit)
-                .where(
-                        QVisit.visit.vet.uuid.eq(vetUuid),
-                        QVisit.visit.startTime.goe(startOfDay),
-                        QVisit.visit.startTime.lt(endOfDay)
-                )
-                .fetch();
-    }
-
-    @Override
-    public List<Visit> findAllByRoomUuidAndStartTimeBetween(
-            UUID roomUuid,
-            LocalDateTime startOfDay,
-            LocalDateTime endOfDay) {
-
-        return queryFactory
-                .selectFrom(QVisit.visit)
-                .where(
-                        QVisit.visit.room.uuid.eq(roomUuid),
-                        QVisit.visit.startTime.goe(startOfDay),
-                        QVisit.visit.startTime.lt(endOfDay)
-                )
-                .fetch();
+        return new OrderSpecifier<>(
+                Order.DESC,
+                visit.createdDate
+        );
     }
 }

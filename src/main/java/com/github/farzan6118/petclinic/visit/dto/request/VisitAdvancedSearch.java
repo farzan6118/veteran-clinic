@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,8 +24,8 @@ public record VisitAdvancedSearch(
         @Schema(example = "10")
         Integer pageSize,
 
-        @Schema(description = "Sort field",
-                allowableValues = {"createdDate", "lastModifiedDate"})
+        @Schema(description = "Sort field", defaultValue = "startTime",
+                allowableValues = {"startTime", "endTime", "createdDate", "lastModifiedDate"})
         String sortBy,
 
         @Schema(description = "Sort direction",
@@ -32,10 +33,17 @@ public record VisitAdvancedSearch(
         Sort.Direction sortDirection,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        LocalDateTime startDateTime,
+        LocalDateTime visitDateFrom,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        LocalDateTime endDateTime,
+        LocalDateTime visitDateTo,
+
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        Instant createdDateFrom,
+
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        Instant createdDateTo,
+
         UUID vetUuid,
         UUID petUuid,
         UUID roomUuid

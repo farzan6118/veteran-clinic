@@ -165,14 +165,14 @@ public class VisitServiceImpl implements VisitService {
     private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
         if (!startTime.isBefore(endTime)) {
             throw new ValidationException(
-                    "visit end time must be after start time",
-                    "visit end time must be after start time");
+                    "visit visitDateTo time must be after visitDateFrom time",
+                    "visit visitDateTo time must be after visitDateFrom time");
         }
 
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
             throw new ValidationException(
-                    "visit start and end time must be on the same day",
-                    "visit start and end time must be on the same day");
+                    "visit visitDateFrom and visitDateTo time must be on the same day",
+                    "visit visitDateFrom and visitDateTo time must be on the same day");
         }
     }
 
@@ -221,8 +221,28 @@ public class VisitServiceImpl implements VisitService {
         Pageable pageable = pageMapper.getPageable(
                 request.pageNumber(), request.pageSize(),
                 request.sortBy(), request.sortDirection());
+        dateTimeValidation(request);
         Page<Visit> pagedVisit = visitRepository.advancedSearch(request, pageable);
         return pageMapper.toPageResponse(pagedVisit, visitMapper::toResponse);
+    }
+
+    private void dateTimeValidation(VisitAdvancedSearch request) {
+        if (request.createdDateFrom() != null && request.createdDateTo() != null) {
+            if (request.createdDateFrom().isAfter(request.createdDateTo())) {
+                throw new ValidationException(
+                        "invalid.created.date.from.created.date.to",
+                        "create date from is after create date to"
+                );
+            }
+        }
+        if (request.visitDateFrom() != null && request.visitDateTo() != null) {
+            if (request.visitDateFrom().isAfter(request.visitDateTo())) {
+                throw new ValidationException(
+                        "invalid.visit.date.from.visit.date.to",
+                        "visit date from is after visit date to"
+                );
+            }
+        }
     }
 
     @Override
