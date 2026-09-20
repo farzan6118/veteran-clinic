@@ -87,11 +87,7 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        return new PageImpl<>(
-                content,
-                pageable,
-                total != null ? total : 0L
-        );
+        return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
     private void addLocalDateTimeRangePredicate(
@@ -110,10 +106,7 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
     }
 
     private void addInstantRangePredicate(
-            BooleanBuilder predicate,
-            DateTimeExpression<Instant> path,
-            Instant from,
-            Instant to) {
+            BooleanBuilder predicate, DateTimeExpression<Instant> path, Instant from, Instant to) {
 
         if (from != null) {
             predicate.and(path.goe(from));
@@ -124,10 +117,7 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
         }
     }
 
-    private void addUuidPredicate(
-            BooleanBuilder predicate,
-            SimpleExpression<UUID> path,
-            UUID value) {
+    private void addUuidPredicate(BooleanBuilder predicate, SimpleExpression<UUID> path, UUID value) {
 
         if (value != null) {
             predicate.and(path.eq(value));
@@ -136,32 +126,26 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
 
     private OrderSpecifier<?> getOrderSpecifier(QVisit visit, Pageable pageable) {
 
-        Sort.Order sortOrder = pageable.getSort().getOrderFor("startTime");
+        Sort.Order sortOrder = pageable.getSort().stream()
+                .findFirst()
+                .orElse(null);
 
-        if (sortOrder != null) {
-            return new OrderSpecifier<>(
-                    sortOrder.isAscending()
-                            ? Order.ASC
-                            : Order.DESC,
-                    visit.createdDate
-            );
+        if (sortOrder == null) {
+            return new OrderSpecifier<>(Order.DESC, visit.createdDate);
         }
 
-        sortOrder =
-                pageable.getSort().getOrderFor("lastModifiedDate");
+        Order order = sortOrder.isAscending() ? Order.ASC : Order.DESC;
 
-        if (sortOrder != null) {
-            return new OrderSpecifier<>(
-                    sortOrder.isAscending()
-                            ? Order.ASC
-                            : Order.DESC,
-                    visit.lastModifiedDate
-            );
-        }
+        return switch (sortOrder.getProperty()) {
+            case "startTime" -> new OrderSpecifier<>(order, visit.startTime);
 
-        return new OrderSpecifier<>(
-                Order.DESC,
-                visit.createdDate
-        );
+            case "endTime" -> new OrderSpecifier<>(order, visit.endTime);
+
+            case "createdDate" -> new OrderSpecifier<>(order, visit.createdDate);
+
+            case "lastModifiedDate" -> new OrderSpecifier<>(order, visit.lastModifiedDate);
+
+            default -> new OrderSpecifier<>(Order.DESC, visit.createdDate);
+        };
     }
 }
