@@ -1,24 +1,27 @@
 package com.github.farzan6118.petclinic.impl;
 
+import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
+import com.github.farzan6118.petclinic.config.ClinicProperties;
+import com.github.farzan6118.petclinic.medical.model.MedicalRecord;
+import com.github.farzan6118.petclinic.medical.service.MedicalRecordService;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.pet.service.PetService;
 import com.github.farzan6118.petclinic.room.model.Room;
-import com.github.farzan6118.petclinic.room.repository.RoomRepository;
+import com.github.farzan6118.petclinic.room.service.RoomService;
 import com.github.farzan6118.petclinic.vet.model.Vet;
-import com.github.farzan6118.petclinic.vet.repository.VetAvailabilityRepository;
-import com.github.farzan6118.petclinic.vet.repository.VetRepository;
+import com.github.farzan6118.petclinic.vet.service.VetAvailabilityService;
+import com.github.farzan6118.petclinic.vet.service.VetService;
+import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
-import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
-import com.github.farzan6118.petclinic.visit.mapper.VisitMapper;
+import com.github.farzan6118.petclinic.visit.dto.response.DurationTemplateResponseDto;
 import com.github.farzan6118.petclinic.visit.model.Visit;
 import com.github.farzan6118.petclinic.visit.repository.VisitRepository;
-import com.github.farzan6118.petclinic.visit.service.VisitServiceQueryImpl;
+import com.github.farzan6118.petclinic.visit.service.DurationTemplateService;
+import com.github.farzan6118.petclinic.visit.service.VisitServiceCommandImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,890 +33,179 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class VisitServiceImplTest {
 
-    @Mock
-    private VisitNotificationService visitNotificationService;
-
-    @Mock
-    private VisitRepository visitRepository;
-
-    @Mock
-    private PetService petService;
-
-    @Mock
-    private VisitMapper visitMapper;
-
-    @Mock
-    private VetRepository vetRepository;
-
-    @Mock
-    private VetAvailabilityRepository availabilityRepository;
-
-    @Mock
-    private RoomRepository roomRepository;
+    @Mock private VisitRepository visitRepository;
+    @Mock private ClinicProperties clinicProperties;
+    @Mock private RoomService roomService;
+    @Mock private PetService petService;
+    @Mock private VetService vetService;
+    @Mock private VetAvailabilityService vetAvailabilityService;
+    @Mock private DurationTemplateService durationTemplateService;
+    @Mock private VisitNotificationService visitNotificationService;
+    @Mock private MedicalRecordService medicalRecordService;
 
     @InjectMocks
-    private VisitServiceQueryImpl service;
+    private VisitServiceCommandImpl service;
 
-    private UUID vetUuid;
-    private UUID petUuid;
-    private UUID visitUuid;
+    private final UUID petUuid = UUID.randomUUID();
+    private final UUID vetUuid = UUID.randomUUID();
+    private final UUID visitUuid = UUID.randomUUID();
 
-    private Vet vet;
     private Pet pet;
+    private Vet vet;
     private Room room;
 
     @BeforeEach
     void setUp() {
-        vetUuid = UUID.randomUUID();
-        petUuid = UUID.randomUUID();
-        visitUuid = UUID.randomUUID();
+        pet = new Pet();
+        pet.setUuid(petUuid);
 
         vet = new Vet();
         vet.setUuid(vetUuid);
 
-        pet = new Pet();
-        pet.setUuid(petUuid);
-
         room = new Room();
         room.setUuid(UUID.randomUUID());
-
-        Visit savedVisit = new Visit();
-        savedVisit.setUuid(visitUuid);
-    }
-
-    // -------------------------------------------------------------------------
-    // bookVisit
-    // -------------------------------------------------------------------------
-
-    @Test
-    void shouldBookOnsiteVisitSuccessfully() {
-        LocalDate date = LocalDate.now().plusDays(1);
-        LocalTime time = LocalTime.of(10, 0);
-
-        CreateVisitRequestDto request = new CreateVisitRequestDto(
-                petUuid, vetUuid, date, time, VisitType.ONSITE, "General examination");
-
-        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
-        when(vetRepository.findByUuidWithLock(vetUuid)).thenReturn(Optional.of(vet));
-        when(availabilityRepository.existsCoveringTime(
-                eq(vetUuid),
-                eq(LocalDateTime.of(date, time)),
-                eq(LocalDateTime.of(date, time.plusMinutes(10)))
-        )).thenReturn(true);
-
-        when(roomRepository.findActiveRoomsByTypeNames(List.of("examination", "individual")))
-                .thenReturn(List.of(room));
-
-        when(visitRepository.existsRoomReservation(
-                eq(room.getUuid()),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class),
-                isNull()
-        )).thenReturn(false);
-
-        when(visitRepository.save(any(Visit.class)))
-                .thenAnswer(invocation -> {
-                    Visit saved = invocation.getArgument(0);
-                    saved.setUuid(visitUuid);
-                    return saved;
-                });
-
-        service.bookVisit(request);
-
-        ArgumentCaptor<Visit> captor = ArgumentCaptor.forClass(Visit.class);
-        verify(visitRepository).save(captor.capture());
-
-        Visit savedVisit = captor.getValue();
-
-        assertEquals(vet, savedVisit.getVet());
-        assertEquals(pet, savedVisit.getPet());
-        assertEquals(room, savedVisit.getRoom());
-        assertEquals(VisitType.ONSITE, savedVisit.getVisitType());
-        assertEquals(VisitStatus.SCHEDULED, savedVisit.getStatus());
-        assertEquals(LocalDateTime.of(date, time), savedVisit.getStartTime());
-        assertEquals(
-                LocalDateTime.of(date, time.plusMinutes(10)),
-                savedVisit.getEndTime()
-        );
-
-        verify(visitNotificationService)
-                .notifyBookVisitParticipants(savedVisit, pet, vet);
-    }
-
-    @Test
-    void shouldBookOnlineVisitWithoutRoom() {
-        LocalDate date = LocalDate.now().plusDays(1);
-        LocalTime time = LocalTime.of(10, 0);
-
-        CreateVisitRequestDto request = new CreateVisitRequestDto(
-                petUuid,
-                vetUuid,
-                date,
-                time,
-                VisitType.ONLINE,
-                "Online consultation"
-        );
-
-        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
-        when(vetRepository.findByUuidWithLock(vetUuid)).thenReturn(Optional.of(vet));
-        when(availabilityRepository.existsCoveringTime(
-                eq(vetUuid),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class)
-        )).thenReturn(true);
-
-        when(visitRepository.save(any(Visit.class)))
-                .thenAnswer(invocation -> {
-                    Visit saved = invocation.getArgument(0);
-                    saved.setUuid(visitUuid);
-                    return saved;
-                });
-
-        service.bookVisit(request);
-
-        ArgumentCaptor<Visit> captor = ArgumentCaptor.forClass(Visit.class);
-        verify(visitRepository).save(captor.capture());
-
-        Visit savedVisit = captor.getValue();
-
-        assertNull(savedVisit.getRoom());
-        assertEquals(VisitType.ONLINE, savedVisit.getVisitType());
-
-        verify(roomRepository, never())
-                .findActiveRoomsByTypeNames(anyList());
-
-        verify(visitNotificationService)
-                .notifyBookVisitParticipants(savedVisit, pet, vet);
-    }
-
-    @Test
-    void shouldBookOwnersPlaceVisitWithoutRoom() {
-        LocalDate date = LocalDate.now().plusDays(1);
-        LocalTime time = LocalTime.of(10, 0);
-
-        CreateVisitRequestDto request = new CreateVisitRequestDto(
-                petUuid,
-                vetUuid,
-                date,
-                time,
-                VisitType.OFFSITE,
-                "Home visit"
-        );
-
-        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
-        when(vetRepository.findByUuidWithLock(vetUuid)).thenReturn(Optional.of(vet));
-        when(availabilityRepository.existsCoveringTime(
-                eq(vetUuid),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class)
-        )).thenReturn(true);
-
-        when(visitRepository.save(any(Visit.class)))
-                .thenAnswer(invocation -> {
-                    Visit saved = invocation.getArgument(0);
-                    saved.setUuid(visitUuid);
-                    return saved;
-                });
-
-        service.bookVisit(request);
-
-        ArgumentCaptor<Visit> captor = ArgumentCaptor.forClass(Visit.class);
-        verify(visitRepository).save(captor.capture());
-
-        assertNull(captor.getValue().getRoom());
-        assertEquals(VisitType.OFFSITE, captor.getValue().getVisitType());
-
-        verify(roomRepository, never())
-                .findActiveRoomsByTypeNames(anyList());
-    }
-
-    @Test
-    void shouldBookEmergencyVisitUsingEmergencyRoom() {
-        LocalDate date = LocalDate.now().plusDays(1);
-        LocalTime time = LocalTime.of(10, 0);
-
-        CreateVisitRequestDto request = new CreateVisitRequestDto(
-                petUuid,
-                vetUuid,
-                date,
-                time,
-                VisitType.ONSITE,
-                "Emergency"
-        );
-
-        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
-        when(vetRepository.findByUuidWithLock(vetUuid)).thenReturn(Optional.of(vet));
-
-        when(availabilityRepository.existsCoveringTime(
-                eq(vetUuid),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class)
-        )).thenReturn(true);
-
-        when(roomRepository.findActiveRoomsByTypeNames(
-                List.of("surgery", "emergency", "isolation")
-        )).thenReturn(List.of(room));
-
-        when(visitRepository.existsRoomReservation(
-                eq(room.getUuid()),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class),
-                isNull()
-        )).thenReturn(false);
-
-        when(visitRepository.save(any(Visit.class)))
-                .thenAnswer(invocation -> {
-                    Visit saved = invocation.getArgument(0);
-                    saved.setUuid(visitUuid);
-                    return saved;
-                });
-
-        service.bookVisit(request);
-
-        verify(roomRepository)
-                .findActiveRoomsByTypeNames(
-                        List.of("surgery", "emergency", "isolation")
-                );
-
-        ArgumentCaptor<Visit> captor = ArgumentCaptor.forClass(Visit.class);
-        verify(visitRepository).save(captor.capture());
-
-        assertEquals(room, captor.getValue().getRoom());
-        assertEquals(VisitType.ONSITE, captor.getValue().getVisitType());
-    }
-
-    @Test
-    void shouldRejectBookingWhenPetDoesNotExist() {
-        LocalDate date = LocalDate.now().plusDays(1);
-
-        CreateVisitRequestDto request = new CreateVisitRequestDto(
-                petUuid,
-                vetUuid,
-                date,
-                LocalTime.of(10, 0),
-                VisitType.ONLINE,
-                null
-        );
-
-        when(petService.getEntityByUuid(petUuid))
-                .thenThrow(new NotFoundException("pet.not.found"));
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.bookVisit(request)
-        );
-
-        verify(vetRepository, never()).findByUuidWithLock(any());
-        verify(visitRepository, never()).save(any());
-    }
-
-    @Test
-    void shouldRejectBookingWhenVetDoesNotExist() {
-        LocalDate date = LocalDate.now().plusDays(1);
-
-        CreateVisitRequestDto request = new CreateVisitRequestDto(
-                petUuid,
-                vetUuid,
-                date,
-                LocalTime.of(10, 0),
-                VisitType.ONLINE,
-                null
-        );
-
-        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
-        when(vetRepository.findByUuidWithLock(vetUuid))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.bookVisit(request)
-        );
-
-        verify(availabilityRepository, never())
-                .existsCoveringTime(any(), any(), any());
-
-        verify(visitRepository, never()).save(any());
-    }
-
-    @Test
-    void shouldRejectBookingWhenVetIsNotAvailable() {
-        LocalDate date = LocalDate.now().plusDays(1);
-        LocalTime time = LocalTime.of(10, 0);
-
-        CreateVisitRequestDto request = new CreateVisitRequestDto(
-                petUuid,
-                vetUuid,
-                date,
-                time,
-                VisitType.ONLINE,
-                null
-        );
-
-        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
-        when(vetRepository.findByUuidWithLock(vetUuid)).thenReturn(Optional.of(vet));
-
-        when(availabilityRepository.existsCoveringTime(
-                eq(vetUuid),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class)
-        )).thenReturn(false);
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.bookVisit(request)
-        );
-
-        verify(visitRepository, never()).save(any());
-        verify(visitNotificationService, never())
-                .notifyBookVisitParticipants(any(), any(), any());
-    }
-
-    @Test
-    void shouldRejectBookingWhenRoomIsNotAvailable() {
-        LocalDate date = LocalDate.now().plusDays(1);
-        LocalTime time = LocalTime.of(10, 0);
-
-        CreateVisitRequestDto request = new CreateVisitRequestDto(
-                petUuid,
-                vetUuid,
-                date,
-                time,
-                VisitType.ONSITE,
-                null
-        );
-
-        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
-        when(vetRepository.findByUuidWithLock(vetUuid)).thenReturn(Optional.of(vet));
-
-        when(availabilityRepository.existsCoveringTime(
-                eq(vetUuid),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class)
-        )).thenReturn(true);
-
-        when(roomRepository.findActiveRoomsByTypeNames(
-                List.of("examination", "individual")
-        )).thenReturn(List.of(room));
-
-        when(visitRepository.existsRoomReservation(
-                eq(room.getUuid()),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class),
-                isNull()
-        )).thenReturn(true);
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.bookVisit(request)
-        );
-
-        verify(visitRepository, never()).save(any());
-    }
-
-    // -------------------------------------------------------------------------
-    // cancelVisit
-    // -------------------------------------------------------------------------
-
-    @Test
-    void shouldCancelScheduledVisitAndNotifyParticipants() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(1).plusMinutes(10),
-                VisitType.ONLINE,
-                "test"
-        );
-        visit.setUuid(visitUuid);
-
-        when(visitRepository.findByUuid(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        service.cancelVisit(visitUuid, "Customer request");
-
-        assertEquals(VisitStatus.CANCELLED, visit.getStatus());
-
-        verify(visitNotificationService)
-                .notifyCancelVisitParticipants(
-                        visit,
-                        pet,
-                        vet,
-                        "Customer request"
-                );
-    }
-
-    @Test
-    void shouldDoNothingWhenVisitIsAlreadyCancelled() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(1).plusMinutes(10),
-                VisitType.ONLINE,
-                null
-        );
-
-        visit.setStatus(VisitStatus.CANCELLED);
-
-        when(visitRepository.findByUuid(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        service.cancelVisit(visitUuid, "Already cancelled");
-
-        verify(visitNotificationService, never())
-                .notifyCancelVisitParticipants(any(), any(), any(), anyString());
-    }
-
-    @Test
-    void shouldRejectCancellingCompletedVisit() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().minusMinutes(10),
-                LocalDateTime.now().plusMinutes(10),
-                VisitType.ONLINE,
-                null
-        );
-
-        visit.setStatus(VisitStatus.COMPLETED);
-
-        when(visitRepository.findByUuid(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.cancelVisit(visitUuid, "Too late")
-        );
-
-        verify(visitNotificationService, never())
-                .notifyCancelVisitParticipants(any(), any(), any(), anyString());
-    }
-
-    @Test
-    void shouldRejectCancellingUnknownVisit() {
-        when(visitRepository.findByUuid(visitUuid))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.cancelVisit(visitUuid, "reason")
-        );
-    }
-
-    // -------------------------------------------------------------------------
-    // completeVisit
-    // -------------------------------------------------------------------------
-
-    @Test
-    void shouldCompleteStartedVisit() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().minusMinutes(5),
-                LocalDateTime.now().plusMinutes(5),
-                VisitType.ONLINE,
-                null
-        );
-
-        visit.setUuid(visitUuid);
-
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        VisitResponseDto response = mock(VisitResponseDto.class);
-
-        when(visitMapper.toResponse(visit)).thenReturn(response);
-
-        service.completeVisit(visitUuid, null);
-
-        assertEquals(VisitStatus.COMPLETED, visit.getStatus());
-
-        verify(visitRepository).findByUuidForUpdate(visitUuid);
-        verify(visitMapper).toResponse(visit);
-    }
-
-    @Test
-    void shouldRejectCompletingCancelledVisit() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().minusMinutes(5),
-                LocalDateTime.now().plusMinutes(5),
-                VisitType.ONLINE,
-                null
-        );
-
-        visit.setStatus(VisitStatus.CANCELLED);
-
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        assertThrows(
-                ValidationException.class,
-                () -> service.completeVisit(visitUuid, null)
-        );
-    }
-
-    @Test
-    void shouldRejectCompletingAlreadyCompletedVisit() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().minusMinutes(5),
-                LocalDateTime.now().plusMinutes(5),
-                VisitType.ONLINE,
-                null
-        );
-
-        visit.setStatus(VisitStatus.COMPLETED);
-
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        assertThrows(
-                ValidationException.class,
-                () -> service.completeVisit(visitUuid, null)
-        );
-    }
-
-    @Test
-    void shouldRejectCompletingVisitThatHasNotStarted() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().plusMinutes(10),
-                LocalDateTime.now().plusMinutes(20),
-                VisitType.ONLINE,
-                null
-        );
-
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        assertThrows(
-                ValidationException.class,
-                () -> service.completeVisit(visitUuid, null)
-        );
-    }
-
-    @Test
-    void shouldRejectCompletingVisitThatAlreadyFinished() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().minusMinutes(20),
-                LocalDateTime.now().minusMinutes(10),
-                VisitType.ONLINE,
-                null
-        );
-
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        assertThrows(
-                ValidationException.class,
-                () -> service.completeVisit(visitUuid, null)
-        );
-    }
-
-    // -------------------------------------------------------------------------
-    // rescheduleVisit
-    // -------------------------------------------------------------------------
-
-    @Test
-    void shouldRescheduleVisitSuccessfully() {
-        LocalDateTime oldStart = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
-        LocalDateTime oldEnd = oldStart.plusMinutes(10);
-
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                oldStart,
-                oldEnd,
-                VisitType.ONLINE,
-                "old description"
-        );
-
-        visit.setUuid(visitUuid);
-
-        LocalDate newDate = LocalDate.now().plusDays(2);
-        LocalTime newTime = LocalTime.of(14, 0);
-
-        RescheduleVisitRequestDto request =
-                new RescheduleVisitRequestDto(
-                        newDate,
-                        newTime,
-                        VisitType.ONLINE,
-                        "new description",
-                        "customer request"
-                );
-
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        when(vetRepository.findByUuidWithLock(vetUuid))
+        room.setName("Examination room");
+
+        lenient().when(durationTemplateService.findByName("STANDARD"))
+                .thenReturn(new DurationTemplateResponseDto(
+                        UUID.randomUUID(), "STANDARD", 10, "Standard visit"));
+        lenient().when(vetAvailabilityService.findAvailableByUuidAndTimeRange(any(), any(), any()))
                 .thenReturn(Optional.of(vet));
+        lenient().when(clinicProperties.closeDays()).thenReturn(java.util.Set.of());
+        lenient().when(clinicProperties.workingHours())
+                .thenReturn(new ClinicProperties.WorkingHours(LocalTime.of(8, 0), LocalTime.of(17, 0)));
+    }
 
-        when(availabilityRepository.existsCoveringTime(
-                eq(vetUuid),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class)
-        )).thenReturn(true);
+    /**
+     * Verifies that booking an onsite visit resolves the pet, veterinarian, and room,
+     * creates a scheduled visit with the configured duration, and notifies participants.
+     */
+    @Test
+    void bookVisit_shouldSaveVisitAndNotifyParticipants() {
+        LocalDate visitDate = LocalDate.now().plusDays(1);
+        LocalTime visitTime = LocalTime.of(10, 0);
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
+                petUuid, vetUuid, visitDate, visitTime, VisitType.ONSITE, "General examination");
 
-        when(visitMapper.toResponse(visit))
-                .thenReturn(mock(VisitResponseDto.class));
+        when(vetService.getVetWithUuidLock(vetUuid)).thenReturn(vet);
+        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
+        when(roomService.getAvailableRoomByVisitTypeAndVisitCategory(
+                VisitType.ONSITE, VisitCategory.ROUTINE)).thenReturn(room);
+        when(visitRepository.save(any(Visit.class))).thenAnswer(invocation -> {
+            Visit visit = invocation.getArgument(0);
+            visit.setUuid(visitUuid);
+            return visit;
+        });
+
+        service.bookVisit(request);
+
+        ArgumentCaptor<Visit> visitCaptor = ArgumentCaptor.forClass(Visit.class);
+        verify(visitRepository).save(visitCaptor.capture());
+
+        Visit savedVisit = visitCaptor.getValue();
+        assertEquals(pet, savedVisit.getPet());
+        assertEquals(vet, savedVisit.getVet());
+        assertEquals(room, savedVisit.getRoom());
+        assertEquals(VisitStatus.SCHEDULED, savedVisit.getStatus());
+        assertEquals(LocalDateTime.of(visitDate, visitTime), savedVisit.getStartTime());
+        assertEquals(LocalDateTime.of(visitDate, visitTime.plusMinutes(10)), savedVisit.getEndTime());
+        verify(visitNotificationService).notifyBookVisitParticipants(savedVisit, pet, vet);
+    }
+
+    /**
+     * Verifies that rescheduling changes the visit time and description, reuses the
+     * availability and conflict checks, saves the updated visit, and sends a notification.
+     */
+    @Test
+    void rescheduleVisit_shouldUpdateSlotAndNotifyParticipants() {
+        LocalDateTime oldStart = LocalDateTime.now().minusHours(1);
+        Visit visit = new Visit().schedule(
+                vet, pet, room, oldStart, oldStart.plusMinutes(10), VisitType.ONSITE, "Original visit");
+        visit.setUuid(visitUuid);
+
+        LocalDate newDate = LocalDate.now().plusDays(1);
+        LocalTime newTime = LocalTime.of(11, 0);
+        RescheduleVisitRequestDto request = new RescheduleVisitRequestDto(
+                newDate, newTime, VisitType.ONSITE, "Updated visit", "Owner requested another time");
+
+        when(visitRepository.findByUuidForUpdate(visitUuid)).thenReturn(Optional.of(visit));
+        when(vetService.getVetWithUuidLock(vetUuid)).thenReturn(vet);
+        when(roomService.getAvailableRoomByVisitTypeAndVisitCategory(
+                VisitType.ONSITE, VisitCategory.ROUTINE)).thenReturn(room);
 
         service.rescheduleVisit(visitUuid, request);
 
-        assertEquals(
-                LocalDateTime.of(newDate, newTime),
-                visit.getStartTime()
-        );
-
-        assertEquals(
-                "new description",
-                visit.getDescription()
-        );
-
-        verify(visitRepository).findByUuidForUpdate(visitUuid);
-
-        verify(vetRepository).findByUuidWithLock(vetUuid);
-
-        verify(visitNotificationService)
-                .notifyRescheduleVisitParticipants(
-                        eq(oldStart),
-                        eq(visit),
-                        eq(pet),
-                        eq(vet),
-                        eq(LocalDateTime.of(newDate, newTime))
-                );
+        assertEquals(LocalDateTime.of(newDate, newTime), visit.getStartTime());
+        assertEquals(LocalDateTime.of(newDate, newTime.plusMinutes(10)), visit.getEndTime());
+        assertEquals("Updated visit", visit.getDescription());
+        verify(visitRepository).save(visit);
+        verify(visitNotificationService).notifyRescheduleVisitParticipants(
+                oldStart, visit, pet, vet, LocalDateTime.of(newDate, newTime));
     }
 
+    /**
+     * Verifies that cancelling an active visit changes its status to CANCELLED and
+     * notifies the pet owner and veterinarian with the cancellation reason.
+     */
     @Test
-    void shouldRejectReschedulingUnknownVisit() {
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.empty());
-
-        RescheduleVisitRequestDto request =
-                new RescheduleVisitRequestDto(
-                        LocalDate.now().plusDays(2),
-                        LocalTime.of(10, 0),
-                        VisitType.ONLINE,
-                        "new",
-                        "reason"
-                );
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.rescheduleVisit(visitUuid, request)
-        );
-    }
-
-    @Test
-    void shouldRejectReschedulingCancelledVisit() {
+    void cancelVisit_shouldCancelVisitAndNotifyParticipants() {
         Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(1).plusMinutes(10),
-                VisitType.ONLINE,
-                null
-        );
-
-        visit.setStatus(VisitStatus.CANCELLED);
-
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        RescheduleVisitRequestDto request =
-                new RescheduleVisitRequestDto(
-                        LocalDate.now().plusDays(2),
-                        LocalTime.of(10, 0),
-                        VisitType.ONLINE,
-                        null,
-                        null
-                );
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.rescheduleVisit(visitUuid, request)
-        );
-
-        verify(vetRepository, never()).findByUuidWithLock(any());
-    }
-
-    @Test
-    void shouldRejectReschedulingCompletedVisit() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(1).plusMinutes(10),
-                VisitType.ONLINE,
-                null
-        );
-
-        visit.setStatus(VisitStatus.COMPLETED);
-
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        RescheduleVisitRequestDto request =
-                new RescheduleVisitRequestDto(
-                        LocalDate.now().plusDays(2),
-                        LocalTime.of(10, 0),
-                        VisitType.ONLINE,
-                        null,
-                        null
-                );
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.rescheduleVisit(visitUuid, request)
-        );
-    }
-
-    @Test
-    void shouldRejectReschedulingToPast() {
-        Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(1).plusMinutes(10),
-                VisitType.ONLINE,
-                null
-        );
-
+                vet, pet, room,
+                LocalDateTime.now().minusMinutes(20),
+                LocalDateTime.now().plusMinutes(20),
+                VisitType.ONSITE,
+                "Visit");
         visit.setUuid(visitUuid);
 
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
+        when(visitRepository.findByUuid(visitUuid)).thenReturn(Optional.of(visit));
 
-        when(vetRepository.findByUuidWithLock(vetUuid))
-                .thenReturn(Optional.of(vet));
+        service.cancelVisit(visitUuid, "Owner cancelled");
 
-        RescheduleVisitRequestDto request =
-                new RescheduleVisitRequestDto(
-                        LocalDate.now().minusDays(1),
-                        LocalTime.of(10, 0),
-                        VisitType.ONLINE,
-                        null,
-                        null
-                );
-
-        assertThrows(
-                ValidationException.class,
-                () -> service.rescheduleVisit(visitUuid, request)
-        );
-
-        verify(availabilityRepository, never())
-                .existsCoveringTime(any(), any(), any());
+        assertEquals(VisitStatus.CANCELLED, visit.getStatus());
+        verify(visitNotificationService).notifyCancelVisitParticipants(
+                visit, pet, vet, "Owner cancelled");
     }
 
+    /**
+     * Verifies that completing an in-progress visit changes its status to COMPLETED
+     * and delegates creation of the associated medical record to the medical service.
+     */
     @Test
-    void shouldRejectReschedulingWhenVetIsUnavailable() {
+    void completeVisit_shouldCompleteVisitAndCreateMedicalRecord() {
         Visit visit = new Visit().schedule(
-                vet,
-                pet,
-                null,
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(1).plusMinutes(10),
-                VisitType.ONLINE,
-                null
-        );
-
+                vet, pet, room,
+                LocalDateTime.now().minusMinutes(10),
+                LocalDateTime.now().plusMinutes(10),
+                VisitType.ONSITE,
+                "Visit");
         visit.setUuid(visitUuid);
 
-        when(visitRepository.findByUuidForUpdate(visitUuid))
-                .thenReturn(Optional.of(visit));
+        CompleteVisitRequestDto request = new CompleteVisitRequestDto(
+                "Ear infection", "Inflammation observed", null,
+                "Medication for seven days", "Keep the ear clean", true,
+                LocalDate.now().plusDays(14), null, null);
 
-        when(vetRepository.findByUuidWithLock(vetUuid))
-                .thenReturn(Optional.of(vet));
+        when(visitRepository.findByUuidForUpdate(visitUuid)).thenReturn(Optional.of(visit));
 
-        when(availabilityRepository.existsCoveringTime(
-                eq(vetUuid),
-                any(LocalDateTime.class),
-                any(LocalDateTime.class)
-        )).thenReturn(false);
+        service.completeVisit(visitUuid, request);
 
-        RescheduleVisitRequestDto request =
-                new RescheduleVisitRequestDto(
-                        LocalDate.now().plusDays(2),
-                        LocalTime.of(10, 0),
-                        VisitType.ONLINE,
-                        null,
-                        null
-                );
-
-        assertThrows(
-                NotFoundException.class,
-                () -> service.rescheduleVisit(visitUuid, request)
-        );
-    }
-
-    // -------------------------------------------------------------------------
-    // simple query methods
-    // -------------------------------------------------------------------------
-
-    @Test
-    void shouldReturnVisitByUuid() {
-        Visit visit = mock(Visit.class);
-        VisitResponseDto response = mock(VisitResponseDto.class);
-
-        when(visitRepository.findByUuid(visitUuid))
-                .thenReturn(Optional.of(visit));
-
-        when(visitMapper.toResponse(visit))
-                .thenReturn(response);
-
-        assertSame(response, service.findByUuid(visitUuid));
-    }
-
-    @Test
-    void shouldReturnAllVisits() {
-        Visit first = mock(Visit.class);
-        Visit second = mock(Visit.class);
-
-        VisitResponseDto firstResponse = mock(VisitResponseDto.class);
-        VisitResponseDto secondResponse = mock(VisitResponseDto.class);
-
-        when(visitRepository.findAll())
-                .thenReturn(List.of(first, second));
-
-        when(visitMapper.toResponse(first))
-                .thenReturn(firstResponse);
-
-        when(visitMapper.toResponse(second))
-                .thenReturn(secondResponse);
-
-//        List<VisitResponseDto> result = service.findAll(requestDto);
-//
-//        assertEquals(
-//                List.of(firstResponse, secondResponse),
-//                result
-//        );
+        assertEquals(VisitStatus.COMPLETED, visit.getStatus());
+        ArgumentCaptor<MedicalRecord> recordCaptor = ArgumentCaptor.forClass(MedicalRecord.class);
+        verify(medicalRecordService).create(recordCaptor.capture(), eq(request), eq(visit));
+        assertNotNull(recordCaptor.getValue());
     }
 }

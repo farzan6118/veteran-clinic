@@ -32,7 +32,7 @@ Important current state observed on September 21, 2026:
 - The working tree was clean before this context file was added.
 - The project compiles far enough to start the Spring test context.
 - `mvnw test` currently fails: 26 tests ran, with 9 failures and 6 errors.
-- Most failing tests are stale relative to the current `VisitServiceQueryImpl` dependency set and fail with `NullPointerException` because mocks for newer dependencies are missing.
+- The previously stale visit-service test has been replaced with a focused four-test suite for `VisitServiceCommandImpl`.
 - Security configuration currently permits all requests and therefore bypasses real endpoint protection.
 - A Keycloak client secret is currently stored directly in `application-home.yaml` and should be externalized.
 - Database schema management currently uses Hibernate `ddl-auto: update`; Flyway configuration is commented out.
@@ -138,7 +138,7 @@ Common enums include:
 
 ## 6. Visit scheduling behavior
 
-`VisitServiceQueryImpl` is currently the most important business service.
+`VisitServiceCommandImpl` contains visit mutations and is currently the most important business service. `VisitServiceQueryImpl` contains visit reads and search operations.
 
 When booking a visit, the service generally:
 
@@ -171,7 +171,7 @@ The medical feature currently contains:
 - `MedicalRecordMapper` for both request-to-entity and entity-to-response mapping
 - `MedicalRecordResponseDto` for the future read API
 
-The visit completion workflow accepts medical-record fields through `CompleteVisitRequestDto`. `VisitServiceImpl.completeVisit(...)` completes the visit and delegates medical-record creation to `MedicalRecordService` in the same outer transaction. The endpoint is intended to be used by the attending vet or an operator entering the vet's clinical result. Authorization rules for those roles are not yet enforced because the current security configuration permits all requests.
+The visit completion workflow accepts medical-record fields through `CompleteVisitRequestDto`. `VisitServiceCommandImpl.completeVisit(...)` completes the visit and delegates medical-record creation to `MedicalRecordService` in the same outer transaction. The endpoint is intended to be used by the attending vet or an operator entering the vet's clinical result. Authorization rules for those roles are not yet enforced because the current security configuration permits all requests.
 
 The future API should expose a pet's medical-record history to authorized operators and veterinarians. That API has not been added yet.
 
@@ -264,7 +264,7 @@ The test suite covers useful scenarios such as:
 - Completion
 - Pagination
 
-Current test problems indicate test drift rather than necessarily a fundamental business-logic failure. The test class does not currently mock all dependencies required by the modern `VisitServiceQueryImpl`, especially `DurationTemplateService`, and at least one completion test expects mapper behavior that the implementation no longer performs.
+The focused test suite currently covers one meaningful success path for each command workflow: booking, rescheduling, cancellation, and completion with medical-record creation. It uses `VisitServiceCommandImpl` and mocks its current dependencies.
 
 When changing visit logic, update the focused unit tests first and add integration tests for database locking and overlapping reservations.
 
@@ -272,13 +272,13 @@ Medical-record implementation notes:
 
 - `MedicalRecordMapper.toEntity(...)` currently receives `CompleteVisitRequestDto`, which keeps the completion payload tied to the visit feature. This is acceptable for the current workflow, but a dedicated medical-record creation request DTO may be cleaner when the medical API expands.
 - `MedicalRecordServiceImpl` is class-level `@Transactional(readOnly = true)` and its `create(...)` method currently has no method-level write transaction override. This should be corrected before relying on the service independently.
-- `VisitServiceQueryImpl` currently has a `MedicalRecordMapper` dependency even though record mapping is delegated to `MedicalRecordService`; the unused dependency should be removed unless the completion method is changed to return a mapped record response.
+- `VisitServiceCommandImpl` delegates record creation to `MedicalRecordService`; response mapping is prepared for the future medical-record read API.
 
 ## 11. Highest-priority technical improvements
 
 Recommended order:
 
-1. Repair `VisitServiceImplTest` so the test suite is green and meaningful.
+1. Keep `VisitServiceCommandImplTest` focused and green as visit behavior evolves.
 2. Restore authentication and define explicit role/permission rules.
 3. Remove committed secrets from application configuration.
 4. Add Flyway or Liquibase migrations and stop relying on `ddl-auto: update` for deployed environments.
