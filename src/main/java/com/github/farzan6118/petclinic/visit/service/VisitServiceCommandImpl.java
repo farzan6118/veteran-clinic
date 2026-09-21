@@ -1,15 +1,14 @@
 package com.github.farzan6118.petclinic.visit.service;
 
-import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
-import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
-import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.config.ClinicProperties;
 import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
+import com.github.farzan6118.petclinic.medical.model.MedicalRecord;
+import com.github.farzan6118.petclinic.medical.service.MedicalRecordService;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.pet.service.PetService;
 import com.github.farzan6118.petclinic.room.model.Room;
@@ -22,14 +21,10 @@ import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.VisitAdvancedSearch;
 import com.github.farzan6118.petclinic.visit.dto.response.DurationTemplateResponseDto;
-import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
-import com.github.farzan6118.petclinic.visit.mapper.VisitMapper;
 import com.github.farzan6118.petclinic.visit.model.Visit;
 import com.github.farzan6118.petclinic.visit.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,18 +36,17 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class VisitServiceImpl implements VisitService {
+public class VisitServiceCommandImpl implements VisitServiceCommand {
 
     private final ClinicProperties clinicProperties;
     private final VisitRepository visitRepository;
     private final RoomService roomService;
-    private final VisitMapper visitMapper;
     private final PetService petService;
     private final VetService vetService;
     private final VetAvailabilityService vetAvailabilityService;
     private final DurationTemplateService durationTemplateService;
     private final VisitNotificationService visitNotificationService;
-    private final PageMapper pageMapper;
+    private final MedicalRecordService medicalRecordService;
 
     /**
      * Book an available appointment slot for a pet.
@@ -176,14 +170,6 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
-    public VisitResponseDto getByUuid(UUID uuid) {
-
-        Visit visit = getVisitByUuid(uuid);
-
-        return visitMapper.toResponse(visit);
-    }
-
-    @Override
     @Transactional
     public void cancelVisit(UUID uuid, String reason) {
 
@@ -202,18 +188,6 @@ public class VisitServiceImpl implements VisitService {
         visitNotificationService.notifyCancelVisitParticipants(visit, visit.getPet(), visit.getVet(), reason);
 
         log.info("Visit cancelled. visitUuid={}", visit.getUuid());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PageResponseDto<VisitResponseDto> advancedSearch(
-            VisitAdvancedSearch request) {
-        Pageable pageable = pageMapper.getPageable(
-                request.pageNumber(), request.pageSize(),
-                request.sortBy(), request.sortDirection());
-        dateTimeValidation(request);
-        Page<Visit> pagedVisit = visitRepository.advancedSearch(request, pageable);
-        return pageMapper.toPageResponse(pagedVisit, visitMapper::toResponse);
     }
 
     private void dateTimeValidation(VisitAdvancedSearch request) {
@@ -244,6 +218,12 @@ public class VisitServiceImpl implements VisitService {
         Visit visit = getVisitForUpdate(uuid);
         validateCompletion(visit);
         visit.complete(LocalDateTime.now());
+
+        if (request != null) {
+            MedicalRecord medicalRecord = new MedicalRecord();
+            medicalRecordService.create(medicalRecord, request, visit);
+        }
+
         log.info("Visit completed successfully. visitUuid={}", uuid);
     }
 
@@ -285,16 +265,6 @@ public class VisitServiceImpl implements VisitService {
         if (now.isAfter(endTime)) {
             throw new ValidationException("visit.already.finished", "Visit has already finished");
         }
-    }
-
-    /**
-     * Get all visits.
-     */
-    @Override
-    public PageResponseDto<VisitResponseDto> findAll(PageAndSortRequestDto requestDto) {
-        Pageable pageable = pageMapper.getPageable(requestDto);
-        Page<Visit> visitPage = visitRepository.findAll(pageable);
-        return pageMapper.toPageResponse(visitPage, visitMapper::toResponse);
     }
 
     /**

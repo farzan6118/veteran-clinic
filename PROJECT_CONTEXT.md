@@ -32,7 +32,7 @@ Important current state observed on September 21, 2026:
 - The working tree was clean before this context file was added.
 - The project compiles far enough to start the Spring test context.
 - `mvnw test` currently fails: 26 tests ran, with 9 failures and 6 errors.
-- Most failing tests are stale relative to the current `VisitServiceImpl` dependency set and fail with `NullPointerException` because mocks for newer dependencies are missing.
+- Most failing tests are stale relative to the current `VisitServiceQueryImpl` dependency set and fail with `NullPointerException` because mocks for newer dependencies are missing.
 - Security configuration currently permits all requests and therefore bypasses real endpoint protection.
 - A Keycloak client secret is currently stored directly in `application-home.yaml` and should be externalized.
 - Database schema management currently uses Hibernate `ddl-auto: update`; Flyway configuration is commented out.
@@ -123,6 +123,7 @@ Important entities include:
 - `Room`: physical resource used by onsite visits
 - `Visit`: appointment connecting a pet, veterinarian, time range, visit type, and optionally a room
 - `DurationTemplate`: reusable duration configuration, including the `STANDARD` duration used by visit booking
+- `MedicalRecord`: clinical record authored by a veterinarian for a pet and associated with a visit; currently connected to persistence and visit completion, but not yet exposed through a medical-record read API
 
 Common enums include:
 
@@ -137,7 +138,7 @@ Common enums include:
 
 ## 6. Visit scheduling behavior
 
-`VisitServiceImpl` is currently the most important business service.
+`VisitServiceQueryImpl` is currently the most important business service.
 
 When booking a visit, the service generally:
 
@@ -160,6 +161,19 @@ Rescheduling repeats the relevant availability and conflict checks while excludi
 Visit completion validates the current status and ensures the visit has started but has not already ended.
 
 Visit cancellation is idempotent for already-cancelled visits, but completed visits cannot be cancelled.
+
+Medical records are represented by `medical/model/MedicalRecord.java`. A record links a `Pet`, `Visit`, and `Vet`, and supports consultation, prescription, vaccination, surgery, follow-up, and other record types. It stores diagnosis, clinical notes, treatment plan, prescription text, follow-up information, vaccination details, and surgery details.
+
+The medical feature currently contains:
+
+- `MedicalRecordRepository` for persistence
+- `MedicalRecordService` and `MedicalRecordServiceImpl` for creation
+- `MedicalRecordMapper` for both request-to-entity and entity-to-response mapping
+- `MedicalRecordResponseDto` for the future read API
+
+The visit completion workflow accepts medical-record fields through `CompleteVisitRequestDto`. `VisitServiceImpl.completeVisit(...)` completes the visit and delegates medical-record creation to `MedicalRecordService` in the same outer transaction. The endpoint is intended to be used by the attending vet or an operator entering the vet's clinical result. Authorization rules for those roles are not yet enforced because the current security configuration permits all requests.
+
+The future API should expose a pet's medical-record history to authorized operators and veterinarians. That API has not been added yet.
 
 ## 7. API and application behavior
 
@@ -250,9 +264,15 @@ The test suite covers useful scenarios such as:
 - Completion
 - Pagination
 
-Current test problems indicate test drift rather than necessarily a fundamental business-logic failure. The test class does not currently mock all dependencies required by the modern `VisitServiceImpl`, especially `DurationTemplateService`, and at least one completion test expects mapper behavior that the implementation no longer performs.
+Current test problems indicate test drift rather than necessarily a fundamental business-logic failure. The test class does not currently mock all dependencies required by the modern `VisitServiceQueryImpl`, especially `DurationTemplateService`, and at least one completion test expects mapper behavior that the implementation no longer performs.
 
 When changing visit logic, update the focused unit tests first and add integration tests for database locking and overlapping reservations.
+
+Medical-record implementation notes:
+
+- `MedicalRecordMapper.toEntity(...)` currently receives `CompleteVisitRequestDto`, which keeps the completion payload tied to the visit feature. This is acceptable for the current workflow, but a dedicated medical-record creation request DTO may be cleaner when the medical API expands.
+- `MedicalRecordServiceImpl` is class-level `@Transactional(readOnly = true)` and its `create(...)` method currently has no method-level write transaction override. This should be corrected before relying on the service independently.
+- `VisitServiceQueryImpl` currently has a `MedicalRecordMapper` dependency even though record mapping is delegated to `MedicalRecordService`; the unused dependency should be removed unless the completion method is changed to return a mapped record response.
 
 ## 11. Highest-priority technical improvements
 

@@ -18,7 +18,7 @@ import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
 import com.github.farzan6118.petclinic.visit.mapper.VisitMapper;
 import com.github.farzan6118.petclinic.visit.model.Visit;
 import com.github.farzan6118.petclinic.visit.repository.VisitRepository;
-import com.github.farzan6118.petclinic.visit.service.VisitServiceImpl;
+import com.github.farzan6118.petclinic.visit.service.VisitServiceQueryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,7 +63,7 @@ class VisitServiceImplTest {
     private RoomRepository roomRepository;
 
     @InjectMocks
-    private VisitServiceImpl service;
+    private VisitServiceQueryImpl service;
 
     private UUID vetUuid;
     private UUID petUuid;
@@ -889,7 +889,7 @@ class VisitServiceImplTest {
         when(visitMapper.toResponse(visit))
                 .thenReturn(response);
 
-        assertSame(response, service.getByUuid(visitUuid));
+        assertSame(response, service.findByUuid(visitUuid));
     }
 
     @Test
