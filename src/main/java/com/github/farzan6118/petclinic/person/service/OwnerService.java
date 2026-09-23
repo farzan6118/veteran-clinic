@@ -4,20 +4,20 @@ import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.person.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.person.dto.request.UpdateOwnerRequestDto;
-import com.github.farzan6118.petclinic.person.dto.response.OwnerResponseDto;
+import com.github.farzan6118.petclinic.person.dto.request.UpdatePersonRequestDto;
+import com.github.farzan6118.petclinic.person.dto.response.PersonResponseDto;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 public interface OwnerService {
-    OwnerResponseDto getByUuid(UUID uuid);
+    PersonResponseDto getByUuid(UUID uuid);
 
-    PageResponseDto<OwnerResponseDto> findAll(PageAndSortRequestDto requestDto);
+    PageResponseDto<PersonResponseDto> findAll(PageAndSortRequestDto requestDto);
 
     void create(CreateOwnerRequestDto request);
 
-    void update(UUID uuid, UpdateOwnerRequestDto request);
+    void update(UUID uuid, UpdatePersonRequestDto request);
 
     @Transactional
     void inactivate(UUID uuid);

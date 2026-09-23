@@ -1,0 +1,18 @@
+package com.github.farzan6118.petclinic.person.dto.request;
+
+public record CreateAddressRequestDto(
+        String title,
+        String countryName,
+        String provinceName,
+        String cityName,
+        String buildingNumber,
+        Integer floor,
+        String unitNumber,
+        String address,
+        String postalCode,
+        Double latitude,
+        Double longitude,
+        String description,
+        boolean defaultAddress
+) {
+}

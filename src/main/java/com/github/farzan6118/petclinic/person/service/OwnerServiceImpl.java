@@ -9,9 +9,9 @@ import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.person.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.person.dto.request.UpdateOwnerRequestDto;
-import com.github.farzan6118.petclinic.person.dto.response.OwnerResponseDto;
-import com.github.farzan6118.petclinic.person.mapper.OwnerMapper;
+import com.github.farzan6118.petclinic.person.dto.request.UpdatePersonRequestDto;
+import com.github.farzan6118.petclinic.person.dto.response.PersonResponseDto;
+import com.github.farzan6118.petclinic.person.mapper.PersonMapper;
 import com.github.farzan6118.petclinic.person.repository.OwnerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,20 +30,20 @@ import java.util.UUID;
 public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerRepository ownerRepository;
-    private final OwnerMapper ownerMapper;
+    private final PersonMapper ownerMapper;
     private final PageMapper pageMapper;
 
     @Override
-    public OwnerResponseDto getByUuid(UUID uuid) {
+    public PersonResponseDto getByUuid(UUID uuid) {
         Owner owner = this.getEntityByUuid(uuid);
-        return ownerMapper.mapToDto(owner);
+        return ownerMapper.toDto(owner);
     }
 
     @Override
-    public PageResponseDto<OwnerResponseDto> findAll(PageAndSortRequestDto requestDto) {
+    public PageResponseDto<PersonResponseDto> findAll(PageAndSortRequestDto requestDto) {
         Pageable pageable = pageMapper.getPageable(requestDto);
         Page<Owner> ownerPage = ownerRepository.findAll(pageable);
-        return pageMapper.toPageResponse(ownerPage, ownerMapper::mapToDto);
+        return pageMapper.toPageResponse(ownerPage, ownerMapper::toDto);
     }
 
     @Transactional
@@ -70,7 +70,7 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Transactional
     @Override
-    public void update(UUID uuid, UpdateOwnerRequestDto request) {
+    public void update(UUID uuid, UpdatePersonRequestDto request) {
         validateBirthDate(request.birthDate());
         validateEmailUniqueness(request.email(), uuid);
         validateTelephoneUniqueness(request.mobileNumber(), uuid);

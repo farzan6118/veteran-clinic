@@ -1,17 +1,14 @@
 package com.github.farzan6118.petclinic.person.dto.response;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
-public record OwnerResponseDto(
+public record PersonResponseDto(
         UUID uuid,
+        String title,
         String firstName,
         String lastName,
-        String email,
-        String mobileNumber,
         String nationalId,
-        LocalDate birthDate,
-        String city,
-        String address
+        AddressResponseDto address,
+        ProfileResponseDto profile
 ) {
 }

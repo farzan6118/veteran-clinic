@@ -2,9 +2,9 @@ package com.github.farzan6118.petclinic.person.controller;
 
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
-import com.github.farzan6118.petclinic.person.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.person.dto.request.UpdateOwnerRequestDto;
-import com.github.farzan6118.petclinic.person.dto.response.OwnerResponseDto;
+import com.github.farzan6118.petclinic.person.dto.request.CreatePersonRequestDto;
+import com.github.farzan6118.petclinic.person.dto.request.UpdatePersonRequestDto;
+import com.github.farzan6118.petclinic.person.dto.response.PersonResponseDto;
 import com.github.farzan6118.petclinic.person.service.OwnerService;
 import com.github.farzan6118.petclinic.pet.dto.response.PetResponseDto;
 import com.github.farzan6118.petclinic.pet.service.PetService;
@@ -21,15 +21,14 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/owners")
+@RequestMapping("/api/persons")
 public class OwnerController {
-
 
     private final OwnerService ownerService;
     private final PetService petService;
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<OwnerResponseDto> getByUuid(@PathVariable UUID uuid) {
+    public ResponseEntity<PersonResponseDto> getByUuid(@PathVariable UUID uuid) {
         return ResponseEntity.ok(ownerService.getByUuid(uuid));
     }
 
@@ -39,13 +38,13 @@ public class OwnerController {
     }
 
     @GetMapping("/page")
-    public ResponseEntity<PageResponseDto<OwnerResponseDto>> findAll(
+    public ResponseEntity<PageResponseDto<PersonResponseDto>> findAll(
             @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
         return ResponseEntity.ok(ownerService.findAll(requestDto));
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody CreateOwnerRequestDto request) {
+    public ResponseEntity<Void> create(@Valid @RequestBody CreatePersonRequestDto request) {
         ownerService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -53,7 +52,7 @@ public class OwnerController {
     @PutMapping("/{uuid}")
     public ResponseEntity<Void> update(
             @PathVariable UUID uuid,
-            @Valid @RequestBody UpdateOwnerRequestDto request) {
+            @Valid @RequestBody UpdatePersonRequestDto request) {
         ownerService.update(uuid, request);
         return ResponseEntity.ok().build();
     }
