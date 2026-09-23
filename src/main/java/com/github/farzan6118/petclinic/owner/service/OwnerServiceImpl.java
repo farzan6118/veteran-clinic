@@ -59,11 +59,11 @@ public class OwnerServiceImpl implements OwnerService {
 
     private void validateUniqueContactInfo(String mobile, String email) {
 
-        if (ownerRepository.existsByEmail(email)) {
+        if (ownerRepository.existsByPerson_profile_Email(email)) {
             throw new ConflictException("email exists", "email " + email + " already exists");
         }
 
-        if (ownerRepository.existsByMobileNumber(mobile)) {
+        if (ownerRepository.existsByPerson_profile_MobileNumber(mobile)) {
             throw new ConflictException("mobile exists", "mobile " + mobile + " already exists");
         }
     }
@@ -73,7 +73,7 @@ public class OwnerServiceImpl implements OwnerService {
     public void update(UUID uuid, UpdateOwnerRequestDto request) {
         validateBirthDate(request.birthDate());
         validateEmailUniqueness(request.email(), uuid);
-        validateTelephoneUniqueness(request.mobileNumber(), uuid);
+        validateMobileNumberUniqueness(request.mobileNumber(), uuid);
         Owner owner = this.getEntityByUuid(uuid);
         ownerMapper.mapToOwner(request, owner);
         ownerRepository.save(owner);
@@ -81,13 +81,13 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     private void validateEmailUniqueness(String email, UUID uuid) {
-        if (ownerRepository.existsByEmailAndUuidNot(email, uuid)) {
+        if (ownerRepository.existsByPerson_profile_EmailAndUuidNot(email, uuid)) {
             throw new NotFoundException("owner with this email already exists");
         }
     }
 
-    private void validateTelephoneUniqueness(String telephone, UUID uuid) {
-        if (ownerRepository.existsByMobileNumberAndUuidNot(telephone, uuid)) {
+    private void validateMobileNumberUniqueness(String mobileNumber, UUID uuid) {
+        if (ownerRepository.existsByPerson_profile_MobileNumberAndUuidNot(mobileNumber, uuid)) {
             throw new NotFoundException("owner with this mobileNumber already exists");
         }
     }
@@ -108,7 +108,7 @@ public class OwnerServiceImpl implements OwnerService {
                     "owner is already inactive"
             );
         }
-        owner.setEntityStatus(EntityStatus.INACTIVE_NOT_DELETED);
+        owner.setEntityStatus(EntityStatus.INACTIVE);
         log.info("owner inactivated: {}", uuid);
     }
 
@@ -117,7 +117,7 @@ public class OwnerServiceImpl implements OwnerService {
     public void activate(UUID uuid) {
         Owner owner = ownerRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException("owner not found"));
-        if (owner.getEntityStatus() != EntityStatus.INACTIVE_NOT_DELETED) {
+        if (owner.getEntityStatus() != EntityStatus.INACTIVE) {
             throw new ValidationException(
                     "owner.cannot.be.activated",
                     "owner cannot be activated"
@@ -136,7 +136,7 @@ public class OwnerServiceImpl implements OwnerService {
                     "owner.is.deleted",
                     "owner is already deleted");
         }
-        owner.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        owner.setEntityStatus(EntityStatus.DELETED);
         log.info("owner has been deleted");
     }
 

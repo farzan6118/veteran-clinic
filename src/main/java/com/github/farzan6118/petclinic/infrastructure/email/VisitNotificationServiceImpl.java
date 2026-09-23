@@ -1,9 +1,9 @@
 package com.github.farzan6118.petclinic.infrastructure.email;
 
+import com.github.farzan6118.petclinic.appointment.model.Visit;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.vet.model.Vet;
-import com.github.farzan6118.petclinic.visit.model.Visit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;

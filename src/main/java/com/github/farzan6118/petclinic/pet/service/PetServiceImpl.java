@@ -7,7 +7,7 @@ import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.owner.model.Owner;
-import com.github.farzan6118.petclinic.owner.service.OwnerService;
+import com.github.farzan6118.petclinic.person.service.OwnerService;
 import com.github.farzan6118.petclinic.pet.dto.request.CreatePetRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.request.UpdatePetRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.response.PetResponseDto;
@@ -93,7 +93,7 @@ public class PetServiceImpl implements PetService {
         if (!pet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
             throw new ValidationException("pet is already inactive");
         }
-        pet.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        pet.setEntityStatus(EntityStatus.DELETED);
         log.info("pet is inactive");
     }
 

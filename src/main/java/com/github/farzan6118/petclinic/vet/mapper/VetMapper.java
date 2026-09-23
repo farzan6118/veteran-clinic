@@ -5,7 +5,6 @@ import com.github.farzan6118.petclinic.vet.dto.request.CreateVetRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
-import com.github.farzan6118.petclinic.vet.model.Profile;
 import com.github.farzan6118.petclinic.vet.model.Vet;
 import org.springframework.stereotype.Component;
 

@@ -1,8 +1,8 @@
 package com.github.farzan6118.petclinic.infrastructure.email;
 
+import com.github.farzan6118.petclinic.appointment.model.Visit;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.vet.model.Vet;
-import com.github.farzan6118.petclinic.visit.model.Visit;
 
 import java.time.LocalDateTime;
 

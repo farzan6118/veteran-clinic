@@ -6,7 +6,6 @@ import com.github.farzan6118.petclinic.owner.dto.request.CreateOwnerRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.request.UpdateOwnerRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.response.OwnerResponseDto;
 import com.github.farzan6118.petclinic.owner.model.Owner;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -19,10 +18,8 @@ public interface OwnerService {
 
     void update(UUID uuid, UpdateOwnerRequestDto request);
 
-    @Transactional
     void inactivate(UUID uuid);
 
-    @Transactional
     void activate(UUID uuid);
 
     void delete(UUID uuid);

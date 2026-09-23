@@ -109,7 +109,7 @@ public class VetServiceImpl implements VetService {
         if (!vet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
             throw new ValidationException("vet is already inactive");
         }
-        vet.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        vet.setEntityStatus(EntityStatus.DELETED);
         log.info("vet inactivated");
     }
 

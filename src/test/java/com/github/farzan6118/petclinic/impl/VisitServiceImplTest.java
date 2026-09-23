@@ -1,27 +1,27 @@
 package com.github.farzan6118.petclinic.impl;
 
+import com.github.farzan6118.petclinic.appointment.dto.request.CompleteVisitRequestDto;
+import com.github.farzan6118.petclinic.appointment.dto.request.CreateVisitRequestDto;
+import com.github.farzan6118.petclinic.appointment.dto.request.RescheduleVisitRequestDto;
+import com.github.farzan6118.petclinic.appointment.dto.response.DurationTemplateResponseDto;
+import com.github.farzan6118.petclinic.appointment.model.Visit;
+import com.github.farzan6118.petclinic.appointment.repository.VisitRepository;
+import com.github.farzan6118.petclinic.appointment.service.DurationTemplateService;
+import com.github.farzan6118.petclinic.appointment.service.VisitServiceCommandImpl;
+import com.github.farzan6118.petclinic.clinic.model.Room;
+import com.github.farzan6118.petclinic.clinic.service.RoomService;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
-import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
 import com.github.farzan6118.petclinic.config.ClinicProperties;
-import com.github.farzan6118.petclinic.medical.model.MedicalRecord;
-import com.github.farzan6118.petclinic.medical.service.MedicalRecordService;
+import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
+import com.github.farzan6118.petclinic.pet.model.MedicalRecord;
 import com.github.farzan6118.petclinic.pet.model.Pet;
+import com.github.farzan6118.petclinic.pet.service.MedicalRecordService;
 import com.github.farzan6118.petclinic.pet.service.PetService;
-import com.github.farzan6118.petclinic.room.model.Room;
-import com.github.farzan6118.petclinic.room.service.RoomService;
 import com.github.farzan6118.petclinic.vet.model.Vet;
 import com.github.farzan6118.petclinic.vet.service.VetAvailabilityService;
 import com.github.farzan6118.petclinic.vet.service.VetService;
-import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
-import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
-import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
-import com.github.farzan6118.petclinic.visit.dto.response.DurationTemplateResponseDto;
-import com.github.farzan6118.petclinic.visit.model.Visit;
-import com.github.farzan6118.petclinic.visit.repository.VisitRepository;
-import com.github.farzan6118.petclinic.visit.service.DurationTemplateService;
-import com.github.farzan6118.petclinic.visit.service.VisitServiceCommandImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,9 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VisitServiceImplTest {
