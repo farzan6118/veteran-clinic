@@ -5,11 +5,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@SQLRestriction("entity_status <> 'DELETED'")
 public class Room extends BaseEntity<Integer> {
 
     @Column(length = 200, nullable = false)
@@ -27,7 +29,7 @@ public class Room extends BaseEntity<Integer> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(nullable = false)
-    private Building building;
+    private Clinic clinic;
 
     @Column(nullable = false)
     private boolean active;

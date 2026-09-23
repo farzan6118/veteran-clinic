@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 @Setter
 @Audited
 @NoArgsConstructor
+@SQLRestriction("entity_status <> 'DELETED'")
 public class Visit extends BaseEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

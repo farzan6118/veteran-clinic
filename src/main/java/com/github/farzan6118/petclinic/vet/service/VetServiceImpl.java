@@ -3,12 +3,12 @@ package com.github.farzan6118.petclinic.vet.service;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.mapper.VetMapper;
 import com.github.farzan6118.petclinic.vet.model.Vet;
@@ -55,7 +55,7 @@ public class VetServiceImpl implements VetService {
     @Override
     public void create(VetCreateRequestDto request) {
 
-        validateUniqueContactInfo(request.mobileNumber(), request.email());
+        validateUniqueContactInfo(request.profile().mobileNumber(), request.profile().email());
         Vet vet = vetMapper.toEntity(request);
 
         vetRepository.save(vet);
@@ -63,11 +63,11 @@ public class VetServiceImpl implements VetService {
     }
 
     private void validateUniqueContactInfo(String mobileNumber, String email) {
-        if (vetRepository.existsByEmail(email)) {
-            throw new ValidationException("email exists", "vet email " + email + " exists");
+        if (vetRepository.existsByPerson_Profile_Email(email)) {
+            throw new ConflictException("email exists", "vet email " + email + " exists");
         }
-        if (vetRepository.existsByMobileNumber(mobileNumber)) {
-            throw new ValidationException("mobileNumber exists", "vet mobileNumber " + mobileNumber + " exists");
+        if (vetRepository.existsByPerson_Profile_MobileNumber(mobileNumber)) {
+            throw new ConflictException("mobileNumber exists", "vet mobileNumber " + mobileNumber + " exists");
         }
     }
 
@@ -75,21 +75,21 @@ public class VetServiceImpl implements VetService {
     @Override
     public void update(UUID uuid, VetUpdateRequestDto request) {
         Vet vet = getEntityByUuid(uuid);
-        validateEmailUniqueness(request.email(), uuid);
-        validateTelephoneUniqueness(request.mobileNumber(), uuid);
+        validateEmailUniqueness(request.profile().email(), uuid);
+        validateTelephoneUniqueness(request.profile().mobileNumber(), uuid);
         vetMapper.toEntity(request, vet);
         log.info("vet updated");
     }
 
     private void validateEmailUniqueness(String email, UUID vetUuid) {
-        if (vetRepository.existsByEmailAndUuidNot(email, vetUuid)) {
-            throw new ValidationException("Vet with this email already exists");
+        if (vetRepository.existsByPerson_Profile_EmailAndUuidNot(email, vetUuid)) {
+            throw new ConflictException("email exists", "vet email " + email + " already exists");
         }
     }
 
     private void validateTelephoneUniqueness(String mobileNumber, UUID vetUuid) {
-        if (vetRepository.existsByMobileNumberAndUuidNot(mobileNumber, vetUuid)) {
-            throw new ValidationException("Vet with this mobileNumber already exists");
+        if (vetRepository.existsByPerson_Profile_MobileNumberAndUuidNot(mobileNumber, vetUuid)) {
+            throw new ConflictException("mobileNumber exists", "vet mobileNumber " + mobileNumber + " already exists");
         }
     }
 
@@ -102,12 +102,6 @@ public class VetServiceImpl implements VetService {
         }
         vet.setEntityStatus(EntityStatus.DELETED);
         log.info("vet inactivated");
-    }
-
-    @Override
-    public VetProfileResponseDto getVetProfileByUuid(UUID uuid) {
-        Vet vet = getEntityByUuid(uuid);
-        return vetMapper.mapToVetProfileDto(vet);
     }
 
     @Override

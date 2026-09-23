@@ -1,15 +1,28 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Visit cancelled</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Visit cancelled</title></head>
 <body style="margin:0;padding:24px;background:#f4f7f8;color:#24323d;font-family:Arial,sans-serif;line-height:1.5;">
 <main style="max-width:620px;margin:auto;background:#ffffff;border:1px solid #d9e2e6;padding:28px;">
     <h2 style="margin-top:0;color:#a33b3b;">Your pet's visit was cancelled</h2>
     <p>Dear <strong th:text="${ownerName}">John Doe</strong>,</p>
     <p>The following visit for <strong th:text="${petName}">Jessy</strong> has been cancelled.</p>
     <table style="width:100%;border-collapse:collapse;margin:22px 0;">
-        <tr><th style="text-align:left;background:#f8eaea;padding:10px;">Veterinarian</th><td style="padding:10px;border-bottom:1px solid #d9e2e6;" th:text="${vetName}">Dr. Smith</td></tr>
-        <tr><th style="text-align:left;background:#f8eaea;padding:10px;">Scheduled time</th><td style="padding:10px;border-bottom:1px solid #d9e2e6;" th:text="${#temporals.format(visitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Scheduled time</td></tr>
-        <tr><th style="text-align:left;background:#f8eaea;padding:10px;">Reason</th><td style="padding:10px;" th:text="${reason}">Not provided</td></tr>
+        <tr>
+            <th style="text-align:left;background:#f8eaea;padding:10px;">Veterinarian</th>
+            <td style="padding:10px;border-bottom:1px solid #d9e2e6;" th:text="${vetName}">Dr. Smith</td>
+        </tr>
+        <tr>
+            <th style="text-align:left;background:#f8eaea;padding:10px;">Scheduled time</th>
+            <td style="padding:10px;border-bottom:1px solid #d9e2e6;"
+                th:text="${#temporals.format(visitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Scheduled time
+            </td>
+        </tr>
+        <tr>
+            <th style="text-align:left;background:#f8eaea;padding:10px;">Reason</th>
+            <td style="padding:10px;" th:text="${reason}">Not provided</td>
+        </tr>
     </table>
     <p>Please contact the clinic if you would like to arrange another appointment.</p>
     <p>Warm regards,<br>PetClinic Farzan6118</p>

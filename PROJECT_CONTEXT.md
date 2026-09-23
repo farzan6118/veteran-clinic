@@ -1,6 +1,6 @@
 # Veterinary Clinic — Project Context
 
-Last reviewed: September 21, 2026
+Last reviewed: September 23, 2026
 
 This file is the working context for future development sessions. Read it before making project-wide assumptions or starting a new task.
 
@@ -27,10 +27,10 @@ The project has a serious domain-oriented backend foundation and is more than a 
 
 It is still active development and should not yet be considered production-ready.
 
-Important current state observed on September 21, 2026:
+Important current state observed on September 23, 2026:
 
 - The working tree was clean before this context file was added.
-- The project compiles far enough to start the Spring test context.
+- The current working tree does not compile after the in-progress `Person`/`Address` refactor. A compile check on September 23, 2026 found stale flat-person access in `FillInitialRecords`, visit mapping, and visit notifications; those call sites still need migration.
 - `mvnw test` currently fails: 26 tests ran, with 9 failures and 6 errors.
 - The previously stale visit-service test has been replaced with a focused four-test suite for `VisitServiceCommandImpl`.
 - Security configuration currently permits all requests and therefore bypasses real endpoint protection.
@@ -101,6 +101,8 @@ src/main/resources/docker/mailpit-docker-compose.yml
 
 ## 5. Domain model
 
+Shared person data lives in `person/`. `Person` stores title, first name, last name, and national ID, and has required one-to-one associations to `Profile` and `Address`. `Profile` stores email, mobile number, birth date, and photo. `Address` stores structured location details and optional coordinates. `Owner` and `Vet` each refer to a `Person`; vet availability remains on `Vet`. Owner and vet create/update requests carry nested `person`, `profile`, and `address` objects, and responses expose the corresponding mapped DTOs. Contact lookups and uniqueness checks therefore follow the `person.profile` relationship.
+
 The central relationship is:
 
 ```text
@@ -113,11 +115,12 @@ Owner
 
 Important entities include:
 
-- `Owner`: person responsible for one or more pets
+- `Owner`: association to a shared `Person`, responsible for one or more pets
 - `Pet`: animal belonging to an owner and participating in visits
 - `Species`: pet species/type data
-- `Vet`: veterinarian identity and professional information
-- `Profile`: veterinarian profile information
+- `Vet`: association to a shared `Person` with veterinarian availability
+- `Profile`: shared contact details, birth date, and photo for a person
+- `Address`: structured address and optional geolocation associated with a person
 - `VetAvailability`: time periods during which a veterinarian can accept visits
 - `RoomType`: classification of clinic rooms
 - `Room`: physical resource used by onsite visits

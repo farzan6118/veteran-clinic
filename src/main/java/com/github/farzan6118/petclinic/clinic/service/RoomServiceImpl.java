@@ -32,7 +32,6 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
-    private final RoomTypeService roomTypeService;
     private final PageMapper pageMapper;
 
     @Override

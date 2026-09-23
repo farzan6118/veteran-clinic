@@ -3,9 +3,7 @@ package com.github.farzan6118.petclinic.vet.service;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.request.VetProfileUpdateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.model.Vet;
 
@@ -21,13 +19,9 @@ public interface VetService {
 
     void create(VetCreateRequestDto request);
 
-    void updateVetProfileByUuid(VetProfileUpdateRequestDto request, UUID vetUuid);
-
     void update(UUID uuid, VetUpdateRequestDto request);
 
     void delete(UUID uuid);
-
-    VetProfileResponseDto getVetProfileByUuid(UUID uuid);
 
     Vet getVetWithUuidLock(UUID vetUuid);
 }

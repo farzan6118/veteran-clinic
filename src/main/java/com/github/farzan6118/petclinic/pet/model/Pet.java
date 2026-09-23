@@ -7,12 +7,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 
 @Entity
 @Getter
 @Setter
+@SQLRestriction("entity_status <> 'DELETED'")
 public class Pet extends BaseEntity<Long> {
 
     @Size(max = 128)

@@ -21,17 +21,13 @@ public interface VetRepository extends JpaRepository<Vet, Long> {
     @Query("select v from Vet v where v.uuid = :uuid")
     Optional<Vet> findByUuidWithLock(@Param("uuid") UUID uuid);
 
-    Optional<Vet> findByEmail(String email);
+    boolean existsByPerson_Profile_EmailAndUuidNot(String email, UUID uuid);
 
-    Optional<Vet> findByMobileNumber(String mobile);
+    boolean existsByPerson_Profile_MobileNumberAndUuidNot(String mobile, UUID uuid);
 
-    boolean existsByEmailAndUuidNot(String email, UUID uuid);
+    boolean existsByPerson_Profile_MobileNumber(String mobile);
 
-    boolean existsByMobileNumberAndUuidNot(String mobile, UUID uuid);
-
-    boolean existsByMobileNumber(String mobile);
-
-    boolean existsByEmail(String email);
+    boolean existsByPerson_Profile_Email(String email);
 
     boolean existsByUuid(UUID vetUuid);
 

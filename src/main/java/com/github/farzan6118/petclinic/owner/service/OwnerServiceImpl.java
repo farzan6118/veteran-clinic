@@ -13,10 +13,6 @@ import com.github.farzan6118.petclinic.owner.dto.response.OwnerResponseDto;
 import com.github.farzan6118.petclinic.owner.mapper.OwnerMapper;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.owner.repository.OwnerRepository;
-import com.github.farzan6118.petclinic.person.mapper.AddressMapper;
-import com.github.farzan6118.petclinic.person.mapper.PersonMapper;
-import com.github.farzan6118.petclinic.person.mapper.ProfileMapper;
-import com.github.farzan6118.petclinic.person.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Slf4j
@@ -33,11 +28,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class OwnerServiceImpl implements OwnerService {
 
-    private final PersonRepository personRepository;
     private final OwnerRepository ownerRepository;
-    private final ProfileMapper profileMapper;
-    private final AddressMapper addressMapper;
-    private final PersonMapper personMapper;
     private final OwnerMapper ownerMapper;
     private final PageMapper pageMapper;
 
@@ -57,6 +48,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     @Transactional
     public void create(OwnerCreateRequestDto request) {
+        validateUniqueContactInfo(request.profile().mobileNumber(), request.profile().email());
         Owner owner = ownerMapper.toEntity(request);
         ownerRepository.save(owner);
     }
@@ -64,8 +56,9 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     @Transactional
     public void update(UUID uuid, OwnerUpdateRequestDto request) {
-        Owner owner = ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ValidationException("Owner not found: " + uuid));
+        Owner owner = getEntityByUuid(uuid);
+        validateEmailUniqueness(request.profile().email(), uuid);
+        validateMobileNumberUniqueness(request.profile().mobileNumber(), uuid);
         ownerMapper.toEntity(request, owner);
     }
 
@@ -82,19 +75,13 @@ public class OwnerServiceImpl implements OwnerService {
 
     private void validateEmailUniqueness(String email, UUID uuid) {
         if (ownerRepository.existsByPerson_profile_EmailAndUuidNot(email, uuid)) {
-            throw new NotFoundException("owner with this email already exists");
+            throw new ConflictException("email exists", "owner email " + email + " already exists");
         }
     }
 
     private void validateMobileNumberUniqueness(String mobileNumber, UUID uuid) {
         if (ownerRepository.existsByPerson_profile_MobileNumberAndUuidNot(mobileNumber, uuid)) {
-            throw new NotFoundException("owner with this mobileNumber already exists");
-        }
-    }
-
-    private void validateBirthDate(LocalDate birthDate) {
-        if (birthDate != null && birthDate.isAfter(LocalDate.now())) {
-            throw new ValidationException("Owner birth date cannot be in the future");
+            throw new ConflictException("mobile exists", "owner mobile " + mobileNumber + " already exists");
         }
     }
 
@@ -136,7 +123,7 @@ public class OwnerServiceImpl implements OwnerService {
                     "owner.is.deleted",
                     "owner is already deleted");
         }
-        owner.setEntityStatus(EntityStatus.DELETED);
+        owner.setStatus(EntityStatus.DELETED);
         log.info("owner has been deleted");
     }
 

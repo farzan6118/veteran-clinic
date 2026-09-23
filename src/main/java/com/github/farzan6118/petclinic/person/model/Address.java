@@ -9,12 +9,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@SQLRestriction("entity_status <> 'DELETED'")
 public class Address extends BaseEntity<Long> {
 
     @Size(max = 100)
@@ -72,7 +74,7 @@ public class Address extends BaseEntity<Long> {
     private String address;
 
 
-    @Pattern(regexp = "^[0-9]{10}$", message = "Postal code must contain exactly 10 digits")
+    //    @Pattern(regexp = "^[0-9]{10}$", message = "Postal code must contain exactly 10 digits")
     @Column(length = 10)
     @Schema(
             description = "Postal code", example = "1234567890",

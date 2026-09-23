@@ -8,6 +8,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.util.StringUtils;
 
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 @Entity
 @Getter
 @Setter
+@SQLRestriction("entity_status <> 'DELETED'")
 public class Person extends BaseEntity<Long> {
 
     @Size(max = 10)

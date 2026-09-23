@@ -1,15 +1,30 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Visit rescheduled</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Visit rescheduled</title></head>
 <body style="margin:0;padding:24px;background:#f4f7f8;color:#24323d;font-family:Arial,sans-serif;line-height:1.5;">
 <main style="max-width:620px;margin:auto;background:#ffffff;border:1px solid #d9e2e6;padding:28px;">
     <h2 style="margin-top:0;color:#176b87;">Your pet's visit was rescheduled</h2>
     <p>Dear <strong th:text="${ownerName}">John Doe</strong>,</p>
     <p>The appointment for <strong th:text="${petName}">Jessy</strong> has been moved to a new time.</p>
     <table style="width:100%;border-collapse:collapse;margin:22px 0;">
-        <tr><th style="text-align:left;background:#eaf4f7;padding:10px;">Veterinarian</th><td style="padding:10px;border-bottom:1px solid #d9e2e6;" th:text="${vetName}">Dr. Smith</td></tr>
-        <tr><th style="text-align:left;background:#eaf4f7;padding:10px;">Previous time</th><td style="padding:10px;border-bottom:1px solid #d9e2e6;" th:text="${#temporals.format(oldVisitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Old time</td></tr>
-        <tr><th style="text-align:left;background:#eaf4f7;padding:10px;">New time</th><td style="padding:10px;" th:text="${#temporals.format(newVisitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">New time</td></tr>
+        <tr>
+            <th style="text-align:left;background:#eaf4f7;padding:10px;">Veterinarian</th>
+            <td style="padding:10px;border-bottom:1px solid #d9e2e6;" th:text="${vetName}">Dr. Smith</td>
+        </tr>
+        <tr>
+            <th style="text-align:left;background:#eaf4f7;padding:10px;">Previous time</th>
+            <td style="padding:10px;border-bottom:1px solid #d9e2e6;"
+                th:text="${#temporals.format(oldVisitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">Old time
+            </td>
+        </tr>
+        <tr>
+            <th style="text-align:left;background:#eaf4f7;padding:10px;">New time</th>
+            <td style="padding:10px;" th:text="${#temporals.format(newVisitDate, 'EEEE, MMMM dd, yyyy HH:mm')}">New
+                time
+            </td>
+        </tr>
     </table>
     <p>Please update your plans and arrive a few minutes before the new appointment time.</p>
     <p>Warm regards,<br>PetClinic Farzan6118</p>

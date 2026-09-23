@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
+@SQLRestriction("entity_status <> 'DELETED'")
 public class MedicalRecord extends BaseEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -4,6 +4,7 @@ import com.github.farzan6118.petclinic.common.persistence.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@SQLRestriction("entity_status <> 'DELETED'")
 public class VetAvailability extends BaseEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
