@@ -13,5 +13,6 @@ public interface VisitNotificationService {
 
     void notifyBookVisitParticipants(Visit visit, Pet pet, Vet vet);
 
-    void notifyRescheduleVisitParticipants(Visit visit, Pet pet, Vet vet, LocalDateTime oldVisitDate);
+    void notifyRescheduleVisitParticipants(
+            LocalDateTime oldVisitDate, Visit visit, Pet pet, Vet vet, LocalDateTime newVisitStart);
 }

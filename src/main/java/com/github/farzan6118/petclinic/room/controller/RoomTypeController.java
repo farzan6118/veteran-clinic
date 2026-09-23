@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.room.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.room.dto.request.CreateRoomTypeRequestDto;
 import com.github.farzan6118.petclinic.room.dto.request.UpdateRoomTypeRequestDto;
 import com.github.farzan6118.petclinic.room.dto.response.RoomTypeResponseDto;
@@ -27,9 +28,10 @@ public class RoomTypeController {
         return ResponseEntity.ok(roomTypeService.getByUuid(uuid));
     }
 
-    @GetMapping
-    public ResponseEntity<List<RoomTypeResponseDto>> findAll() {
-        return ResponseEntity.ok(roomTypeService.findAll());
+    @GetMapping("/page")
+    public ResponseEntity<List<RoomTypeResponseDto>> findAll(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(roomTypeService.findAll(requestDto));
     }
 
     @PostMapping

@@ -1,10 +1,12 @@
 package com.github.farzan6118.petclinic.owner.service;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
-import com.github.farzan6118.petclinic.common.exception.EmailAlreadyExistsException;
-import com.github.farzan6118.petclinic.common.exception.GenericValidationException;
-import com.github.farzan6118.petclinic.common.exception.PhoneAlreadyExistsException;
-import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
+import com.github.farzan6118.petclinic.common.exception.NotFoundException;
+import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.owner.dto.request.CreateOwnerRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.request.UpdateOwnerRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.response.OwnerResponseDto;
@@ -13,11 +15,12 @@ import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.owner.repository.OwnerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -28,6 +31,7 @@ public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerRepository ownerRepository;
     private final OwnerMapper ownerMapper;
+    private final PageMapper pageMapper;
 
     @Override
     public OwnerResponseDto getByUuid(UUID uuid) {
@@ -36,11 +40,10 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public List<OwnerResponseDto> findAll() {
-        return ownerRepository.findAll()
-                .stream()
-                .map(ownerMapper::mapToDto)
-                .toList();
+    public PageResponseDto<OwnerResponseDto> findAll(PageAndSortRequestDto requestDto) {
+        Pageable pageable = pageMapper.getPageable(requestDto);
+        Page<Owner> ownerPage = ownerRepository.findAll(pageable);
+        return pageMapper.toPageResponse(ownerPage, ownerMapper::mapToDto);
     }
 
     @Transactional
@@ -57,11 +60,11 @@ public class OwnerServiceImpl implements OwnerService {
     private void validateUniqueContactInfo(String mobile, String email) {
 
         if (ownerRepository.existsByEmail(email)) {
-            throw new EmailAlreadyExistsException("email exists", "email " + email + " already exists");
+            throw new ConflictException("email exists", "email " + email + " already exists");
         }
 
         if (ownerRepository.existsByMobileNumber(mobile)) {
-            throw new PhoneAlreadyExistsException("mobile exists", "mobile " + mobile + " already exists");
+            throw new ConflictException("mobile exists", "mobile " + mobile + " already exists");
         }
     }
 
@@ -79,19 +82,19 @@ public class OwnerServiceImpl implements OwnerService {
 
     private void validateEmailUniqueness(String email, UUID uuid) {
         if (ownerRepository.existsByEmailAndUuidNot(email, uuid)) {
-            throw new ResourceNotFoundException("owner with this email already exists");
+            throw new NotFoundException("owner with this email already exists");
         }
     }
 
     private void validateTelephoneUniqueness(String telephone, UUID uuid) {
         if (ownerRepository.existsByMobileNumberAndUuidNot(telephone, uuid)) {
-            throw new ResourceNotFoundException("owner with this mobileNumber already exists");
+            throw new NotFoundException("owner with this mobileNumber already exists");
         }
     }
 
     private void validateBirthDate(LocalDate birthDate) {
         if (birthDate != null && birthDate.isAfter(LocalDate.now())) {
-            throw new GenericValidationException("Owner birth date cannot be in the future");
+            throw new ValidationException("Owner birth date cannot be in the future");
         }
     }
 
@@ -100,7 +103,7 @@ public class OwnerServiceImpl implements OwnerService {
     public void inactivate(UUID uuid) {
         Owner owner = getEntityByUuid(uuid);
         if (owner.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new GenericValidationException(
+            throw new ValidationException(
                     "owner.is.inactive",
                     "owner is already inactive"
             );
@@ -113,9 +116,9 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public void activate(UUID uuid) {
         Owner owner = ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("owner not found"));
+                .orElseThrow(() -> new NotFoundException("owner not found"));
         if (owner.getEntityStatus() != EntityStatus.INACTIVE_NOT_DELETED) {
-            throw new GenericValidationException(
+            throw new ValidationException(
                     "owner.cannot.be.activated",
                     "owner cannot be activated"
             );
@@ -129,7 +132,7 @@ public class OwnerServiceImpl implements OwnerService {
     public void delete(UUID uuid) {
         Owner owner = this.getEntityByUuid(uuid);
         if (!owner.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new GenericValidationException(
+            throw new ValidationException(
                     "owner.is.deleted",
                     "owner is already deleted");
         }
@@ -140,7 +143,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Owner getEntityByUuid(UUID uuid) {
         return ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException("owner not found"));
+                .orElseThrow(() -> new NotFoundException("owner not found"));
     }
 
 }

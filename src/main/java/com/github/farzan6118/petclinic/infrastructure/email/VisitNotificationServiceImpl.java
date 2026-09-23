@@ -109,15 +109,15 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
 
     @Async
     @Override
-    public void notifyRescheduleVisitParticipants(Visit visit, Pet pet, Vet vet, LocalDateTime oldVisitDate) {
+    public void notifyRescheduleVisitParticipants(
+            LocalDateTime oldVisitDate, Visit visit, Pet pet, Vet vet, LocalDateTime newVisitStart) {
         Owner owner = pet.getOwner();
-
         try {
             emailService.sendVetVisitRescheduledEmail(
                     vet.getEmail(),
                     vet.getFullName(),
                     oldVisitDate,
-                    null,
+                    newVisitStart,
                     pet.getName(),
                     pet.getSpecies().getName(),
                     owner.getFullName()
@@ -128,7 +128,7 @@ public class VisitNotificationServiceImpl implements VisitNotificationService {
                     owner.getFullName(),
                     pet.getName(),
                     oldVisitDate,
-                    null,
+                    newVisitStart,
                     vet.getFullName()
             );
 

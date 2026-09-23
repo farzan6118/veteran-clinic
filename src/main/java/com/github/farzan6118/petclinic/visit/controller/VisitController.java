@@ -1,10 +1,14 @@
 package com.github.farzan6118.petclinic.visit.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.visit.dto.request.CompleteVisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.visit.dto.request.RescheduleVisitRequestDto;
-import com.github.farzan6118.petclinic.visit.dto.request.VisitRequestDto;
+import com.github.farzan6118.petclinic.visit.dto.request.VisitAdvancedSearch;
 import com.github.farzan6118.petclinic.visit.dto.response.VisitResponseDto;
-import com.github.farzan6118.petclinic.visit.service.VisitService;
+import com.github.farzan6118.petclinic.visit.service.VisitServiceCommand;
+import com.github.farzan6118.petclinic.visit.service.VisitServiceQuery;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -22,60 +24,51 @@ import java.util.UUID;
 @RequestMapping("/api/visits")
 public class VisitController {
 
-    private final VisitService visitService;
+    private final VisitServiceCommand visitServiceCommand;
+    private final VisitServiceQuery visitServiceQuery;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void bookVisit(@Valid @RequestBody VisitRequestDto request) {
-        visitService.bookVisit(request);
+    public void bookVisit(@Valid @RequestBody CreateVisitRequestDto request) {
+        visitServiceCommand.bookVisit(request);
     }
 
     @PutMapping("{uuid}")
     @ResponseStatus(HttpStatus.CREATED)
     public void rescheduleVisit(
             @PathVariable UUID uuid, @Valid @RequestBody RescheduleVisitRequestDto request) {
-        visitService.rescheduleVisit(uuid, request);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<VisitResponseDto>> getAllVisits() {
-        return ResponseEntity.ok(visitService.getAllVisits());
-    }
-
-    @GetMapping("/{uuid}")
-    public ResponseEntity<VisitResponseDto> getByUuid(@PathVariable UUID uuid) {
-        return ResponseEntity.ok(visitService.getByUuid(uuid));
+        visitServiceCommand.rescheduleVisit(uuid, request);
     }
 
     @DeleteMapping("/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancelVisit(@PathVariable UUID uuid, String reason) {
-        visitService.cancelVisit(uuid, reason);
-    }
-
-    @GetMapping("/vet/{vetUuid}")
-    public ResponseEntity<List<VisitResponseDto>> getVetVisits(
-            @PathVariable UUID vetUuid, @RequestParam LocalDate date) {
-        return ResponseEntity.ok(visitService.findAllVisitsByVetUuid(vetUuid, date));
-    }
-
-    @GetMapping("/pet/{petUuid}")
-    public ResponseEntity<List<VisitResponseDto>> getPetVisits(
-            @PathVariable UUID petUuid, @RequestParam LocalDate date) {
-        return ResponseEntity.ok(visitService.findAllVisitsByPetUuid(petUuid, date));
-    }
-
-    @GetMapping("/room/{roomUuid}")
-    public ResponseEntity<List<VisitResponseDto>> getRoomVisits(
-            @PathVariable UUID roomUuid, @RequestParam LocalDate date) {
-        return ResponseEntity.ok(visitService.findAllVisitsByRoomUuid(roomUuid, date));
+        visitServiceCommand.cancelVisit(uuid, reason);
     }
 
     @PatchMapping("/{uuid}/complete")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void completeVisit(
             @PathVariable UUID uuid, @Valid @RequestBody CompleteVisitRequestDto request) {
-        visitService.completeVisit(uuid, request);
+        visitServiceCommand.completeVisit(uuid, request);
+    }
+
+
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDto<VisitResponseDto>> findAll(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(visitServiceQuery.findAll(requestDto));
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<VisitResponseDto> findByUuid(@PathVariable UUID uuid) {
+        return ResponseEntity.ok(visitServiceQuery.findByUuid(uuid));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageResponseDto<VisitResponseDto>> advancedSearch(
+            @ModelAttribute("request") @Valid VisitAdvancedSearch request) {
+        return ResponseEntity.ok(visitServiceQuery.advancedSearch(request));
     }
 }
 

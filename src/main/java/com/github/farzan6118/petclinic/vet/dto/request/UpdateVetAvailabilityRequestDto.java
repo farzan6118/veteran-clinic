@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 public record UpdateVetAvailabilityRequestDto(
 
         @FutureOrPresent
-        @NotNull(message = "start.time.is.required")
+        @NotNull(message = "visit.date.from.is.required")
         LocalDateTime startTime,
 
         @Future
-        @NotNull(message = "end.time.is.required")
+        @NotNull(message = "visit.date.to.is.required")
         LocalDateTime endTime
 ) {
 }

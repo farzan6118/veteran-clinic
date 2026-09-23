@@ -1,5 +1,7 @@
 package com.github.farzan6118.petclinic.pet.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.pet.dto.request.CreatePetRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.request.UpdatePetRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.response.PetResponseDto;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -27,9 +28,10 @@ public class PetController {
         return ResponseEntity.ok(petService.getByUuid(uuid));
     }
 
-    @GetMapping
-    public ResponseEntity<List<PetResponseDto>> findAll() {
-        return ResponseEntity.ok(petService.findAll());
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDto<PetResponseDto>> findAll(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(petService.findAll(requestDto));
     }
 
     @PostMapping

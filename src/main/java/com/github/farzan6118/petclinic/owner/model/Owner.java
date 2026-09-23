@@ -1,17 +1,16 @@
 package com.github.farzan6118.petclinic.owner.model;
 
+import com.github.farzan6118.petclinic.common.persistence.Address;
 import com.github.farzan6118.petclinic.common.persistence.BaseEntity;
-import jakarta.persistence.Column;
+import com.github.farzan6118.petclinic.common.persistence.Profile;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,21 +31,11 @@ public class Owner extends BaseEntity<Long> {
     @Size(max = 20)
     private String nationalId;
 
-    @Past
-    private LocalDate birthDate;
+    @OneToOne(cascade = CascadeType.ALL, optional = false, mappedBy = "owner")
+    private Profile profile;
 
-    @NotBlank
-    @Size(max = 20)
-    @Column(nullable = false, unique = true)
-    private String mobileNumber;
-
-    @Email
-    @NotBlank
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    private String city;
-    private String address;
+    @OneToOne(cascade = CascadeType.ALL, optional = false, mappedBy = "owner")
+    private Address address;
 
     public String getFullName() {
         return Stream.of(firstName, lastName)

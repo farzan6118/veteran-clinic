@@ -14,11 +14,10 @@ public record VisitResponseDto(
         String ownerFullName,
         UUID vetUuid,
         String vetFullName,
-        LocalDateTime start,
-        LocalDateTime end,
+        LocalDateTime visitDateFrom,
+        LocalDateTime visitDateTo,
         VisitType visitType,
         UUID roomUuid,
-        String roomName,
         String description,
         VisitStatus status
 ) {

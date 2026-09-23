@@ -1,5 +1,7 @@
 package com.github.farzan6118.petclinic.owner.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.owner.dto.request.CreateOwnerRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.request.UpdateOwnerRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.response.OwnerResponseDto;
@@ -36,9 +38,10 @@ public class OwnerController {
         return ResponseEntity.ok(petService.getPetListByOwnerUuid(uuid));
     }
 
-    @GetMapping
-    public ResponseEntity<List<OwnerResponseDto>> findAll() {
-        return ResponseEntity.ok(ownerService.findAll());
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDto<OwnerResponseDto>> findAll(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(ownerService.findAll(requestDto));
     }
 
     @PostMapping

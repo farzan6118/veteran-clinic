@@ -1,5 +1,7 @@
 package com.github.farzan6118.petclinic.room.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.room.dto.request.CreateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.request.UpdateRoomRequestDto;
 import com.github.farzan6118.petclinic.room.dto.response.RoomResponseDto;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -27,9 +28,10 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getByUuid(uuid));
     }
 
-    @GetMapping
-    public ResponseEntity<List<RoomResponseDto>> findAll() {
-        return ResponseEntity.ok(roomService.findAll());
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDto<RoomResponseDto>> findAll(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(roomService.findAll(requestDto));
     }
 
     @PostMapping

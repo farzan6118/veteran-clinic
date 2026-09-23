@@ -1,5 +1,7 @@
 package com.github.farzan6118.petclinic.vet.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.request.CreateVetAvailabilityRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetAvailabilityRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.response.AvailabilityResponseDto;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -39,9 +40,11 @@ public class VetAvailabilityController {
         vetAvailabilityService.updateAvailability(vetUuid, availabilityUuid, request);
     }
 
-    @GetMapping
-    public ResponseEntity<List<AvailabilityResponseDto>> getVetAvailability(@PathVariable UUID vetUuid) {
-        return ResponseEntity.ok(vetAvailabilityService.getVetAvailability(vetUuid));
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDto<AvailabilityResponseDto>> getVetAvailabilityPageable(
+            @PathVariable UUID vetUuid,
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(vetAvailabilityService.getVetAvailabilityPageable(vetUuid, requestDto));
     }
 
     @DeleteMapping("/{availabilityUuid}")

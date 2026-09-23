@@ -1,7 +1,6 @@
 package com.github.farzan6118.petclinic.pet.controller;
 
-import com.github.farzan6118.petclinic.common.dto.request.PageRequestDto;
-import com.github.farzan6118.petclinic.common.dto.request.SortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.pet.dto.request.CreateSpeciesRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.request.UpdateSpeciesRequestDto;
@@ -9,15 +8,11 @@ import com.github.farzan6118.petclinic.pet.dto.response.SpeciesResponseDto;
 import com.github.farzan6118.petclinic.pet.service.SpeciesService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -34,22 +29,9 @@ public class SpeciesController {
     }
 
     @GetMapping("/page")
-    public ResponseEntity<PageResponseDto<SpeciesResponseDto>> findAll(PageRequestDto page, SortRequestDto sort) {
-        return ResponseEntity.ok(speciesService.findAll(page, sort));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<SpeciesResponseDto>> findAll() {
-        return ResponseEntity.ok(speciesService.findAll());
-    }
-
-
-    private Pageable getPageable(PageRequestDto page, SortRequestDto sort) {
-        return PageRequest.of(
-                page.pageNumber(),
-                page.pageSize(),
-                Sort.by(sort.sortDirection(), sort.sortBy())
-        );
+    public ResponseEntity<PageResponseDto<SpeciesResponseDto>> findAll(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(speciesService.findAll(requestDto));
     }
 
     @PostMapping

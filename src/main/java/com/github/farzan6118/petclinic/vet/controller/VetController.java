@@ -1,5 +1,7 @@
 package com.github.farzan6118.petclinic.vet.controller;
 
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.request.CreateVetRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetProfileUpdateRequestDto;
@@ -13,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -29,9 +30,10 @@ public class VetController {
         return ResponseEntity.ok(vetService.getByUuid(uuid));
     }
 
-    @GetMapping
-    public ResponseEntity<List<VetResponseDto>> findAll() {
-        return ResponseEntity.ok(vetService.findAll());
+    @GetMapping("/page")
+    public ResponseEntity<PageResponseDto<VetResponseDto>> findAllPageable(
+            @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
+        return ResponseEntity.ok(vetService.findAllPageable(requestDto));
     }
 
     @PostMapping
