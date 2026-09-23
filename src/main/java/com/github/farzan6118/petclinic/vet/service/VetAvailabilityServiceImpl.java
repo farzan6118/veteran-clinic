@@ -6,8 +6,8 @@ import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
-import com.github.farzan6118.petclinic.vet.dto.request.CreateVetAvailabilityRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetAvailabilityRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityCreateRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityUpdateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.response.AvailabilityResponseDto;
 import com.github.farzan6118.petclinic.vet.mapper.VetAvailabilityMapper;
 import com.github.farzan6118.petclinic.vet.model.Vet;
@@ -36,7 +36,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
     @Override
     @Transactional
-    public void createAvailability(CreateVetAvailabilityRequestDto request) {
+    public void createAvailability(VetAvailabilityCreateRequestDto request) {
         LocalDateTime startDateTime = request.startTime();
         LocalDateTime endDateTime = request.endTime();
         Vet vet = getVet(request.vetUuid());
@@ -56,7 +56,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
     @Override
     @Transactional
-    public void updateAvailability(UUID availabilityUuid, UpdateVetAvailabilityRequestDto request) {
+    public void updateAvailability(UUID availabilityUuid, VetAvailabilityUpdateRequestDto request) {
         VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, request.vetUuid())
                 .orElseThrow(() -> new NotFoundException("Vet availability not found"));
         LocalDateTime startDateTime = request.startTime();

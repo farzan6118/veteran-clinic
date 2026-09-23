@@ -6,9 +6,8 @@ import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
-import com.github.farzan6118.petclinic.vet.dto.request.CreateVetRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.request.VetProfileUpdateRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.mapper.VetMapper;
@@ -30,13 +29,13 @@ import java.util.UUID;
 public class VetServiceImpl implements VetService {
 
     private final VetRepository vetRepository;
-    private final VetMapper vetMapper;
     private final PageMapper pageMapper;
+    private final VetMapper vetMapper;
 
     @Override
     public VetResponseDto getByUuid(UUID uuid) {
         Vet vet = getEntityByUuid(uuid);
-        return vetMapper.mapToDto(vet);
+        return vetMapper.toDto(vet);
     }
 
     @Override
@@ -49,15 +48,15 @@ public class VetServiceImpl implements VetService {
     public PageResponseDto<VetResponseDto> findAllPageable(PageAndSortRequestDto requestDto) {
         Pageable pageable = pageMapper.getPageable(requestDto);
         Page<Vet> vetPage = vetRepository.findAll(pageable);
-        return pageMapper.toPageResponse(vetPage, vetMapper::mapToDto);
+        return pageMapper.toPageResponse(vetPage, vetMapper::toDto);
     }
 
     @Transactional
     @Override
-    public void create(CreateVetRequestDto request) {
+    public void create(VetCreateRequestDto request) {
 
         validateUniqueContactInfo(request.mobileNumber(), request.email());
-        Vet vet = vetMapper.mapToEntity(request);
+        Vet vet = vetMapper.toEntity(request);
 
         vetRepository.save(vet);
         log.info("vet created");
@@ -74,19 +73,11 @@ public class VetServiceImpl implements VetService {
 
     @Transactional
     @Override
-    public void updateVetProfileByUuid(VetProfileUpdateRequestDto request, UUID vetUuid) {
-        Vet vet = getEntityByUuid(vetUuid);
-        vet.updateProfile(request.city(), request.address(), request.birthDate(), request.specialty());
-        log.info("vet profile updated");
-    }
-
-    @Transactional
-    @Override
-    public void update(UUID uuid, UpdateVetRequestDto request) {
+    public void update(UUID uuid, VetUpdateRequestDto request) {
         Vet vet = getEntityByUuid(uuid);
         validateEmailUniqueness(request.email(), uuid);
         validateTelephoneUniqueness(request.mobileNumber(), uuid);
-        vetMapper.mapToEntity(request, vet);
+        vetMapper.toEntity(request, vet);
         log.info("vet updated");
     }
 

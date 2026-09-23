@@ -2,9 +2,9 @@ package com.github.farzan6118.petclinic.vet.controller;
 
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
-import com.github.farzan6118.petclinic.vet.dto.request.CreateVetRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetProfileUpdateRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.service.VetService;
@@ -38,7 +38,7 @@ public class VetController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@Valid @RequestBody CreateVetRequestDto request) {
+    public void create(@Valid @RequestBody VetCreateRequestDto request) {
         vetService.create(request);
     }
 
@@ -46,7 +46,7 @@ public class VetController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void update(
             @PathVariable UUID uuid,
-            @Valid @RequestBody UpdateVetRequestDto request) {
+            @Valid @RequestBody VetUpdateRequestDto request) {
         vetService.update(uuid, request);
     }
 

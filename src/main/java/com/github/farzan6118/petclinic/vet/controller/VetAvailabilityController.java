@@ -2,8 +2,8 @@ package com.github.farzan6118.petclinic.vet.controller;
 
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
-import com.github.farzan6118.petclinic.vet.dto.request.CreateVetAvailabilityRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetAvailabilityRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityCreateRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityUpdateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.response.AvailabilityResponseDto;
 import com.github.farzan6118.petclinic.vet.service.VetAvailabilityService;
 import jakarta.validation.Valid;
@@ -25,7 +25,7 @@ public class VetAvailabilityController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void createAvailability(@Valid @RequestBody CreateVetAvailabilityRequestDto request) {
+    public void createAvailability(@Valid @RequestBody VetAvailabilityCreateRequestDto request) {
         vetAvailabilityService.createAvailability(request);
     }
 
@@ -33,7 +33,7 @@ public class VetAvailabilityController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateAvailability(
             @PathVariable UUID availabilityUuid,
-            @Valid @RequestBody UpdateVetAvailabilityRequestDto request
+            @Valid @RequestBody VetAvailabilityUpdateRequestDto request
     ) {
         vetAvailabilityService.updateAvailability(availabilityUuid, request);
     }

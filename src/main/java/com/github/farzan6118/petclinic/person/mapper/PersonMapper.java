@@ -1,6 +1,7 @@
 package com.github.farzan6118.petclinic.person.mapper;
 
 import com.github.farzan6118.petclinic.person.dto.request.PersonCreateRequestDto;
+import com.github.farzan6118.petclinic.person.dto.request.PersonUpdateRequestDto;
 import com.github.farzan6118.petclinic.person.dto.response.PersonResponseDto;
 import com.github.farzan6118.petclinic.person.model.Person;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,8 @@ public class PersonMapper {
         return new PersonResponseDto(
                 person.getTitle(),
                 person.getFirstName(),
-                person.getLastName(), person.getNationalId()
+                person.getLastName(),
+                person.getNationalId()
         );
     }
 
@@ -28,14 +30,21 @@ public class PersonMapper {
         person.setTitle(toUpper(request.title()));
         person.setFirstName(toLower(request.firstName()));
         person.setLastName(toLower(request.lastName()));
-        person.setFirstName(request.nationalId());
+        person.setNationalId(request.nationalId());
     }
 
-    private String toUpper(String string) {
-        return string.toUpperCase(Locale.ROOT).trim();
+    public void toEntity(PersonUpdateRequestDto request, Person person) {
+        person.setTitle(toUpper(request.title()));
+        person.setFirstName(toLower(request.firstName()));
+        person.setLastName(toLower(request.lastName()));
+        person.setNationalId(request.nationalId());
     }
 
-    private String toLower(String string) {
-        return string.toLowerCase(Locale.ROOT).trim();
+    private String toUpper(String value) {
+        return value == null ? null : value.toUpperCase(Locale.ROOT).trim();
+    }
+
+    private String toLower(String value) {
+        return value == null ? null : value.toLowerCase(Locale.ROOT).trim();
     }
 }

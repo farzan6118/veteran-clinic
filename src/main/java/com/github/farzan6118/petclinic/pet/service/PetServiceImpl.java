@@ -7,7 +7,7 @@ import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.owner.model.Owner;
-import com.github.farzan6118.petclinic.person.service.PersonService;
+import com.github.farzan6118.petclinic.owner.service.OwnerService;
 import com.github.farzan6118.petclinic.pet.dto.request.CreatePetRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.request.UpdatePetRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.response.PetResponseDto;
@@ -31,11 +31,11 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class PetServiceImpl implements PetService {
 
-    private final PetRepository petRepository;
     private final SpeciesService speciesService;
-    private final PersonService personService;
-    private final PetMapper petMapper;
+    private final PetRepository petRepository;
     private final PageMapper pageMapper;
+    private final PetMapper petMapper;
+    private final OwnerService ownerService;
 
     @Override
     public PetResponseDto getByUuid(UUID uuid) {
@@ -54,7 +54,7 @@ public class PetServiceImpl implements PetService {
     @Override
     @Transactional
     public void create(CreatePetRequestDto request) {
-        Owner owner = personService.getEntityByUuid(request.ownerUuid());
+        Owner owner = ownerService.getEntityByUuid(request.ownerUuid());
         validateUniqueness(owner.getId(), request.name());
         Species species = speciesService.getEntityByUuid(request.speciesUuid());
         Pet pet = new Pet();
@@ -73,7 +73,7 @@ public class PetServiceImpl implements PetService {
     @Override
     public void update(UUID uuid, UpdatePetRequestDto request) {
         Pet pet = this.getEntityByUuid(uuid);
-        Owner owner = personService.getEntityByUuid(request.ownerUuid());
+        Owner owner = ownerService.getEntityByUuid(request.ownerUuid());
         validateUniqueness(owner.getId(), request.name(), pet.getId());
         Species species = speciesService.getEntityByUuid(request.speciesUuid());
         petMapper.mapToPet(request, owner, pet, species);

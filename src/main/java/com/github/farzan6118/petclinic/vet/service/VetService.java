@@ -2,9 +2,9 @@ package com.github.farzan6118.petclinic.vet.service;
 
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
-import com.github.farzan6118.petclinic.vet.dto.request.CreateVetRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.request.UpdateVetRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetProfileUpdateRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetProfileResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.model.Vet;
@@ -19,11 +19,11 @@ public interface VetService {
 
     PageResponseDto<VetResponseDto> findAllPageable(PageAndSortRequestDto requestDto);
 
-    void create(CreateVetRequestDto request);
+    void create(VetCreateRequestDto request);
 
     void updateVetProfileByUuid(VetProfileUpdateRequestDto request, UUID vetUuid);
 
-    void update(UUID uuid, UpdateVetRequestDto request);
+    void update(UUID uuid, VetUpdateRequestDto request);
 
     void delete(UUID uuid);
 

@@ -19,7 +19,7 @@ public class RoomMapper {
         return new RoomResponseDto(
                 room.getUuid(),
                 room.getName(),
-                room.getCode(),
+                room.getRoomNumber(),
                 roomTypeMapper.mapToDto(room.getRoomType()),
                 room.isActive()
         );
@@ -27,14 +27,14 @@ public class RoomMapper {
 
     public void mapToEntity(CreateRoomRequestDto request, Room room) {
         room.setName(normalizeName(request.name()));
-        room.setCode(normalizeName(request.code()));
+        room.setRoomNumber(normalizeName(request.code()));
         room.setRoomType(request.roomType());
         room.setActive(request.active());
     }
 
     public void mapToEntity(UpdateRoomRequestDto request, Room room) {
         room.setName(normalizeName(request.name()));
-        room.setCode(normalizeName(request.code()));
+        room.setRoomNumber(normalizeName(request.code()));
         room.setRoomType(request.roomType());
         room.setActive(request.active());
     }

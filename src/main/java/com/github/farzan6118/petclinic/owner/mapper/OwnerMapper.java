@@ -20,11 +20,12 @@ public class OwnerMapper {
     private final ProfileMapper profileMapper;
 
     public OwnerResponseDto toDto(Owner owner) {
+        Person person = owner.getPerson();
         return new OwnerResponseDto(
                 owner.getUuid(),
-                personMapper.toDto(owner.getPerson()),
-                profileMapper.toDto(owner.getPerson().getProfile()),
-                addressMapper.toDto(owner.getPerson().getAddress())
+                personMapper.toDto(person),
+                profileMapper.toDto(person.getProfile()),
+                addressMapper.toDto(person.getAddress())
         );
     }
 
@@ -42,9 +43,9 @@ public class OwnerMapper {
     }
 
     public void toEntity(OwnerUpdateRequestDto request, Owner owner) {
-        Person person = personMapper.toEntity(request.person());
-        person.setProfile(profileMapper.toEntity(request.profile()));
-        person.setAddress(addressMapper.toEntity(request.address()));
-        owner.setPerson(person);
+        Person person = owner.getPerson();
+        personMapper.toEntity(request.person(), person);
+        profileMapper.toEntity(request.profile(), person.getProfile());
+        addressMapper.toEntity(request.address(), person.getAddress());
     }
 }

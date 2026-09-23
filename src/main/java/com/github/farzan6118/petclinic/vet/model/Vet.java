@@ -6,7 +6,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Audited;
@@ -22,9 +21,6 @@ import java.util.List;
 @Setter
 @Audited
 public class Vet extends BaseEntity<Long> {
-
-    @Size(max = 10)
-    private String title;
 
     @OneToOne(optional = false)
     private Person person;

@@ -44,22 +44,20 @@ public class OwnerController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody OwnerCreateRequestDto request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@Valid @RequestBody OwnerCreateRequestDto request) {
         ownerService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<Void> update(
-            @PathVariable UUID uuid,
-            @Valid @RequestBody OwnerUpdateRequestDto request) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update(@PathVariable UUID uuid, @Valid @RequestBody OwnerUpdateRequestDto request) {
         ownerService.update(uuid, request);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID uuid) {
         ownerService.delete(uuid);
-        return ResponseEntity.noContent().build();
     }
 }
