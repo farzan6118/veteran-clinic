@@ -2,8 +2,8 @@ package com.github.farzan6118.petclinic.owner.controller;
 
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
-import com.github.farzan6118.petclinic.owner.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.owner.dto.request.UpdateOwnerRequestDto;
+import com.github.farzan6118.petclinic.owner.dto.request.OwnerCreateRequestDto;
+import com.github.farzan6118.petclinic.owner.dto.request.OwnerUpdateRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.response.OwnerResponseDto;
 import com.github.farzan6118.petclinic.owner.service.OwnerService;
 import com.github.farzan6118.petclinic.pet.dto.response.PetResponseDto;
@@ -23,7 +23,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/api/owners")
 public class OwnerController {
-
 
     private final OwnerService ownerService;
     private final PetService petService;
@@ -45,7 +44,7 @@ public class OwnerController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody CreateOwnerRequestDto request) {
+    public ResponseEntity<Void> create(@Valid @RequestBody OwnerCreateRequestDto request) {
         ownerService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -53,7 +52,7 @@ public class OwnerController {
     @PutMapping("/{uuid}")
     public ResponseEntity<Void> update(
             @PathVariable UUID uuid,
-            @Valid @RequestBody UpdateOwnerRequestDto request) {
+            @Valid @RequestBody OwnerUpdateRequestDto request) {
         ownerService.update(uuid, request);
         return ResponseEntity.ok().build();
     }

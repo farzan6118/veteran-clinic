@@ -7,8 +7,12 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record CreateVetAvailabilityRequestDto(
+
+        @NotNull
+        UUID vetUuid,
 
         @NotNull
         @Schema(example = "09:00")

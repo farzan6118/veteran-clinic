@@ -2,8 +2,8 @@ package com.github.farzan6118.petclinic.owner.service;
 
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
-import com.github.farzan6118.petclinic.owner.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.owner.dto.request.UpdateOwnerRequestDto;
+import com.github.farzan6118.petclinic.owner.dto.request.OwnerCreateRequestDto;
+import com.github.farzan6118.petclinic.owner.dto.request.OwnerUpdateRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.response.OwnerResponseDto;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 
@@ -14,9 +14,9 @@ public interface OwnerService {
 
     PageResponseDto<OwnerResponseDto> findAll(PageAndSortRequestDto requestDto);
 
-    void create(CreateOwnerRequestDto request);
+    void create(OwnerCreateRequestDto request);
 
-    void update(UUID uuid, UpdateOwnerRequestDto request);
+    void update(UUID uuid, OwnerUpdateRequestDto request);
 
     void inactivate(UUID uuid);
 

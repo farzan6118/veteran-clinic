@@ -9,7 +9,7 @@ import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
 import com.github.farzan6118.petclinic.common.enums.Sex;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.person.model.Profile;
-import com.github.farzan6118.petclinic.person.repository.OwnerRepository;
+import com.github.farzan6118.petclinic.person.repository.PersonRepository;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.pet.model.Species;
 import com.github.farzan6118.petclinic.pet.repository.PetRepository;
@@ -32,7 +32,7 @@ public class FillInitialRecords {
 
     @Bean
     CommandLineRunner fillInitialRecordsRunner(
-            OwnerRepository ownerRepository,
+            PersonRepository personRepository,
             SpeciesRepository speciesRepository,
             PetRepository petRepository,
             RoomRepository roomRepository,
@@ -43,7 +43,7 @@ public class FillInitialRecords {
 
     ) {
         return args -> fillInitialRecords(
-                ownerRepository,
+                personRepository,
                 speciesRepository,
                 petRepository,
                 roomRepository,
@@ -56,7 +56,7 @@ public class FillInitialRecords {
 
     @Transactional
     void fillInitialRecords(
-            OwnerRepository ownerRepository,
+            PersonRepository personRepository,
             SpeciesRepository speciesRepository,
             PetRepository petRepository,
             RoomRepository roomRepository,
@@ -65,7 +65,7 @@ public class FillInitialRecords {
             VetAvailabilityRepository vetAvailabilityRepository,
             DurationTemplateRepository durationTemplateRepository
     ) {
-        if (ownerRepository.count() == 0
+        if (personRepository.count() == 0
                 && speciesRepository.count() == 0
                 && petRepository.count() == 0
                 && roomRepository.count() == 0
@@ -93,7 +93,7 @@ public class FillInitialRecords {
                             "Small companion animal."))
             );
 
-            List<Owner> owners = ownerRepository.saveAll(List.of(
+            List<Owner> owners = personRepository.saveAll(List.of(
                     owner("Ms.", "Mina", "Rahimi", "200000001", LocalDate.of(1990, 4, 12), "09120000001", "mina.rahimi@example.com", "Tehran", "Valiasr Street"),
                     owner("Mr.", "Arman", "Karimi", "200000002", LocalDate.of(1987, 9, 25), "09120000002", "arman.karimi@example.com", "Shiraz", "Zand Street"),
                     owner("Ms.", "Niloofar", "Ahmadi", "200000003", LocalDate.of(1995, 1, 8), "09120000003", "niloofar.ahmadi@example.com", "Tabriz", "Shahrivar Street")
@@ -225,7 +225,7 @@ public class FillInitialRecords {
             ));
         }
 
-        ownerRepository.findAll().forEach(owner -> {
+        personRepository.findAll().forEach(owner -> {
             if (owner.getBirthDate() == null) {
                 owner.setBirthDate(switch (owner.getEmail()) {
                     case "mina.rahimi@example.com" -> LocalDate.of(1990, 4, 12);

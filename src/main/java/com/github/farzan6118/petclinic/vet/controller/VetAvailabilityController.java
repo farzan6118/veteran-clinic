@@ -25,19 +25,17 @@ public class VetAvailabilityController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void createAvailability(
-            @PathVariable UUID vetUuid, @Valid @RequestBody CreateVetAvailabilityRequestDto request) {
-        vetAvailabilityService.createAvailability(vetUuid, request);
+    public void createAvailability(@Valid @RequestBody CreateVetAvailabilityRequestDto request) {
+        vetAvailabilityService.createAvailability(request);
     }
 
     @PutMapping("/{availabilityUuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateAvailability(
-            @PathVariable UUID vetUuid,
             @PathVariable UUID availabilityUuid,
             @Valid @RequestBody UpdateVetAvailabilityRequestDto request
     ) {
-        vetAvailabilityService.updateAvailability(vetUuid, availabilityUuid, request);
+        vetAvailabilityService.updateAvailability(availabilityUuid, request);
     }
 
     @GetMapping("/page")

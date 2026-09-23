@@ -13,9 +13,9 @@ import java.util.UUID;
 
 public interface VetAvailabilityService {
 
-    void createAvailability(UUID vetUuid, CreateVetAvailabilityRequestDto request);
+    void createAvailability(CreateVetAvailabilityRequestDto request);
 
-    void updateAvailability(UUID vetUuid, UUID availabilityUuid, UpdateVetAvailabilityRequestDto request);
+    void updateAvailability(UUID availabilityUuid, UpdateVetAvailabilityRequestDto request);
 
     void deleteAvailability(UUID vetUuid, UUID availabilityUuid);
 

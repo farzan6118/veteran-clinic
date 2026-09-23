@@ -1,6 +1,6 @@
 package com.github.farzan6118.petclinic.person.dto.request;
 
-public record UpdateAddressRequestDto(
+public record AddressCreateRequestDto(
         String title,
         String countryName,
         String provinceName,

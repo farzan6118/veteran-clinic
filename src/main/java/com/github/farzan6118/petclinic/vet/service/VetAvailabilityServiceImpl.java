@@ -2,6 +2,7 @@ package com.github.farzan6118.petclinic.vet.service;
 
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
@@ -35,12 +36,12 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
     @Override
     @Transactional
-    public void createAvailability(UUID vetUuid, CreateVetAvailabilityRequestDto request) {
+    public void createAvailability(CreateVetAvailabilityRequestDto request) {
         LocalDateTime startDateTime = request.startTime();
         LocalDateTime endDateTime = request.endTime();
-        Vet vet = getVet(vetUuid);
+        Vet vet = getVet(request.vetUuid());
         validateTimeRange(startDateTime, endDateTime);
-        checkCreateOverlapping(vetUuid, startDateTime, endDateTime);
+        checkCreateOverlapping(request.vetUuid(), startDateTime, endDateTime);
         VetAvailability availability = new VetAvailability().create(vet, startDateTime, endDateTime);
 
         availabilityRepository.save(availability);
@@ -55,13 +56,13 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
     @Override
     @Transactional
-    public void updateAvailability(UUID vetUuid, UUID availabilityUuid, UpdateVetAvailabilityRequestDto request) {
-        VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, vetUuid)
+    public void updateAvailability(UUID availabilityUuid, UpdateVetAvailabilityRequestDto request) {
+        VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, request.vetUuid())
                 .orElseThrow(() -> new NotFoundException("Vet availability not found"));
         LocalDateTime startDateTime = request.startTime();
         LocalDateTime endDateTime = request.endTime();
         validateTimeRange(startDateTime, endDateTime);
-        checkUpdateOverlapping(vetUuid, availabilityUuid, startDateTime, endDateTime);
+        checkUpdateOverlapping(request.vetUuid(), availabilityUuid, startDateTime, endDateTime);
         availability.update(startDateTime, endDateTime);
     }
 
@@ -80,7 +81,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
         VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, vetUuid)
                 .orElseThrow(() -> new NotFoundException("Vet availability not found"));
-
+        availability.setEntityStatus(EntityStatus.DELETED);
         availability.setActive(false);
     }
 

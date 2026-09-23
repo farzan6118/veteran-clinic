@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.person.model;
 import com.github.farzan6118.petclinic.common.persistence.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -29,10 +30,20 @@ public class Person extends BaseEntity<Long> {
     @Size(max = 20)
     private String nationalId;
 
-    @OneToOne(cascade = CascadeType.ALL, optional = false, mappedBy = "owner")
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            optional = false,
+            orphanRemoval = true
+    )
+    @JoinColumn(name = "profile_id", nullable = false, unique = true)
     private Profile profile;
 
-    @OneToOne(cascade = CascadeType.ALL, optional = false, mappedBy = "owner")
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            optional = false,
+            orphanRemoval = true
+    )
+    @JoinColumn(name = "address_id", nullable = false, unique = true)
     private Address address;
 
     public String getFullName() {
@@ -40,6 +51,4 @@ public class Person extends BaseEntity<Long> {
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(" "));
     }
-
-
 }

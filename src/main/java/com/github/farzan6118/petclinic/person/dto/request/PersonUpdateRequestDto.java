@@ -1,6 +1,6 @@
-package com.github.farzan6118.petclinic.person.dto.response;
+package com.github.farzan6118.petclinic.person.dto.request;
 
-public record PersonResponseDto(
+public record PersonUpdateRequestDto(
         String title,
         String firstName,
         String lastName,

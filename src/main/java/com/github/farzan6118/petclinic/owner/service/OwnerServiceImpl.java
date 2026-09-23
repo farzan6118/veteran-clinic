@@ -7,12 +7,16 @@ import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
-import com.github.farzan6118.petclinic.owner.dto.request.CreateOwnerRequestDto;
-import com.github.farzan6118.petclinic.owner.dto.request.UpdateOwnerRequestDto;
+import com.github.farzan6118.petclinic.owner.dto.request.OwnerCreateRequestDto;
+import com.github.farzan6118.petclinic.owner.dto.request.OwnerUpdateRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.response.OwnerResponseDto;
 import com.github.farzan6118.petclinic.owner.mapper.OwnerMapper;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.owner.repository.OwnerRepository;
+import com.github.farzan6118.petclinic.person.mapper.AddressMapper;
+import com.github.farzan6118.petclinic.person.mapper.PersonMapper;
+import com.github.farzan6118.petclinic.person.mapper.ProfileMapper;
+import com.github.farzan6118.petclinic.person.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,32 +33,40 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class OwnerServiceImpl implements OwnerService {
 
+    private final PersonRepository personRepository;
     private final OwnerRepository ownerRepository;
+    private final ProfileMapper profileMapper;
+    private final AddressMapper addressMapper;
+    private final PersonMapper personMapper;
     private final OwnerMapper ownerMapper;
     private final PageMapper pageMapper;
 
     @Override
     public OwnerResponseDto getByUuid(UUID uuid) {
         Owner owner = this.getEntityByUuid(uuid);
-        return ownerMapper.mapToDto(owner);
+        return ownerMapper.toDto(owner);
     }
 
     @Override
     public PageResponseDto<OwnerResponseDto> findAll(PageAndSortRequestDto requestDto) {
         Pageable pageable = pageMapper.getPageable(requestDto);
         Page<Owner> ownerPage = ownerRepository.findAll(pageable);
-        return pageMapper.toPageResponse(ownerPage, ownerMapper::mapToDto);
+        return pageMapper.toPageResponse(ownerPage, ownerMapper::toDto);
     }
 
-    @Transactional
     @Override
-    public void create(CreateOwnerRequestDto request) {
-        Owner owner = new Owner();
-        validateBirthDate(request.birthDate());
-        validateUniqueContactInfo(request.mobileNumber(), request.email());
-        ownerMapper.mapToOwner(request, owner);
+    @Transactional
+    public void create(OwnerCreateRequestDto request) {
+        Owner owner = ownerMapper.toEntity(request);
         ownerRepository.save(owner);
-        log.info("owner created");
+    }
+
+    @Override
+    @Transactional
+    public void update(UUID uuid, OwnerUpdateRequestDto request) {
+        Owner owner = ownerRepository.findByUuid(uuid)
+                .orElseThrow(() -> new ValidationException("Owner not found: " + uuid));
+        ownerMapper.toEntity(request, owner);
     }
 
     private void validateUniqueContactInfo(String mobile, String email) {
@@ -66,18 +78,6 @@ public class OwnerServiceImpl implements OwnerService {
         if (ownerRepository.existsByPerson_profile_MobileNumber(mobile)) {
             throw new ConflictException("mobile exists", "mobile " + mobile + " already exists");
         }
-    }
-
-    @Transactional
-    @Override
-    public void update(UUID uuid, UpdateOwnerRequestDto request) {
-        validateBirthDate(request.birthDate());
-        validateEmailUniqueness(request.email(), uuid);
-        validateMobileNumberUniqueness(request.mobileNumber(), uuid);
-        Owner owner = this.getEntityByUuid(uuid);
-        ownerMapper.mapToOwner(request, owner);
-        ownerRepository.save(owner);
-        log.info("owner updated");
     }
 
     private void validateEmailUniqueness(String email, UUID uuid) {

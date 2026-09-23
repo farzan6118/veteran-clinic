@@ -1,7 +1,7 @@
 package com.github.farzan6118.petclinic.person.mapper;
 
-import com.github.farzan6118.petclinic.person.dto.request.CreateAddressRequestDto;
-import com.github.farzan6118.petclinic.person.dto.request.UpdateAddressRequestDto;
+import com.github.farzan6118.petclinic.person.dto.request.AddressCreateRequestDto;
+import com.github.farzan6118.petclinic.person.dto.request.AddressUpdateRequestDto;
 import com.github.farzan6118.petclinic.person.dto.response.AddressResponseDto;
 import com.github.farzan6118.petclinic.person.model.Address;
 import org.springframework.stereotype.Component;
@@ -27,13 +27,13 @@ public class AddressMapper {
         );
     }
 
-    public Address toEntity(CreateAddressRequestDto request) {
+    public Address toEntity(AddressCreateRequestDto request) {
         Address address = new Address();
         toEntity(request, address);
         return address;
     }
 
-    public void toEntity(CreateAddressRequestDto request, Address address) {
+    public void toEntity(AddressCreateRequestDto request, Address address) {
         address.setTitle(request.title());
         address.setCountryName(request.countryName());
         address.setProvinceName(request.provinceName());
@@ -49,7 +49,7 @@ public class AddressMapper {
         address.setDefaultAddress(request.defaultAddress());
     }
 
-    public void toEntity(UpdateAddressRequestDto request, Address address) {
+    public void toEntity(AddressUpdateRequestDto request, Address address) {
         address.setTitle(request.title());
         address.setCountryName(request.countryName());
         address.setProvinceName(request.provinceName());
