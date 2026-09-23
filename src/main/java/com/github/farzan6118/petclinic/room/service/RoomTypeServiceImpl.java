@@ -67,7 +67,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Override
     public void delete(UUID uuid) {
         RoomType roomType = getEntityByUuid(uuid);
-        roomType.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        roomType.setEntityStatus(EntityStatus.DELETED);
         log.info("room type inactivated");
     }
 }

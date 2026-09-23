@@ -95,7 +95,7 @@ public class RoomServiceImpl implements RoomService {
         if (!room.getEntityStatus().equals(EntityStatus.ACTIVE)) {
             throw new ValidationException("room is already inactive");
         }
-        room.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        room.setEntityStatus(EntityStatus.DELETED);
         log.info("room inactivated");
     }
 

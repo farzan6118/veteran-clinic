@@ -86,7 +86,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     @Override
     public void delete(UUID uuid) {
         Species species = this.getEntityByUuid(uuid);
-        species.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        species.setEntityStatus(EntityStatus.DELETED);
         log.info("species is inactive deleted");
     }
 }

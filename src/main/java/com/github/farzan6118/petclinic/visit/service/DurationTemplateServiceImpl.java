@@ -122,7 +122,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
                     "Duration template already inactive"
             );
         }
-        durationTemplate.setEntityStatus(EntityStatus.INACTIVE_NOT_DELETED);
+        durationTemplate.setEntityStatus(EntityStatus.INACTIVE);
         log.info("Duration template inactivated: {}", uuid);
     }
 
@@ -131,7 +131,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     public void activate(UUID uuid) {
         DurationTemplate durationTemplate = durationTemplateRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException("duration template not found"));
-        if (durationTemplate.getEntityStatus() != EntityStatus.INACTIVE_NOT_DELETED) {
+        if (durationTemplate.getEntityStatus() != EntityStatus.INACTIVE) {
             throw new ValidationException(
                     "duration.template.cannot.be.activated",
                     "Duration template cannot be activated"
@@ -150,7 +150,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
                     "duration.template.is.deleted",
                     "Duration template already deleted");
         }
-        entityByUuid.setEntityStatus(EntityStatus.INACTIVE_DELETED);
+        entityByUuid.setEntityStatus(EntityStatus.DELETED);
         log.info("duration template deleted");
     }
 
