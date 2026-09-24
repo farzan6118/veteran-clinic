@@ -15,15 +15,16 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     Optional<Room> findByUuid(UUID uuid);
 
-    boolean existsByRoomNumber(String code);
+    boolean existsByRoomNumberIgnoreCase(String code);
 
-    boolean existsByRoomNumberAndUuidNot(String roomNumber, UUID uuid);
+    boolean existsByRoomNumberIgnoreCaseAndUuidNot(String roomNumber, UUID uuid);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select room
             from Room room
             where room.active = true
+                and room.clinic.active = true
                 and lower(room.roomType.name) in :roomTypeNames
             order by room.id
             """)

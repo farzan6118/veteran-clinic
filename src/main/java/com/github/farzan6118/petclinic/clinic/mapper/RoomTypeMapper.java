@@ -6,7 +6,7 @@ import com.github.farzan6118.petclinic.clinic.dto.response.RoomTypeResponseDto;
 import com.github.farzan6118.petclinic.clinic.model.RoomType;
 import org.springframework.stereotype.Component;
 
-import java.util.Locale;
+import java.util.Objects;
 
 @Component
 public class RoomTypeMapper {
@@ -31,6 +31,6 @@ public class RoomTypeMapper {
     }
 
     private String normalizeName(String string) {
-        return string.toLowerCase(Locale.ROOT).trim();
+        return Objects.requireNonNull(string, "room type name is required").trim();
     }
 }

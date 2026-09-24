@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.pet.service;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
@@ -53,17 +54,18 @@ public class SpeciesServiceImpl implements SpeciesService {
     @Transactional
     @Override
     public void create(CreateSpeciesRequestDto request) {
-        validateUniqueContactInfo(request.code());
+        validateCodeUniqueness(request.code());
         Species species = new Species();
         speciesMapper.mapToSpecies(request, species);
         speciesRepository.save(species);
         log.info("species created");
     }
 
-    private void validateUniqueContactInfo(String code) {
-        if (speciesRepository.existsByCode(code)) {
-            throw new ValidationException("species exists",
-                    "species with code: '" + code + "' already exists");
+    private void validateCodeUniqueness(String code) {
+        String normalizedCode = code.trim();
+        if (speciesRepository.existsByCodeIgnoreCase(normalizedCode)) {
+            throw new ConflictException("species.code.exists",
+                    "species with code '" + code + "' already exists");
         }
     }
 
@@ -71,14 +73,15 @@ public class SpeciesServiceImpl implements SpeciesService {
     @Override
     public void update(UUID uuid, UpdateSpeciesRequestDto request) {
         Species species = this.getEntityByUuid(uuid);
-        validateEmailUniqueness(species.getCode(), uuid);
+        validateCodeUniqueness(request.code(), uuid);
         speciesMapper.mapToSpecies(request, species);
         log.info("species updated");
     }
 
-    private void validateEmailUniqueness(String code, UUID uuid) {
-        if (speciesRepository.existsByCodeAndUuidNot(code, uuid)) {
-            throw new NotFoundException("species with this code already exists");
+    private void validateCodeUniqueness(String code, UUID uuid) {
+        String normalizedCode = code.trim();
+        if (speciesRepository.existsByCodeIgnoreCaseAndUuidNot(normalizedCode, uuid)) {
+            throw new ConflictException("species.code.exists", "species with code '" + code + "' already exists");
         }
     }
 
@@ -86,7 +89,10 @@ public class SpeciesServiceImpl implements SpeciesService {
     @Override
     public void delete(UUID uuid) {
         Species species = this.getEntityByUuid(uuid);
+        if (species.getEntityStatus() != EntityStatus.ACTIVE) {
+            throw new ValidationException("species.is.inactive", "species is already inactive");
+        }
         species.setEntityStatus(EntityStatus.DELETED);
-        log.info("species is inactive deleted");
+        log.info("species deleted: {}", uuid);
     }
 }

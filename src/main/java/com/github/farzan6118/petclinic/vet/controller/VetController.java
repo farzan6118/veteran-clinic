@@ -41,7 +41,7 @@ public class VetController {
     }
 
     @PutMapping("/{uuid}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(
             @PathVariable UUID uuid,
             @Valid @RequestBody VetUpdateRequestDto request) {
@@ -49,7 +49,7 @@ public class VetController {
     }
 
     @DeleteMapping("/{uuid}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID uuid) {
         vetService.delete(uuid);
     }

@@ -35,24 +35,24 @@ public class PetController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody CreatePetRequestDto request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@Valid @RequestBody CreatePetRequestDto request) {
         petService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<Void> update(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update(
             @PathVariable UUID uuid,
             @Valid @RequestBody UpdatePetRequestDto request
     ) {
         petService.update(uuid, request);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID uuid) {
         petService.delete(uuid);
-        return ResponseEntity.noContent().build();
     }
 }
 

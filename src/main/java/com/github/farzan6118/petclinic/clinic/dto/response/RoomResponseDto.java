@@ -7,6 +7,7 @@ public record RoomResponseDto(
         String name,
         String code,
         RoomTypeResponseDto roomType,
-        Boolean active
+        Boolean active,
+        UUID clinicUuid
 ) {
 }

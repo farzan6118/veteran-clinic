@@ -35,23 +35,23 @@ public class RoomController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody CreateRoomRequestDto request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@Valid @RequestBody CreateRoomRequestDto request) {
         roomService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<Void> update(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update(
             @PathVariable UUID uuid,
             @Valid @RequestBody UpdateRoomRequestDto request) {
         roomService.update(uuid, request);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID uuid) {
         roomService.delete(uuid);
-        return ResponseEntity.noContent().build();
     }
 }
 

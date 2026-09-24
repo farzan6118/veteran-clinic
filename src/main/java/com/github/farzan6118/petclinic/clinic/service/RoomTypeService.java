@@ -5,8 +5,8 @@ import com.github.farzan6118.petclinic.clinic.dto.request.UpdateRoomTypeRequestD
 import com.github.farzan6118.petclinic.clinic.dto.response.RoomTypeResponseDto;
 import com.github.farzan6118.petclinic.clinic.model.RoomType;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface RoomTypeService {
@@ -15,7 +15,7 @@ public interface RoomTypeService {
 
     RoomType getEntityByUuid(UUID uuid);
 
-    List<RoomTypeResponseDto> findAll(PageAndSortRequestDto requestDto);
+    PageResponseDto<RoomTypeResponseDto> findAll(PageAndSortRequestDto requestDto);
 
     void create(CreateRoomTypeRequestDto request);
 

@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.vet.service;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
@@ -50,7 +51,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     private void checkCreateOverlapping(UUID vetUuid, LocalDateTime startTime, LocalDateTime endTime) {
         boolean overlapping = availabilityRepository.existsOverlappingAvailability(vetUuid, startTime, endTime);
         if (overlapping) {
-            throw new ValidationException("Vet already has an availability overlapping this time range");
+            throw new ConflictException("vet.availability.overlap", "Vet already has an availability overlapping this time range");
         }
     }
 
@@ -71,7 +72,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
         boolean overlapping = availabilityRepository.existsOverlappingAvailabilityForUpdate(
                 vetUuid, availabilityUuid, startTime, endTime);
         if (overlapping) {
-            throw new ValidationException("Vet already has an availability overlapping this time range");
+            throw new ConflictException("vet.availability.overlap", "Vet already has an availability overlapping this time range");
         }
     }
 
@@ -81,6 +82,9 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
 
         VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, vetUuid)
                 .orElseThrow(() -> new NotFoundException("Vet availability not found"));
+        if (availability.getEntityStatus() != EntityStatus.ACTIVE) {
+            throw new ValidationException("vet.availability.is.inactive", "vet availability is already inactive");
+        }
         availability.setEntityStatus(EntityStatus.DELETED);
         availability.setActive(false);
     }

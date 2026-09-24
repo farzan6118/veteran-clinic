@@ -35,21 +35,21 @@ public class SpeciesController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody CreateSpeciesRequestDto request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@Valid @RequestBody CreateSpeciesRequestDto request) {
         speciesService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<Void> update(@PathVariable UUID uuid,
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update(@PathVariable UUID uuid,
                                        @Valid @RequestBody UpdateSpeciesRequestDto request) {
         speciesService.update(uuid, request);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID uuid) {
         speciesService.delete(uuid);
-        return ResponseEntity.noContent().build();
     }
 }

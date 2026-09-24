@@ -1,0 +1,80 @@
+package com.github.farzan6118.petclinic.clinic.service;
+
+import com.github.farzan6118.petclinic.clinic.dto.request.CreateClinicRequestDto;
+import com.github.farzan6118.petclinic.clinic.dto.request.UpdateClinicRequestDto;
+import com.github.farzan6118.petclinic.clinic.dto.response.ClinicResponseDto;
+import com.github.farzan6118.petclinic.clinic.mapper.ClinicMapper;
+import com.github.farzan6118.petclinic.clinic.model.Clinic;
+import com.github.farzan6118.petclinic.clinic.repository.ClinicRepository;
+import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.enums.EntityStatus;
+import com.github.farzan6118.petclinic.common.exception.NotFoundException;
+import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.mapper.PageMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ClinicServiceImpl implements ClinicService {
+
+    private final ClinicRepository clinicRepository;
+    private final ClinicMapper clinicMapper;
+    private final PageMapper pageMapper;
+
+    @Override
+    public ClinicResponseDto getByUuid(UUID uuid) {
+        return clinicMapper.toDto(getEntityByUuid(uuid));
+    }
+
+    @Override
+    public Clinic getEntityByUuid(UUID uuid) {
+        return clinicRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("clinic not found"));
+    }
+
+    @Override
+    public PageResponseDto<ClinicResponseDto> findAll(PageAndSortRequestDto request) {
+        Pageable pageable = pageMapper.getPageable(request);
+        Page<Clinic> clinics = clinicRepository.findAll(pageable);
+        return pageMapper.toPageResponse(clinics, clinicMapper::toDto);
+    }
+
+    @Override
+    @Transactional
+    public void create(CreateClinicRequestDto request) {
+        clinicRepository.save(clinicMapper.toEntity(request));
+        log.info("clinic created");
+    }
+
+    @Override
+    @Transactional
+    public void update(UUID uuid, UpdateClinicRequestDto request) {
+        Clinic clinic = getEntityByUuid(uuid);
+        if (clinic.getEntityStatus() != EntityStatus.ACTIVE) {
+            throw new ValidationException("clinic.is.inactive", "clinic is already inactive");
+        }
+        clinicMapper.toEntity(request, clinic);
+        log.info("clinic updated: {}", uuid);
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID uuid) {
+        Clinic clinic = getEntityByUuid(uuid);
+        if (clinic.getEntityStatus() != EntityStatus.ACTIVE) {
+            throw new ValidationException("clinic.is.inactive", "clinic is already inactive");
+        }
+        clinic.setEntityStatus(EntityStatus.DELETED);
+        log.info("clinic deleted: {}", uuid);
+    }
+}

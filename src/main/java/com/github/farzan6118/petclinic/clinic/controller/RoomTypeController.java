@@ -5,6 +5,7 @@ import com.github.farzan6118.petclinic.clinic.dto.request.UpdateRoomTypeRequestD
 import com.github.farzan6118.petclinic.clinic.dto.response.RoomTypeResponseDto;
 import com.github.farzan6118.petclinic.clinic.service.RoomTypeService;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
+import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -29,29 +29,29 @@ public class RoomTypeController {
     }
 
     @GetMapping("/page")
-    public ResponseEntity<List<RoomTypeResponseDto>> findAll(
+    public ResponseEntity<PageResponseDto<RoomTypeResponseDto>> findAll(
             @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
         return ResponseEntity.ok(roomTypeService.findAll(requestDto));
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody CreateRoomTypeRequestDto request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@Valid @RequestBody CreateRoomTypeRequestDto request) {
         roomTypeService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<Void> update(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update(
             @PathVariable UUID uuid,
             @Valid @RequestBody UpdateRoomTypeRequestDto request) {
         roomTypeService.update(uuid, request);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID uuid) {
         roomTypeService.delete(uuid);
-        return ResponseEntity.noContent().build();
     }
 }
 

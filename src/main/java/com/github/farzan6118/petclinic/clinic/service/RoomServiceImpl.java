@@ -4,13 +4,16 @@ import com.github.farzan6118.petclinic.clinic.dto.request.CreateRoomRequestDto;
 import com.github.farzan6118.petclinic.clinic.dto.request.UpdateRoomRequestDto;
 import com.github.farzan6118.petclinic.clinic.dto.response.RoomResponseDto;
 import com.github.farzan6118.petclinic.clinic.mapper.RoomMapper;
+import com.github.farzan6118.petclinic.clinic.model.Clinic;
 import com.github.farzan6118.petclinic.clinic.model.Room;
+import com.github.farzan6118.petclinic.clinic.model.RoomType;
 import com.github.farzan6118.petclinic.clinic.repository.RoomRepository;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
@@ -33,6 +36,8 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
     private final PageMapper pageMapper;
+    private final RoomTypeService roomTypeService;
+    private final ClinicService clinicService;
 
     @Override
     public RoomResponseDto getByUuid(UUID uuid) {
@@ -57,18 +62,22 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public void create(CreateRoomRequestDto request) {
 
-        validateUniqueContactInfo(request.code());
+        validateCodeUniqueness(request.code());
+        var roomType = roomTypeService.getEntityByUuid(request.roomTypeUuid());
+        var clinic = clinicService.getEntityByUuid(request.clinicUuid());
+        validateActiveReferences(roomType, clinic);
         Room room = new Room();
-        roomMapper.mapToEntity(request, room);
+        roomMapper.mapToEntity(request, room, roomType, clinic);
 
         roomRepository.save(room);
         log.info("room created");
 
     }
 
-    private void validateUniqueContactInfo(String code) {
-        if (roomRepository.existsByRoomNumber(code)) {
-            throw new ValidationException("room exists", "room code'" + code + "' exists");
+    private void validateCodeUniqueness(String code) {
+        String normalizedCode = code.trim();
+        if (roomRepository.existsByRoomNumberIgnoreCase(normalizedCode)) {
+            throw new ConflictException("room.number.exists", "room number '" + code + "' already exists");
         }
     }
 
@@ -77,13 +86,25 @@ public class RoomServiceImpl implements RoomService {
     public void update(UUID uuid, UpdateRoomRequestDto request) {
         Room room = getEntityByUuid(uuid);
         validateCodeUniqueness(request.code(), uuid);
-        roomMapper.mapToEntity(request, room);
+        var roomType = roomTypeService.getEntityByUuid(request.roomTypeUuid());
+        var clinic = clinicService.getEntityByUuid(request.clinicUuid());
+        validateActiveReferences(roomType, clinic);
+        roomMapper.mapToEntity(request, room, roomType, clinic);
         log.info("room updated");
     }
 
     private void validateCodeUniqueness(String code, UUID roomUuid) {
-        if (roomRepository.existsByRoomNumberAndUuidNot(code, roomUuid)) {
-            throw new ValidationException("Room with this email already exists");
+        String normalizedCode = code.trim();
+        if (roomRepository.existsByRoomNumberIgnoreCaseAndUuidNot(normalizedCode, roomUuid)) {
+            throw new ConflictException("room.number.exists", "room number '" + code + "' already exists");
+        }
+    }
+
+    private void validateActiveReferences(RoomType roomType, Clinic clinic) {
+        if (roomType.getEntityStatus() != EntityStatus.ACTIVE
+                || clinic.getEntityStatus() != EntityStatus.ACTIVE
+                || !clinic.isActive()) {
+            throw new ValidationException("room.references.inactive", "room type and clinic must be active");
         }
     }
 
@@ -92,10 +113,10 @@ public class RoomServiceImpl implements RoomService {
     public void delete(UUID uuid) {
         Room room = this.getEntityByUuid(uuid);
         if (!room.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ValidationException("room is already inactive");
+            throw new ValidationException("room.is.inactive", "room is already inactive");
         }
         room.setEntityStatus(EntityStatus.DELETED);
-        log.info("room inactivated");
+        log.info("room deleted: {}", uuid);
     }
 
     @Override

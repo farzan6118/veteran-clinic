@@ -13,14 +13,14 @@ public class SpeciesMapper {
 
     public void mapToSpecies(CreateSpeciesRequestDto request, Species species) {
         species.setName(normalizeName(request.name()));
-        species.setCode(request.code());
+        species.setCode(toUpper(request.code()));
         species.setOrigin(request.origin());
         species.setDescription(request.description());
     }
 
     public void mapToSpecies(UpdateSpeciesRequestDto request, Species species) {
         species.setName(normalizeName(request.name()));
-        species.setCode(request.code());
+        species.setCode(toUpper(request.code()));
         species.setOrigin(request.origin());
         species.setDescription(request.description());
     }
@@ -36,6 +36,10 @@ public class SpeciesMapper {
     }
 
     private String normalizeName(String string) {
+        return string.toUpperCase(Locale.ROOT).trim();
+    }
+
+    private String toUpper(String string) {
         return string.toUpperCase(Locale.ROOT).trim();
     }
 }

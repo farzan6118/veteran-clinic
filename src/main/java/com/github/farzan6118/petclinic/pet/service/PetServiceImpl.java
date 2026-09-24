@@ -3,6 +3,7 @@ package com.github.farzan6118.petclinic.pet.service;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.NotFoundException;
 import com.github.farzan6118.petclinic.common.exception.ValidationException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
@@ -55,8 +56,10 @@ public class PetServiceImpl implements PetService {
     @Transactional
     public void create(CreatePetRequestDto request) {
         Owner owner = ownerService.getEntityByUuid(request.ownerUuid());
+        validateOwnerActive(owner);
         validateUniqueness(owner.getId(), request.name());
         Species species = speciesService.getEntityByUuid(request.speciesUuid());
+        validateSpeciesActive(species);
         Pet pet = new Pet();
         petMapper.mapToPet(request, owner, pet, species);
         petRepository.save(pet);
@@ -64,8 +67,8 @@ public class PetServiceImpl implements PetService {
     }
 
     private void validateUniqueness(Long ownerId, String name) {
-        if (petRepository.existsByOwnerIdAndNameIgnoreCase(ownerId, name)) {
-            throw new ValidationException("owner's pet already exists");
+        if (petRepository.existsByOwnerIdAndNameIgnoreCase(ownerId, name.trim())) {
+            throw new ConflictException("pet.exists", "owner already has a pet named '" + name + "'");
         }
     }
 
@@ -74,15 +77,29 @@ public class PetServiceImpl implements PetService {
     public void update(UUID uuid, UpdatePetRequestDto request) {
         Pet pet = this.getEntityByUuid(uuid);
         Owner owner = ownerService.getEntityByUuid(request.ownerUuid());
+        validateOwnerActive(owner);
         validateUniqueness(owner.getId(), request.name(), pet.getId());
         Species species = speciesService.getEntityByUuid(request.speciesUuid());
+        validateSpeciesActive(species);
         petMapper.mapToPet(request, owner, pet, species);
         log.info("pet updated");
     }
 
     private void validateUniqueness(Long ownerId, String name, Long petId) {
-        if (petRepository.existsByOwnerIdAndNameIgnoreCaseAndIdNot(ownerId, name, petId)) {
-            throw new ValidationException("owner's pet already exists");
+        if (petRepository.existsByOwnerIdAndNameIgnoreCaseAndIdNot(ownerId, name.trim(), petId)) {
+            throw new ConflictException("pet.exists", "owner already has a pet named '" + name + "'");
+        }
+    }
+
+    private void validateOwnerActive(Owner owner) {
+        if (owner.getEntityStatus() != EntityStatus.ACTIVE) {
+            throw new ValidationException("owner.is.inactive", "pet owner must be active");
+        }
+    }
+
+    private void validateSpeciesActive(Species species) {
+        if (species.getEntityStatus() != EntityStatus.ACTIVE) {
+            throw new ValidationException("species.is.inactive", "pet species must be active");
         }
     }
 
@@ -91,10 +108,10 @@ public class PetServiceImpl implements PetService {
     public void delete(UUID uuid) {
         Pet pet = this.getEntityByUuid(uuid);
         if (!pet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ValidationException("pet is already inactive");
+            throw new ValidationException("pet.is.inactive", "pet is already inactive");
         }
         pet.setEntityStatus(EntityStatus.DELETED);
-        log.info("pet is inactive");
+        log.info("pet deleted: {}", uuid);
     }
 
     @Override

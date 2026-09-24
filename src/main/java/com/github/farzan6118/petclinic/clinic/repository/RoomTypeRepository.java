@@ -10,4 +10,8 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
 
     Optional<RoomType> findByUuid(UUID uuid);
 
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndUuidNot(String name, UUID uuid);
+
 }

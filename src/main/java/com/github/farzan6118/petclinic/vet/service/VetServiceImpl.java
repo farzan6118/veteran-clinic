@@ -98,10 +98,10 @@ public class VetServiceImpl implements VetService {
     public void delete(UUID uuid) {
         Vet vet = this.getEntityByUuid(uuid);
         if (!vet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ValidationException("vet is already inactive");
+            throw new ValidationException("vet.is.inactive", "vet is already inactive");
         }
-        vet.setEntityStatus(EntityStatus.DELETED);
-        log.info("vet inactivated");
+        vet.setStatus(EntityStatus.DELETED);
+        log.info("vet deleted: {}", uuid);
     }
 
     @Override

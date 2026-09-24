@@ -1,6 +1,6 @@
 # Veterinary Clinic — Project Context
 
-Last reviewed: September 23, 2026
+Last reviewed: September 24, 2026
 
 This file is the working context for future development sessions. Read it before making project-wide assumptions or starting a new task.
 
@@ -27,11 +27,11 @@ The project has a serious domain-oriented backend foundation and is more than a 
 
 It is still active development and should not yet be considered production-ready.
 
-Important current state observed on September 23, 2026:
+Important current state observed on September 24, 2026:
 
-- The working tree was clean before this context file was added.
-- The current working tree does not compile after the in-progress `Person`/`Address` refactor. A compile check on September 23, 2026 found stale flat-person access in `FillInitialRecords`, visit mapping, and visit notifications; those call sites still need migration.
-- `mvnw test` currently fails: 26 tests ran, with 9 failures and 6 errors.
+- Check `git status` before editing because user changes may already be in progress.
+- `./mvnw -q -DskipTests compile` passes after the current entity and CRUD alignment changes.
+- Tests were not run during the September 24, 2026 review. The last recorded test run in this context is from September 21, 2026: 26 tests ran, with 9 failures and 6 errors.
 - The previously stale visit-service test has been replaced with a focused four-test suite for `VisitServiceCommandImpl`.
 - Security configuration currently permits all requests and therefore bypasses real endpoint protection.
 - A Keycloak client secret is currently stored directly in `application-home.yaml` and should be externalized.
@@ -84,7 +84,7 @@ config/         Spring, security, OpenAPI, Redis/client, and clinic configuratio
 infrastructure/ External integrations such as Keycloak and email
 owner/          Owner entity, DTOs, mapper, repository, service, controller
 pet/            Pet and species entities, DTOs, mappers, repositories, services, controllers
-room/           Rooms and room types
+clinic/         Clinics, rooms, and room types
 vet/            Veterinarians, profiles, and availability
 visit/          Visits, duration templates, scheduling, searching, and notifications
 ```
@@ -121,9 +121,10 @@ Important entities include:
 - `Vet`: association to a shared `Person` with veterinarian availability
 - `Profile`: shared contact details, birth date, and photo for a person
 - `Address`: structured address and optional geolocation associated with a person
+- `Clinic`: clinic location with a required address
+- `Room`: clinic room associated with a clinic and room type
 - `VetAvailability`: time periods during which a veterinarian can accept visits
 - `RoomType`: classification of clinic rooms
-- `Room`: physical resource used by onsite visits
 - `Visit`: appointment connecting a pet, veterinarian, time range, visit type, and optionally a room
 - `DurationTemplate`: reusable duration configuration, including the `STANDARD` duration used by visit booking
 - `MedicalRecord`: clinical record authored by a veterinarian for a pet and associated with a visit; currently connected to persistence and visit completion, but not yet exposed through a medical-record read API
@@ -165,9 +166,9 @@ Visit completion validates the current status and ensures the visit has started 
 
 Visit cancellation is idempotent for already-cancelled visits, but completed visits cannot be cancelled.
 
-Medical records are represented by `medical/model/MedicalRecord.java`. A record links a `Pet`, `Visit`, and `Vet`, and supports consultation, prescription, vaccination, surgery, follow-up, and other record types. It stores diagnosis, clinical notes, treatment plan, prescription text, follow-up information, vaccination details, and surgery details.
+Medical records are represented by `pet/model/MedicalRecord.java`. A record links a `Pet`, `Visit`, and `Vet`, and supports consultation, prescription, vaccination, surgery, follow-up, and other record types. It stores diagnosis, clinical notes, treatment plan, prescription text, follow-up information, vaccination details, and surgery details.
 
-The medical feature currently contains:
+The pet package's medical-record feature currently contains:
 
 - `MedicalRecordRepository` for persistence
 - `MedicalRecordService` and `MedicalRecordServiceImpl` for creation
@@ -181,6 +182,8 @@ The future API should expose a pet's medical-record history to authorized operat
 ## 7. API and application behavior
 
 The API is organized under `/api`.
+
+Clinic administration uses `/api/clinics`; room requests refer to a clinic and room type by UUID. Room types, species, pets, vets, and clinics use paginated list responses. CRUD writes validate duplicate natural keys before saving and use soft deletion through `EntityStatus`.
 
 The visit controller currently exposes endpoints for:
 
