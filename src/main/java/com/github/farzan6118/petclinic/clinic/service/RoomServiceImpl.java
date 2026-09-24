@@ -79,7 +79,7 @@ public class RoomServiceImpl implements RoomService {
     private void validateCodeUniqueness(String code) {
         String normalizedCode = code.trim();
         if (roomRepository.existsByRoomNumberIgnoreCase(normalizedCode)) {
-            throw new ConflictException("room.number.exists", "room number '" + code + "' already exists");
+            throw new ConflictException("A room with this number already exists", "room number '" + code + "' already exists");
         }
     }
 
@@ -98,7 +98,7 @@ public class RoomServiceImpl implements RoomService {
     private void validateCodeUniqueness(String code, UUID roomUuid) {
         String normalizedCode = code.trim();
         if (roomRepository.existsByRoomNumberIgnoreCaseAndUuidNot(normalizedCode, roomUuid)) {
-            throw new ConflictException("room.number.exists", "room number '" + code + "' already exists");
+            throw new ConflictException("A room with this number already exists", "room number '" + code + "' already exists");
         }
     }
 
@@ -106,7 +106,7 @@ public class RoomServiceImpl implements RoomService {
         if (roomType.getEntityStatus() != EntityStatus.ACTIVE
                 || clinic.getEntityStatus() != EntityStatus.ACTIVE
                 || !clinic.isActive()) {
-            throw new ConflictException("room.references.inactive", "room type and clinic must be active");
+            throw new ConflictException("The room type and clinic must be active", "room type and clinic must be active");
         }
     }
 
@@ -115,7 +115,7 @@ public class RoomServiceImpl implements RoomService {
     public void delete(UUID uuid) {
         Room room = this.getEntityByUuid(uuid);
         if (!room.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ConflictException("room.is.inactive", "room is already inactive");
+            throw new ConflictException("Room is already inactive", "room is already inactive");
         }
         room.setEntityStatus(EntityStatus.DELETED);
         log.info("room deleted: {}", uuid);

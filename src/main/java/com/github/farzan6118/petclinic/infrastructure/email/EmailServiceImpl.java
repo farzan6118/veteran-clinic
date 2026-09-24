@@ -161,7 +161,7 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
 
         } catch (MessagingException e) {
-            throw new ExternalServiceException("email.send.failed", "Failed to send email");
+            throw new ExternalServiceException("Email could not be sent", "Failed to send email");
         }
     }
 }

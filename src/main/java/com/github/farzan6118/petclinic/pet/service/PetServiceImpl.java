@@ -67,7 +67,7 @@ public class PetServiceImpl implements PetService {
 
     private void validateUniqueness(Long ownerId, String name) {
         if (petRepository.existsByOwnerIdAndNameIgnoreCase(ownerId, name.trim())) {
-            throw new ConflictException("pet.exists", "owner already has a pet named '" + name + "'");
+            throw new ConflictException("This owner already has a pet with that name", "owner already has a pet named '" + name + "'");
         }
     }
 
@@ -86,19 +86,19 @@ public class PetServiceImpl implements PetService {
 
     private void validateUniqueness(Long ownerId, String name, Long petId) {
         if (petRepository.existsByOwnerIdAndNameIgnoreCaseAndIdNot(ownerId, name.trim(), petId)) {
-            throw new ConflictException("pet.exists", "owner already has a pet named '" + name + "'");
+            throw new ConflictException("This owner already has a pet with that name", "owner already has a pet named '" + name + "'");
         }
     }
 
     private void validateOwnerActive(Owner owner) {
         if (owner.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ConflictException("owner.is.inactive", "pet owner must be active");
+            throw new ConflictException("The pet owner must be active", "pet owner must be active");
         }
     }
 
     private void validateSpeciesActive(Species species) {
         if (species.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ConflictException("species.is.inactive", "pet species must be active");
+            throw new ConflictException("The pet species must be active", "pet species must be active");
         }
     }
 
@@ -107,7 +107,7 @@ public class PetServiceImpl implements PetService {
     public void delete(UUID uuid) {
         Pet pet = this.getEntityByUuid(uuid);
         if (!pet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ConflictException("pet.is.inactive", "pet is already inactive");
+            throw new ConflictException("Pet is already inactive", "pet is already inactive");
         }
         pet.setEntityStatus(EntityStatus.DELETED);
         log.info("pet deleted: {}", uuid);

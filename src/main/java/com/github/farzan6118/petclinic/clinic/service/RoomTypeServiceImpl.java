@@ -86,7 +86,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public void delete(UUID uuid) {
         RoomType roomType = getEntityByUuid(uuid);
         if (roomType.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ConflictException("room.type.is.inactive", "room type is already inactive");
+            throw new ConflictException("Room type is already inactive", "room type is already inactive");
         }
         roomType.setEntityStatus(EntityStatus.DELETED);
         log.info("room type deleted: {}", uuid);
@@ -95,14 +95,14 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     private void validateNameUniqueness(String name) {
         String normalizedName = name.trim();
         if (roomTypeRepository.existsByNameIgnoreCase(normalizedName)) {
-            throw new ConflictException("room.type.name.exists", "room type '" + name + "' already exists");
+            throw new ConflictException("A room type with this name already exists", "room type '" + name + "' already exists");
         }
     }
 
     private void validateNameUniqueness(String name, UUID uuid) {
         String normalizedName = name.trim();
         if (roomTypeRepository.existsByNameIgnoreCaseAndUuidNot(normalizedName, uuid)) {
-            throw new ConflictException("room.type.name.exists", "room type '" + name + "' already exists");
+            throw new ConflictException("A room type with this name already exists", "room type '" + name + "' already exists");
         }
     }
 }

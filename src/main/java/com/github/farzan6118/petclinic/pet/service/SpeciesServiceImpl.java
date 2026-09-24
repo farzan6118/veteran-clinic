@@ -76,7 +76,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     private void validateCodeUniqueness(String code) {
         String normalizedCode = code.trim();
         if (speciesRepository.existsByCodeIgnoreCase(normalizedCode)) {
-            throw new ConflictException("species.code.exists",
+            throw new ConflictException("A species with this code already exists",
                     "species with code '" + code + "' already exists");
         }
     }
@@ -93,7 +93,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     private void validateCodeUniqueness(String code, UUID uuid) {
         String normalizedCode = code.trim();
         if (speciesRepository.existsByCodeIgnoreCaseAndUuidNot(normalizedCode, uuid)) {
-            throw new ConflictException("species.code.exists", "species with code '" + code + "' already exists");
+            throw new ConflictException("A species with this code already exists", "species with code '" + code + "' already exists");
         }
     }
 
@@ -102,7 +102,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     public void delete(UUID uuid) {
         Species species = this.getEntityByUuid(uuid);
         if (species.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ConflictException("species.is.inactive", "species is already inactive");
+            throw new ConflictException("Species is already inactive", "species is already inactive");
         }
         species.setEntityStatus(EntityStatus.DELETED);
         log.info("species deleted: {}", uuid);

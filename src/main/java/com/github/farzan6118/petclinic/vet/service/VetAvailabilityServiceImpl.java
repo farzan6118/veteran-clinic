@@ -51,7 +51,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     private void checkCreateOverlapping(UUID vetUuid, LocalDateTime startTime, LocalDateTime endTime) {
         boolean overlapping = availabilityRepository.existsOverlappingAvailability(vetUuid, startTime, endTime);
         if (overlapping) {
-            throw new ConflictException("vet.availability.overlap", "Vet already has an availability overlapping this time range");
+            throw new ConflictException("This availability overlaps another veterinarian availability", "Vet already has an availability overlapping this time range");
         }
     }
 
@@ -72,7 +72,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
         boolean overlapping = availabilityRepository.existsOverlappingAvailabilityForUpdate(
                 vetUuid, availabilityUuid, startTime, endTime);
         if (overlapping) {
-            throw new ConflictException("vet.availability.overlap", "Vet already has an availability overlapping this time range");
+            throw new ConflictException("This availability overlaps another veterinarian availability", "Vet already has an availability overlapping this time range");
         }
     }
 
@@ -83,7 +83,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
         VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, vetUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Vet availability not found"));
         if (availability.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ConflictException("vet.availability.is.inactive", "vet availability is already inactive");
+            throw new ConflictException("Veterinarian availability is already inactive", "vet availability is already inactive");
         }
         availability.setEntityStatus(EntityStatus.DELETED);
         availability.setActive(false);

@@ -80,12 +80,12 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
         String nameUpperCase = name.trim().toUpperCase(Locale.ROOT);
         if (durationTemplateRepository.existsByName(nameUpperCase)) {
             throw new ConflictException(
-                    "durationTemplate exists", "name: " + nameUpperCase + " already exists");
+                    "A duration template with this name already exists", "name: " + nameUpperCase + " already exists");
         }
 
         if (durationTemplateRepository.existsByDurationMinutes(duration)) {
             throw new ConflictException(
-                    "durationTemplate exists", "duration " + duration + " already exists");
+                    "A duration template with this duration already exists", "duration " + duration + " already exists");
         }
     }
 
@@ -102,13 +102,13 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
     private void validateNameUniqueness(String name, UUID uuid) {
         String nameUpperCase = name.trim().toUpperCase(Locale.ROOT);
         if (durationTemplateRepository.existsByNameAndUuidNot(nameUpperCase, uuid)) {
-            throw new ConflictException("duration.exists", "duration template with name: '" + nameUpperCase + "' already exists");
+            throw new ConflictException("A duration template with this name already exists", "duration template with name: '" + nameUpperCase + "' already exists");
         }
     }
 
     private void validateDurationUniqueness(Integer duration, UUID uuid) {
         if (durationTemplateRepository.existsByDurationMinutesAndUuidNot(duration, uuid)) {
-            throw new ConflictException("duration.exists", "duration template with duration: '" + duration + "' already exists");
+            throw new ConflictException("A duration template with this duration already exists", "duration template with duration: '" + duration + "' already exists");
         }
     }
 
@@ -118,7 +118,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
         DurationTemplate durationTemplate = getEntityByUuid(uuid);
         if (durationTemplate.getEntityStatus() != EntityStatus.ACTIVE) {
             throw new ConflictException(
-                    "duration.template.is.inactive",
+                    "Duration template is already inactive",
                     "Duration template already inactive"
             );
         }
@@ -133,7 +133,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
                 .orElseThrow(() -> new ResourceNotFoundException("duration template not found"));
         if (durationTemplate.getEntityStatus() != EntityStatus.INACTIVE) {
             throw new ConflictException(
-                    "duration.template.cannot.be.activated",
+                    "Only inactive duration templates can be activated",
                     "Duration template cannot be activated"
             );
         }
@@ -147,7 +147,7 @@ public class DurationTemplateServiceImpl implements DurationTemplateService {
         DurationTemplate entityByUuid = this.getEntityByUuid(uuid);
         if (!entityByUuid.getEntityStatus().equals(EntityStatus.ACTIVE)) {
             throw new ConflictException(
-                    "duration.template.is.deleted",
+                    "Duration template is already deleted",
                     "Duration template already deleted");
         }
         entityByUuid.setEntityStatus(EntityStatus.DELETED);

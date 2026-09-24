@@ -64,23 +64,23 @@ public class OwnerServiceImpl implements OwnerService {
     private void validateUniqueContactInfo(String mobile, String email) {
 
         if (ownerRepository.existsByPerson_profile_Email(email)) {
-            throw new ConflictException("email exists", "email " + email + " already exists");
+            throw new ConflictException("An owner with this email already exists", "Duplicate owner email");
         }
 
         if (ownerRepository.existsByPerson_profile_MobileNumber(mobile)) {
-            throw new ConflictException("mobile exists", "mobile " + mobile + " already exists");
+            throw new ConflictException("An owner with this mobile number already exists", "Duplicate owner mobile number");
         }
     }
 
     private void validateEmailUniqueness(String email, UUID uuid) {
         if (ownerRepository.existsByPerson_profile_EmailAndUuidNot(email, uuid)) {
-            throw new ConflictException("email exists", "owner email " + email + " already exists");
+            throw new ConflictException("An owner with this email already exists", "Duplicate owner email");
         }
     }
 
     private void validateMobileNumberUniqueness(String mobileNumber, UUID uuid) {
         if (ownerRepository.existsByPerson_profile_MobileNumberAndUuidNot(mobileNumber, uuid)) {
-            throw new ConflictException("mobile exists", "owner mobile " + mobileNumber + " already exists");
+            throw new ConflictException("An owner with this mobile number already exists", "Duplicate owner mobile number");
         }
     }
 
@@ -90,7 +90,7 @@ public class OwnerServiceImpl implements OwnerService {
         Owner owner = getEntityByUuid(uuid);
         if (owner.getEntityStatus() != EntityStatus.ACTIVE) {
             throw new ConflictException(
-                    "owner.is.inactive",
+                    "Owner is already inactive",
                     "owner is already inactive"
             );
         }
@@ -105,7 +105,7 @@ public class OwnerServiceImpl implements OwnerService {
                 .orElseThrow(() -> new ResourceNotFoundException("owner not found"));
         if (owner.getEntityStatus() != EntityStatus.INACTIVE) {
             throw new ConflictException(
-                    "owner.cannot.be.activated",
+                    "Only inactive owners can be activated",
                     "owner cannot be activated"
             );
         }
@@ -119,7 +119,7 @@ public class OwnerServiceImpl implements OwnerService {
         Owner owner = this.getEntityByUuid(uuid);
         if (!owner.getEntityStatus().equals(EntityStatus.ACTIVE)) {
             throw new ConflictException(
-                    "owner.is.deleted",
+                    "Owner is already deleted",
                     "owner is already deleted");
         }
         owner.setStatus(EntityStatus.DELETED);

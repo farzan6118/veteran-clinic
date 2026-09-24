@@ -73,7 +73,7 @@ public class ClinicServiceImpl implements ClinicService {
     public void update(UUID uuid, UpdateClinicRequestDto request) {
         Clinic clinic = getEntityByUuid(uuid);
         if (clinic.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ConflictException("clinic.is.inactive", "clinic is already inactive");
+            throw new ConflictException("Clinic is already inactive", "clinic is already inactive");
         }
         clinicMapper.toEntity(request, clinic);
         log.info("clinic updated: {}", uuid);
@@ -84,7 +84,7 @@ public class ClinicServiceImpl implements ClinicService {
     public void delete(UUID uuid) {
         Clinic clinic = getEntityByUuid(uuid);
         if (clinic.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ConflictException("clinic.is.inactive", "clinic is already inactive");
+            throw new ConflictException("Clinic is already inactive", "clinic is already inactive");
         }
         clinic.setEntityStatus(EntityStatus.DELETED);
         log.info("clinic deleted: {}", uuid);

@@ -75,10 +75,10 @@ public class VetServiceImpl implements VetService {
 
     private void validateUniqueContactInfo(String mobileNumber, String email) {
         if (vetRepository.existsByPerson_Profile_Email(email)) {
-            throw new ConflictException("email exists", "vet email " + email + " exists");
+            throw new ConflictException("A veterinarian with this email already exists", "Duplicate veterinarian email");
         }
         if (vetRepository.existsByPerson_Profile_MobileNumber(mobileNumber)) {
-            throw new ConflictException("mobileNumber exists", "vet mobileNumber " + mobileNumber + " exists");
+            throw new ConflictException("A veterinarian with this mobile number already exists", "Duplicate veterinarian mobile number");
         }
     }
 
@@ -94,13 +94,13 @@ public class VetServiceImpl implements VetService {
 
     private void validateEmailUniqueness(String email, UUID vetUuid) {
         if (vetRepository.existsByPerson_Profile_EmailAndUuidNot(email, vetUuid)) {
-            throw new ConflictException("email exists", "vet email " + email + " already exists");
+            throw new ConflictException("A veterinarian with this email already exists", "Duplicate veterinarian email");
         }
     }
 
     private void validateTelephoneUniqueness(String mobileNumber, UUID vetUuid) {
         if (vetRepository.existsByPerson_Profile_MobileNumberAndUuidNot(mobileNumber, vetUuid)) {
-            throw new ConflictException("mobileNumber exists", "vet mobileNumber " + mobileNumber + " already exists");
+            throw new ConflictException("A veterinarian with this mobile number already exists", "Duplicate veterinarian mobile number");
         }
     }
 
@@ -109,7 +109,7 @@ public class VetServiceImpl implements VetService {
     public void delete(UUID uuid) {
         Vet vet = this.getEntityByUuid(uuid);
         if (!vet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ConflictException("vet.is.inactive", "vet is already inactive");
+            throw new ConflictException("Veterinarian is already inactive", "vet is already inactive");
         }
         vet.setStatus(EntityStatus.DELETED);
         log.info("vet deleted: {}", uuid);

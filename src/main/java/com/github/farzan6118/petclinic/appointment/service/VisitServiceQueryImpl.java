@@ -37,7 +37,7 @@ public class VisitServiceQueryImpl implements VisitServiceQuery {
 
     private Visit getVisitByUuid(UUID uuid) {
         return visitRepository.findByUuid(uuid).orElseThrow(
-                () -> new ResourceNotFoundException("Visit not found: " + uuid));
+                () -> new ResourceNotFoundException("Visit not found", "Visit not found: " + uuid));
     }
 
     @Override
