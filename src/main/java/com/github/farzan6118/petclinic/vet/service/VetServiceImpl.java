@@ -1,5 +1,7 @@
 package com.github.farzan6118.petclinic.vet.service;
 
+import com.github.farzan6118.petclinic.appointment.model.Visit;
+import com.github.farzan6118.petclinic.appointment.service.VisitServiceQuery;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
@@ -9,6 +11,8 @@ import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundExceptio
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.response.TimeInterval;
+import com.github.farzan6118.petclinic.vet.dto.response.VetAvailableTimeSlot;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.mapper.VetMapper;
 import com.github.farzan6118.petclinic.vet.model.Vet;
@@ -22,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,6 +40,7 @@ public class VetServiceImpl implements VetService {
     private final VetRepository vetRepository;
     private final PageMapper pageMapper;
     private final VetMapper vetMapper;
+    private final VisitServiceQuery visitServiceQuery;
 
     @Override
     public VetResponseDto getByUuid(UUID uuid) {
@@ -67,6 +74,64 @@ public class VetServiceImpl implements VetService {
     public Vet getVetWithUuidLock(UUID vetUuid) {
         return vetRepository.findByUuidWithLock(vetUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
+    }
+    @Override
+    public List<VetAvailableTimeSlot> findAvailableVets(
+            LocalDateTime start,
+            LocalDateTime end) {
+        List<Vet> vets = vetRepository.findAvailableVets(start, end);
+        return vets.stream()
+                .map(vet -> {
+                    List<Visit> visits = visitServiceQuery
+                            .findOverlappingVisits(vet.getUuid(), start, end);
+
+                    List<TimeInterval> availableIntervals =
+                            calculateAvailableIntervals(start, end, visits);
+
+                    return new VetAvailableTimeSlot(
+                            vet.getUuid(),
+                            vet.getFullName(),
+                            availableIntervals
+                    );
+                })
+                .filter(vet -> !vet.availableIntervals().isEmpty())
+                .toList();
+    }
+
+    private List<TimeInterval> calculateAvailableIntervals(
+            LocalDateTime start,
+            LocalDateTime end,
+            List<Visit> visits) {
+
+        List<TimeInterval> result = new ArrayList<>();
+
+        LocalDateTime current = start;
+
+        for (Visit visit : visits) {
+
+            LocalDateTime visitStart = visit.getStartTime();
+            LocalDateTime visitEnd = visit.getEndTime();
+
+            if (current.isBefore(visitStart)) {
+                result.add(new TimeInterval(
+                        current.toLocalTime(),
+                        visitStart.toLocalTime()
+                ));
+            }
+
+            if (current.isBefore(visitEnd)) {
+                current = visitEnd;
+            }
+        }
+
+        if (current.isBefore(end)) {
+            result.add(new TimeInterval(
+                    current.toLocalTime(),
+                    end.toLocalTime()
+            ));
+        }
+
+        return result;
     }
 
     @Override

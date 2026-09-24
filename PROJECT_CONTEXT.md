@@ -123,7 +123,7 @@ Important entities include:
 - `Address`: structured address and optional geolocation associated with a person
 - `Clinic`: clinic location with a required address
 - `Room`: clinic room associated with a clinic and room type
-- `VetAvailability`: time periods during which a veterinarian can accept visits
+- `VetAvailableTimeSlot`: time periods during which a veterinarian can accept visits
 - `RoomType`: classification of clinic rooms
 - `Visit`: appointment connecting a pet, veterinarian, time range, visit type, and optionally a room
 - `DurationTemplate`: reusable duration configuration, including the `STANDARD` duration used by visit booking

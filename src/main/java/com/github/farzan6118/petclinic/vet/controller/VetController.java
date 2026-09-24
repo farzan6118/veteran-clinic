@@ -5,15 +5,18 @@ import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
+import com.github.farzan6118.petclinic.vet.dto.response.VetAvailableTimeSlot;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.service.VetService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +42,13 @@ public class VetController {
     @GetMapping
     public ResponseEntity<List<UuidAndTitleResponseDto>> findAllIdAndTitle() {
         return ResponseEntity.ok(vetService.findAllIdAndTitle());
+    }
+
+    @GetMapping("/availability")
+    public ResponseEntity<List<VetAvailableTimeSlot>> findOverlappingVisits(
+            @RequestParam @NotNull LocalDateTime start,
+            @RequestParam @NotNull LocalDateTime end) {
+        return ResponseEntity.ok(vetService.findAvailableVets(start, end));
     }
 
     @PostMapping

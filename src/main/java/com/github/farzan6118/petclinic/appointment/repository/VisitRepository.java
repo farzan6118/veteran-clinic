@@ -33,10 +33,6 @@ public interface VisitRepository extends JpaRepository<Visit, Long>, VisitQueryR
             """)
     Optional<Visit> findByUuidForUpdate(@Param("uuid") UUID uuid);
 
-    List<Visit> findAllByPetOwnerUuid(UUID currentOwnerUuid);
-
-    List<Visit> findAllByVetUuid(UUID currentVetUuid);
-
     @Query("""
             select case when count(v) > 0 then true else false end
             from Visit v

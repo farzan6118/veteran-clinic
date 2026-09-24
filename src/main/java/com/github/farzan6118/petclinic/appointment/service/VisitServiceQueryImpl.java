@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -77,4 +79,11 @@ public class VisitServiceQueryImpl implements VisitServiceQuery {
             }
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Visit> findOverlappingVisits(UUID vetUuid, LocalDateTime start, LocalDateTime end) {
+        return visitRepository.findOverlappingVisits(vetUuid, start, end);
+    }
+
 }

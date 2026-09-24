@@ -147,4 +147,23 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
             default -> new OrderSpecifier<>(Order.ASC, visit.startTime);
         };
     }
+
+    @Override
+    public List<Visit> findOverlappingVisits(
+            UUID vetUuid,
+            LocalDateTime start,
+            LocalDateTime end) {
+
+        QVisit visit = QVisit.visit;
+
+        return queryFactory
+                .selectFrom(visit)
+                .where(
+                        visit.vet.uuid.eq(vetUuid),
+                        visit.startTime.lt(end),
+                        visit.endTime.gt(start)
+                )
+                .orderBy(visit.startTime.asc())
+                .fetch();
+    }
 }

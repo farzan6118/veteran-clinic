@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface VetRepository extends JpaRepository<Vet, Long> {
-
-    Optional<Vet> findByUuid(UUID uuid);
+public interface VetRepository extends JpaRepository<Vet, Long>, VetQueryRepository {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select v from Vet v where v.uuid = :uuid")
     Optional<Vet> findByUuidWithLock(@Param("uuid") UUID uuid);
+
+    Optional<Vet> findByUuid(UUID uuid);
 
     boolean existsByPerson_Profile_EmailAndUuidNot(String email, UUID uuid);
 
@@ -28,10 +28,6 @@ public interface VetRepository extends JpaRepository<Vet, Long> {
     boolean existsByPerson_Profile_MobileNumber(String mobile);
 
     boolean existsByPerson_Profile_Email(String email);
-
-    boolean existsByUuid(UUID vetUuid);
-
-    List<Vet> findByAvailabilities(List<VetAvailability> availabilities);
 
     @Query("""
             select va from VetAvailability va
