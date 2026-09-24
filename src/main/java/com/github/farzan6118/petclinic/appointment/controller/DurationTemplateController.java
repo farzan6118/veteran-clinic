@@ -6,12 +6,14 @@ import com.github.farzan6118.petclinic.appointment.dto.response.DurationTemplate
 import com.github.farzan6118.petclinic.appointment.service.DurationTemplateService;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,6 +34,11 @@ public class DurationTemplateController {
         return ResponseEntity.ok(durationTemplateService.findAllPageable(requestDto));
     }
 
+    @GetMapping
+    public ResponseEntity<List<UuidAndTitleResponseDto>> findAllIdAndTitle() {
+        return ResponseEntity.ok(durationTemplateService.findAllIdAndTitle());
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void create(@Valid @RequestBody CreateDurationTemplateRequestDto request) {
@@ -47,19 +54,7 @@ public class DurationTemplateController {
         durationTemplateService.update(uuid, request);
     }
 
-    @PatchMapping("/{uuid}/activate")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void activate(@PathVariable UUID uuid) {
-        durationTemplateService.activate(uuid);
-    }
-
-    @PatchMapping("/{uuid}/inactivate")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void inactivate(@PathVariable UUID uuid) {
-        durationTemplateService.inactivate(uuid);
-    }
-
-    @DeleteMapping("/{uuid}/delete")
+    @DeleteMapping("/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID uuid) {
         durationTemplateService.delete(uuid);

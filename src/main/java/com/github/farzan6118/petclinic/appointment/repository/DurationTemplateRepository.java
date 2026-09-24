@@ -17,8 +17,6 @@ public interface DurationTemplateRepository extends JpaRepository<DurationTempla
 
     Optional<DurationTemplate> findByNameIgnoreCase(String name);
 
-    Optional<DurationTemplate> findByDurationMinutes(Integer durationMinutes);
-
     boolean existsByDurationMinutes(Integer durationMinutes);
 
     boolean existsByName(String name);

@@ -15,6 +15,7 @@ import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundExceptio
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +55,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     }
 
     @Override
+    @Cacheable(value = "roomType")
     public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
         return roomTypeRepository.findAll()
                 .stream()
@@ -63,6 +65,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "roomType")
     public void create(CreateRoomTypeRequestDto request) {
         validateNameUniqueness(request.name());
         RoomType roomType = new RoomType();
@@ -73,6 +76,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "roomType")
     public void update(UUID uuid, UpdateRoomTypeRequestDto request) {
         RoomType roomType = getEntityByUuid(uuid);
         validateNameUniqueness(request.name(), uuid);
@@ -82,6 +86,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "roomType")
     public void delete(UUID uuid) {
         RoomType roomType = getEntityByUuid(uuid);
         if (roomType.getEntityStatus() != EntityStatus.ACTIVE) {

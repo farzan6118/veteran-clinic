@@ -6,7 +6,9 @@ import com.github.farzan6118.petclinic.appointment.dto.response.DurationTemplate
 import com.github.farzan6118.petclinic.appointment.model.DurationTemplate;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface DurationTemplateService {
@@ -18,15 +20,11 @@ public interface DurationTemplateService {
 
     DurationTemplateResponseDto findByName(String name);
 
-    DurationTemplateResponseDto findByDuration(Integer duration);
+    List<UuidAndTitleResponseDto> findAllIdAndTitle();
 
     void create(CreateDurationTemplateRequestDto request);
 
     void update(UUID uuid, UpdateDurationTemplateRequestDto request);
-
-    void inactivate(UUID uuid);
-
-    void activate(UUID uuid);
 
     void delete(UUID uuid);
 }

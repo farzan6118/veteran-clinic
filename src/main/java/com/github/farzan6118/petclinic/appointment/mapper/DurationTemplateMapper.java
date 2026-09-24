@@ -4,6 +4,7 @@ import com.github.farzan6118.petclinic.appointment.dto.request.CreateDurationTem
 import com.github.farzan6118.petclinic.appointment.dto.request.UpdateDurationTemplateRequestDto;
 import com.github.farzan6118.petclinic.appointment.dto.response.DurationTemplateResponseDto;
 import com.github.farzan6118.petclinic.appointment.model.DurationTemplate;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
@@ -29,6 +30,15 @@ public class DurationTemplateMapper {
                 template.getName(),
                 template.getDurationMinutes(),
                 template.getDescription()
+        );
+    }
+
+    public UuidAndTitleResponseDto toUuidAndTitle(DurationTemplate durationTemplate) {
+        return new UuidAndTitleResponseDto(
+                durationTemplate.getUuid(),
+                String.format("%s (%d min)",
+                        durationTemplate.getName(),
+                        durationTemplate.getDurationMinutes())
         );
     }
 }

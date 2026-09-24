@@ -15,6 +15,7 @@ import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundExceptio
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +54,7 @@ public class ClinicServiceImpl implements ClinicService {
     }
 
     @Override
+    @Cacheable(value = "clinic")
     public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
         return clinicRepository.findAll()
                 .stream()
@@ -62,6 +64,7 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic")
     public void create(CreateClinicRequestDto request) {
         clinicRepository.save(clinicMapper.toEntity(request));
         log.info("clinic created");
@@ -69,6 +72,7 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic")
     public void update(UUID uuid, UpdateClinicRequestDto request) {
         Clinic clinic = getEntityByUuid(uuid);
         if (clinic.getEntityStatus() != EntityStatus.ACTIVE) {
@@ -80,6 +84,7 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "clinic")
     public void delete(UUID uuid) {
         Clinic clinic = getEntityByUuid(uuid);
         if (clinic.getEntityStatus() != EntityStatus.ACTIVE) {

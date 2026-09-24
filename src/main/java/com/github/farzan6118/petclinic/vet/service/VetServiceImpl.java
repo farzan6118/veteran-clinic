@@ -15,6 +15,7 @@ import com.github.farzan6118.petclinic.vet.model.Vet;
 import com.github.farzan6118.petclinic.vet.repository.VetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +55,7 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
+    @Cacheable(value = "vet")
     public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
         return vetRepository.findAll()
                 .stream()
@@ -61,8 +63,15 @@ public class VetServiceImpl implements VetService {
                 .toList();
     }
 
-    @Transactional
     @Override
+    public Vet getVetWithUuidLock(UUID vetUuid) {
+        return vetRepository.findByUuidWithLock(vetUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "vet")
     public void create(VetCreateRequestDto request) {
 
         validateUniqueContactInfo(request.profile().mobileNumber(), request.profile().email());
@@ -81,8 +90,9 @@ public class VetServiceImpl implements VetService {
         }
     }
 
-    @Transactional
     @Override
+    @Transactional
+    @CacheEvict(value = "vet")
     public void update(UUID uuid, VetUpdateRequestDto request) {
         Vet vet = getEntityByUuid(uuid);
         validateEmailUniqueness(request.profile().email(), uuid);
@@ -103,8 +113,9 @@ public class VetServiceImpl implements VetService {
         }
     }
 
-    @Transactional
     @Override
+    @Transactional
+    @CacheEvict(value = "vet")
     public void delete(UUID uuid) {
         Vet vet = this.getEntityByUuid(uuid);
         if (!vet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
@@ -114,10 +125,5 @@ public class VetServiceImpl implements VetService {
         log.info("vet deleted: {}", uuid);
     }
 
-    @Override
-    public Vet getVetWithUuidLock(UUID vetUuid) {
-        return vetRepository.findByUuidWithLock(vetUuid)
-                .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
-    }
 }
 

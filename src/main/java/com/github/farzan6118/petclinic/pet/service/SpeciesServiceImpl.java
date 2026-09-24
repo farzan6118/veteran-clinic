@@ -15,6 +15,7 @@ import com.github.farzan6118.petclinic.pet.model.Species;
 import com.github.farzan6118.petclinic.pet.repository.SpeciesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +55,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     }
 
     @Override
+    @Cacheable(value = "species")
     public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
         return speciesRepository.findAll()
                 .stream()
@@ -63,6 +65,7 @@ public class SpeciesServiceImpl implements SpeciesService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "species")
     public void create(CreateSpeciesRequestDto request) {
         validateCodeUniqueness(request.code());
         Species species = new Species();
@@ -81,6 +84,7 @@ public class SpeciesServiceImpl implements SpeciesService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "species")
     public void update(UUID uuid, UpdateSpeciesRequestDto request) {
         Species species = this.getEntityByUuid(uuid);
         validateCodeUniqueness(request.code(), uuid);
@@ -97,6 +101,7 @@ public class SpeciesServiceImpl implements SpeciesService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "species")
     public void delete(UUID uuid) {
         Species species = this.getEntityByUuid(uuid);
         if (species.getEntityStatus() != EntityStatus.ACTIVE) {

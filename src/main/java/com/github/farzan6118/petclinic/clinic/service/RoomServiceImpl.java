@@ -20,6 +20,7 @@ import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundExceptio
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -60,8 +61,39 @@ public class RoomServiceImpl implements RoomService {
         return pageMapper.toPageResponse(roomPage, roomMapper::mapToDto);
     }
 
+
+    @Override
+    @Cacheable(value = "room")
+    public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
+        return roomRepository.findAll()
+                .stream()
+                .map(roomMapper::toUuidAndTitle)
+                .toList();
+    }
+
+    @Override
+    public Room getAvailableRoomByVisitTypeAndVisitCategory(VisitType visitType, VisitCategory visitCategory) {
+        List<String> roomTypeNames = switch (visitType) {
+            case ONSITE -> List.of("examination", "individual");
+            case ONLINE, OFFSITE -> List.of();
+        };
+
+        if (roomTypeNames.isEmpty()) {
+            return null;
+        }
+
+        return roomRepository.findActiveRoomsByTypeNames(roomTypeNames)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "visit.room.not.available",
+                        "No room is available for the selected visit type and time"));
+    }
+
+
     @Transactional
     @Override
+    @CacheEvict(value = "room")
     public void create(CreateRoomRequestDto request) {
 
         validateCodeUniqueness(request.code());
@@ -85,6 +117,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "room")
     public void update(UUID uuid, UpdateRoomRequestDto request) {
         Room room = getEntityByUuid(uuid);
         validateCodeUniqueness(request.code(), uuid);
@@ -112,6 +145,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "room")
     public void delete(UUID uuid) {
         Room room = this.getEntityByUuid(uuid);
         if (!room.getEntityStatus().equals(EntityStatus.ACTIVE)) {
@@ -119,33 +153,6 @@ public class RoomServiceImpl implements RoomService {
         }
         room.setEntityStatus(EntityStatus.DELETED);
         log.info("room deleted: {}", uuid);
-    }
-
-    @Override
-    public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
-        return roomRepository.findAll()
-                .stream()
-                .map(roomMapper::toUuidAndTitle)
-                .toList();
-    }
-
-    @Override
-    public Room getAvailableRoomByVisitTypeAndVisitCategory(VisitType visitType, VisitCategory visitCategory) {
-        List<String> roomTypeNames = switch (visitType) {
-            case ONSITE -> List.of("examination", "individual");
-            case ONLINE, OFFSITE -> List.of();
-        };
-
-        if (roomTypeNames.isEmpty()) {
-            return null;
-        }
-
-        return roomRepository.findActiveRoomsByTypeNames(roomTypeNames)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "visit.room.not.available",
-                        "No room is available for the selected visit type and time"));
     }
 }
 

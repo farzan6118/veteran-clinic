@@ -36,7 +36,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class VisitServiceCommandImpl implements VisitServiceCommand {
 
     private final ClinicProperties clinicProperties;
@@ -53,7 +53,6 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
      * Book an available appointment slot for a pet.
      */
     @Override
-    @Transactional
     public void bookVisit(CreateVisitRequestDto request) {
         DurationTemplateResponseDto standardDuration = durationTemplateService.findByName("STANDARD");
 
@@ -171,7 +170,6 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
     }
 
     @Override
-    @Transactional
     public void cancelVisit(UUID uuid, String reason) {
 
         Visit visit = getVisitByUuid(uuid);
@@ -210,7 +208,6 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
      * Complete a visit.
      */
     @Override
-    @Transactional
     public void completeVisit(UUID uuid, CompleteVisitRequestDto request) {
         Visit visit = getVisitForUpdate(uuid);
         validateCompletion(visit);
@@ -268,7 +265,6 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
      * Reschedule a visit to another available slot.
      */
     @Override
-    @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
         Visit visit = visitRepository.findByUuidForUpdate(uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Visit not found", "Visit not found: " + uuid));
