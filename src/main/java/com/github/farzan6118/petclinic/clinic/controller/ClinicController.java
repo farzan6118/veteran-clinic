@@ -6,6 +6,7 @@ import com.github.farzan6118.petclinic.clinic.dto.response.ClinicResponseDto;
 import com.github.farzan6118.petclinic.clinic.service.ClinicService;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -32,6 +34,11 @@ public class ClinicController {
     public ResponseEntity<PageResponseDto<ClinicResponseDto>> findAll(
             @ModelAttribute @Valid PageAndSortRequestDto request) {
         return ResponseEntity.ok(clinicService.findAll(request));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UuidAndTitleResponseDto>> findAllIdAndTitle() {
+        return ResponseEntity.ok(clinicService.findAllCached());
     }
 
     @PostMapping

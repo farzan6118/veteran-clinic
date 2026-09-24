@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.vet.mapper;
 
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.person.mapper.AddressMapper;
 import com.github.farzan6118.petclinic.person.mapper.PersonMapper;
 import com.github.farzan6118.petclinic.person.mapper.ProfileMapper;
@@ -47,5 +48,12 @@ public class VetMapper {
         personMapper.toEntity(request.person(), person);
         profileMapper.toEntity(request.profile(), person.getProfile());
         addressMapper.toEntity(request.address(), person.getAddress());
+    }
+
+    public UuidAndTitleResponseDto toUuidAndTitle(Vet vet) {
+        return new UuidAndTitleResponseDto(
+                vet.getUuid(),
+                vet.getFullName()
+        );
     }
 }

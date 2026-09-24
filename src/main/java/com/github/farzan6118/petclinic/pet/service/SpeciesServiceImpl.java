@@ -2,6 +2,7 @@ package com.github.farzan6118.petclinic.pet.service;
 
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
@@ -14,11 +15,13 @@ import com.github.farzan6118.petclinic.pet.model.Species;
 import com.github.farzan6118.petclinic.pet.repository.SpeciesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -32,9 +35,10 @@ public class SpeciesServiceImpl implements SpeciesService {
     private final PageMapper pageMapper;
 
     @Override
+    @Cacheable(value = "speciesResponseDto", key = "#uuid")
     public SpeciesResponseDto getByUuid(UUID uuid) {
         Species species = getEntityByUuid(uuid);
-        return speciesMapper.mapToDto(species);
+        return speciesMapper.toDto(species);
     }
 
     @Override
@@ -47,7 +51,16 @@ public class SpeciesServiceImpl implements SpeciesService {
     public PageResponseDto<SpeciesResponseDto> findAll(PageAndSortRequestDto requestDto) {
         Pageable pageable = pageMapper.getPageable(requestDto);
         Page<Species> speciesPaged = speciesRepository.findAll(pageable);
-        return pageMapper.toPageResponse(speciesPaged, speciesMapper::mapToDto);
+        return pageMapper.toPageResponse(speciesPaged, speciesMapper::toDto);
+    }
+
+    @Override
+    @Cacheable(value = "species")
+    public List<UuidAndTitleResponseDto> findAllCached() {
+        return speciesRepository.findAll()
+                .stream()
+                .map(speciesMapper::toUuidAndTitle)
+                .toList();
     }
 
     @Transactional
@@ -55,7 +68,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     public void create(CreateSpeciesRequestDto request) {
         validateCodeUniqueness(request.code());
         Species species = new Species();
-        speciesMapper.mapToSpecies(request, species);
+        speciesMapper.toEntity(request, species);
         speciesRepository.save(species);
         log.info("species created");
     }
@@ -73,7 +86,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     public void update(UUID uuid, UpdateSpeciesRequestDto request) {
         Species species = this.getEntityByUuid(uuid);
         validateCodeUniqueness(request.code(), uuid);
-        speciesMapper.mapToSpecies(request, species);
+        speciesMapper.toEntity(request, species);
         log.info("species updated");
     }
 
@@ -94,4 +107,6 @@ public class SpeciesServiceImpl implements SpeciesService {
         species.setEntityStatus(EntityStatus.DELETED);
         log.info("species deleted: {}", uuid);
     }
+
+
 }

@@ -4,6 +4,7 @@ import com.github.farzan6118.petclinic.clinic.dto.request.CreateRoomTypeRequestD
 import com.github.farzan6118.petclinic.clinic.dto.request.UpdateRoomTypeRequestDto;
 import com.github.farzan6118.petclinic.clinic.dto.response.RoomTypeResponseDto;
 import com.github.farzan6118.petclinic.clinic.model.RoomType;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -11,7 +12,7 @@ import java.util.Objects;
 @Component
 public class RoomTypeMapper {
 
-    public RoomTypeResponseDto mapToDto(RoomType roomType) {
+    public RoomTypeResponseDto toDto(RoomType roomType) {
         return new RoomTypeResponseDto(
                 roomType.getUuid(),
                 roomType.getName(),
@@ -20,14 +21,21 @@ public class RoomTypeMapper {
         );
     }
 
-    public void mapToEntity(CreateRoomTypeRequestDto request, RoomType roomType) {
+    public void toEntity(CreateRoomTypeRequestDto request, RoomType roomType) {
         roomType.setName(normalizeName(request.name()));
         roomType.setDescription(request.description());
     }
 
-    public void mapToEntity(UpdateRoomTypeRequestDto request, RoomType roomType) {
+    public void toEntity(UpdateRoomTypeRequestDto request, RoomType roomType) {
         roomType.setName(normalizeName(request.name()));
         roomType.setDescription(request.description());
+    }
+
+    public UuidAndTitleResponseDto toUuidAndTitle(RoomType roomType) {
+        return new UuidAndTitleResponseDto(
+                roomType.getUuid(),
+                roomType.getName()
+        );
     }
 
     private String normalizeName(String string) {

@@ -5,8 +5,10 @@ import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.pet.dto.request.CreateSpeciesRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.request.UpdateSpeciesRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.response.SpeciesResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.pet.model.Species;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface SpeciesService {
@@ -15,6 +17,8 @@ public interface SpeciesService {
     Species getEntityByUuid(UUID uuid);
 
     PageResponseDto<SpeciesResponseDto> findAll(PageAndSortRequestDto requestDto);
+
+    List<UuidAndTitleResponseDto> findAllCached();
 
     void create(CreateSpeciesRequestDto request);
 

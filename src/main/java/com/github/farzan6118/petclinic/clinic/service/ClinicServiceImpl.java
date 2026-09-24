@@ -8,17 +8,20 @@ import com.github.farzan6118.petclinic.clinic.model.Clinic;
 import com.github.farzan6118.petclinic.clinic.repository.ClinicRepository;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -47,6 +50,15 @@ public class ClinicServiceImpl implements ClinicService {
         Pageable pageable = pageMapper.getPageable(request);
         Page<Clinic> clinics = clinicRepository.findAll(pageable);
         return pageMapper.toPageResponse(clinics, clinicMapper::toDto);
+    }
+
+    @Override
+    @Cacheable(value = "clinics")
+    public List<UuidAndTitleResponseDto> findAllCached() {
+        return clinicRepository.findAll()
+                .stream()
+                .map(clinicMapper::toUuidAndTitle)
+                .toList();
     }
 
     @Override

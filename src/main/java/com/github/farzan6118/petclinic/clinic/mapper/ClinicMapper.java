@@ -4,6 +4,7 @@ import com.github.farzan6118.petclinic.clinic.dto.request.CreateClinicRequestDto
 import com.github.farzan6118.petclinic.clinic.dto.request.UpdateClinicRequestDto;
 import com.github.farzan6118.petclinic.clinic.dto.response.ClinicResponseDto;
 import com.github.farzan6118.petclinic.clinic.model.Clinic;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.person.mapper.AddressMapper;
 import com.github.farzan6118.petclinic.person.model.Address;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +35,12 @@ public class ClinicMapper {
         Address address = clinic.getAddress();
         addressMapper.toEntity(request.address(), address);
         clinic.setActive(request.active());
+    }
+
+    public UuidAndTitleResponseDto toUuidAndTitle(Clinic clinic) {
+        return new UuidAndTitleResponseDto(
+                clinic.getUuid(),
+                clinic.getAddress().getTitle()
+        );
     }
 }

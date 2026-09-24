@@ -8,17 +8,20 @@ import com.github.farzan6118.petclinic.clinic.model.RoomType;
 import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -34,7 +37,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Override
     public RoomTypeResponseDto getByUuid(UUID uuid) {
         RoomType roomType = getEntityByUuid(uuid);
-        return roomTypeMapper.mapToDto(roomType);
+        return roomTypeMapper.toDto(roomType);
     }
 
     @Override
@@ -47,7 +50,16 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public PageResponseDto<RoomTypeResponseDto> findAll(PageAndSortRequestDto requestDto) {
         Pageable pageable = pageMapper.getPageable(requestDto);
         Page<RoomType> roomTypePage = roomTypeRepository.findAll(pageable);
-        return pageMapper.toPageResponse(roomTypePage, roomTypeMapper::mapToDto);
+        return pageMapper.toPageResponse(roomTypePage, roomTypeMapper::toDto);
+    }
+
+    @Override
+    @Cacheable(value = "rooms")
+    public List<UuidAndTitleResponseDto> findAllCached() {
+        return roomTypeRepository.findAll()
+                .stream()
+                .map(roomTypeMapper::toUuidAndTitle)
+                .toList();
     }
 
     @Transactional
@@ -55,7 +67,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public void create(CreateRoomTypeRequestDto request) {
         validateNameUniqueness(request.name());
         RoomType roomType = new RoomType();
-        roomTypeMapper.mapToEntity(request, roomType);
+        roomTypeMapper.toEntity(request, roomType);
         roomTypeRepository.save(roomType);
         log.info("room type created");
     }
@@ -65,7 +77,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public void update(UUID uuid, UpdateRoomTypeRequestDto request) {
         RoomType roomType = getEntityByUuid(uuid);
         validateNameUniqueness(request.name(), uuid);
-        roomTypeMapper.mapToEntity(request, roomType);
+        roomTypeMapper.toEntity(request, roomType);
         log.info("room type updated");
     }
 

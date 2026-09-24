@@ -8,8 +8,10 @@ import com.github.farzan6118.petclinic.clinic.model.Clinic;
 import com.github.farzan6118.petclinic.clinic.model.Room;
 import com.github.farzan6118.petclinic.clinic.model.RoomType;
 import com.github.farzan6118.petclinic.clinic.repository.RoomRepository;
+import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
@@ -18,6 +20,7 @@ import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundExceptio
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -119,9 +122,12 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public RoomResponseDto getRoomByUuid(UUID uuid) {
-        Room room = getEntityByUuid(uuid);
-        return roomMapper.mapToDto(room);
+    @Cacheable(value = "rooms")
+    public List<UuidAndTitleResponseDto> findAllCached() {
+        return roomRepository.findAll()
+                .stream()
+                .map(roomMapper::toUuidAndTitle)
+                .toList();
     }
 
     @Override

@@ -37,7 +37,7 @@ class SpeciesServiceImplTest {
 
         service.create(request);
 
-        verify(speciesMapper).mapToSpecies(eq(request), any(Species.class));
+        verify(speciesMapper).toEntity(eq(request), any(Species.class));
         verify(speciesRepository).save(any(Species.class));
     }
 

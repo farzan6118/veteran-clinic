@@ -5,6 +5,7 @@ import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.pet.dto.request.CreateSpeciesRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.request.UpdateSpeciesRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.response.SpeciesResponseDto;
+import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.pet.service.SpeciesService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -32,6 +34,11 @@ public class SpeciesController {
     public ResponseEntity<PageResponseDto<SpeciesResponseDto>> findAll(
             @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
         return ResponseEntity.ok(speciesService.findAll(requestDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UuidAndTitleResponseDto>> findAllIdAndTitle() {
+        return ResponseEntity.ok(speciesService.findAllCached());
     }
 
     @PostMapping
