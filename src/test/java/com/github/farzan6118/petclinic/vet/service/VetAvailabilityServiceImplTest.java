@@ -28,16 +28,20 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class VetAvailabilityServiceImplTest {
 
-    @Mock private VetAvailabilityRepository availabilityRepository;
-    @Mock private VetRepository vetRepository;
-    @Mock private PageMapper pageMapper;
-    @Mock private VetAvailabilityMapper vetAvailabilityMapper;
-    @InjectMocks private VetAvailabilityServiceImpl service;
-
     private final UUID vetUuid = UUID.randomUUID();
     private final UUID availabilityUuid = UUID.randomUUID();
     private final LocalDateTime start = LocalDateTime.now().plusDays(2).withHour(9).withMinute(0).withSecond(0).withNano(0);
     private final LocalDateTime end = start.plusHours(2);
+    @Mock
+    private VetAvailabilityRepository availabilityRepository;
+    @Mock
+    private VetRepository vetRepository;
+    @Mock
+    private PageMapper pageMapper;
+    @Mock
+    private VetAvailabilityMapper vetAvailabilityMapper;
+    @InjectMocks
+    private VetAvailabilityServiceImpl service;
 
     @Test
     void createAvailability_savesForActiveVetWhenSlotDoesNotOverlap() {

@@ -30,10 +30,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class VetServiceImplTest {
 
-    @Mock private VetRepository vetRepository;
-    @Mock private PageMapper pageMapper;
-    @Mock private VetMapper vetMapper;
-    @InjectMocks private VetServiceImpl service;
+    @Mock
+    private VetRepository vetRepository;
+    @Mock
+    private PageMapper pageMapper;
+    @Mock
+    private VetMapper vetMapper;
+    @InjectMocks
+    private VetServiceImpl service;
 
     @Test
     void create_shouldPersistNestedPersonWhenContactIsUnique() {

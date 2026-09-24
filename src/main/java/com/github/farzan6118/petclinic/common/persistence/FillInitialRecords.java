@@ -85,7 +85,7 @@ public class FillInitialRecords implements CommandLineRunner {
         if (clinicRepository.count() != 0) return;
         Clinic clinic = new Clinic();
         clinic.setAddress(address("Main clinic", "Berlin", "Berlin", "Afrikanische Str.",
-                1, "12A",  52.52D, 13.4D));
+                1, "12A", 52.52D, 13.4D));
         clinic.setActive(true);
         clinicRepository.save(clinic);
     }

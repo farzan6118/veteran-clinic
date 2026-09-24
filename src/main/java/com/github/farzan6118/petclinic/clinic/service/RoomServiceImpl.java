@@ -8,7 +8,6 @@ import com.github.farzan6118.petclinic.clinic.model.Clinic;
 import com.github.farzan6118.petclinic.clinic.model.Room;
 import com.github.farzan6118.petclinic.clinic.model.RoomType;
 import com.github.farzan6118.petclinic.clinic.repository.RoomRepository;
-import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;

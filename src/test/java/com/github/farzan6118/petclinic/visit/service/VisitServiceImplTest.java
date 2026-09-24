@@ -39,9 +39,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -49,23 +47,29 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class VisitServiceImplTest {
 
-    @Mock private VisitRepository visitRepository;
-    @Mock private ClinicProperties clinicProperties;
-    @Mock private RoomService roomService;
-    @Mock private PetService petService;
-    @Mock private VetService vetService;
-    @Mock private VetAvailabilityService vetAvailabilityService;
-    @Mock private DurationTemplateService durationTemplateService;
-    @Mock private VisitNotificationService visitNotificationService;
-    @Mock private MedicalRecordService medicalRecordService;
-
-    @InjectMocks
-    private VisitServiceCommandImpl service;
-
     private final UUID petUuid = UUID.randomUUID();
     private final UUID vetUuid = UUID.randomUUID();
     private final UUID visitUuid = UUID.randomUUID();
-
+    @Mock
+    private VisitRepository visitRepository;
+    @Mock
+    private ClinicProperties clinicProperties;
+    @Mock
+    private RoomService roomService;
+    @Mock
+    private PetService petService;
+    @Mock
+    private VetService vetService;
+    @Mock
+    private VetAvailabilityService vetAvailabilityService;
+    @Mock
+    private DurationTemplateService durationTemplateService;
+    @Mock
+    private VisitNotificationService visitNotificationService;
+    @Mock
+    private MedicalRecordService medicalRecordService;
+    @InjectMocks
+    private VisitServiceCommandImpl service;
     private Pet pet;
     private Vet vet;
     private Room room;

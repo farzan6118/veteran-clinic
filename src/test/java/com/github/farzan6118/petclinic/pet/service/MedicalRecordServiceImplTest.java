@@ -14,14 +14,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
 
 @ExtendWith(MockitoExtension.class)
 class MedicalRecordServiceImplTest {
 
-    @Mock private MedicalRecordRepository repository;
-    @Mock private MedicalRecordMapper mapper;
-    @InjectMocks private MedicalRecordServiceImpl service;
+    @Mock
+    private MedicalRecordRepository repository;
+    @Mock
+    private MedicalRecordMapper mapper;
+    @InjectMocks
+    private MedicalRecordServiceImpl service;
 
     @Test
     void createMapsAndPersistsMedicalRecord() {

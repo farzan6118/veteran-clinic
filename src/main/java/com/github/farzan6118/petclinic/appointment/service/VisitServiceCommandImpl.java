@@ -3,7 +3,6 @@ package com.github.farzan6118.petclinic.appointment.service;
 import com.github.farzan6118.petclinic.appointment.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.appointment.dto.request.CreateVisitRequestDto;
 import com.github.farzan6118.petclinic.appointment.dto.request.RescheduleVisitRequestDto;
-import com.github.farzan6118.petclinic.appointment.dto.request.VisitAdvancedSearch;
 import com.github.farzan6118.petclinic.appointment.dto.response.DurationTemplateResponseDto;
 import com.github.farzan6118.petclinic.appointment.model.Visit;
 import com.github.farzan6118.petclinic.appointment.repository.VisitRepository;
@@ -93,8 +92,8 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
 
         vetAvailabilityService.findAvailableByUuidAndTimeRange(vet.getUuid(), visitStart, visitEnd)
                 .orElseThrow(() -> new ConflictException(
-                    "The veterinarian is not available at this time",
-                    "No veterinarian availability covers the requested time")
+                        "The veterinarian is not available at this time",
+                        "No veterinarian availability covers the requested time")
                 );
 
         boolean existsVetReservation = visitRepository.existsVetReservation(
@@ -189,21 +188,6 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
         log.info("Visit cancelled. visitUuid={}", visit.getUuid());
     }
 
-    private void dateTimeValidation(VisitAdvancedSearch request) {
-        if (request.createdDateFrom() != null && request.createdDateTo() != null) {
-            if (request.createdDateFrom().isAfter(request.createdDateTo())) {
-                throw new BadRequestException("Created date start must be on or before created date end",
-                        "Created date start is after created date end");
-            }
-        }
-        if (request.visitDateFrom() != null && request.visitDateTo() != null) {
-            if (request.visitDateFrom().isAfter(request.visitDateTo())) {
-                throw new BadRequestException("Visit date start must be on or before visit date end",
-                        "Visit date start is after visit date end");
-            }
-        }
-    }
-
     /**
      * Complete a visit.
      */
@@ -235,7 +219,8 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
 
         switch (visit.getStatus()) {
 
-            case CANCELLED -> throw new ConflictException("A cancelled visit cannot be completed", "Cancelled visit cannot be completed");
+            case CANCELLED ->
+                    throw new ConflictException("A cancelled visit cannot be completed", "Cancelled visit cannot be completed");
 
             case COMPLETED -> throw new ConflictException("Visit is already completed", "Visit is already completed");
 

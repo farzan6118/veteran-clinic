@@ -23,10 +23,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SpeciesServiceImplTest {
 
-    @Mock private SpeciesRepository speciesRepository;
-    @Mock private SpeciesMapper speciesMapper;
-    @Mock private com.github.farzan6118.petclinic.common.mapper.PageMapper pageMapper;
-    @InjectMocks private SpeciesServiceImpl service;
+    @Mock
+    private SpeciesRepository speciesRepository;
+    @Mock
+    private SpeciesMapper speciesMapper;
+    @Mock
+    private com.github.farzan6118.petclinic.common.mapper.PageMapper pageMapper;
+    @InjectMocks
+    private SpeciesServiceImpl service;
 
     @Test
     void create_shouldMapAndSaveWhenCodeIsUnique() {

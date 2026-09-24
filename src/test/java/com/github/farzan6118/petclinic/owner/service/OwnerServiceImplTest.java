@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,10 +27,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OwnerServiceImplTest {
 
-    @Mock private OwnerRepository ownerRepository;
-    @Mock private OwnerMapper ownerMapper;
-    @Mock private PageMapper pageMapper;
-    @InjectMocks private OwnerServiceImpl service;
+    @Mock
+    private OwnerRepository ownerRepository;
+    @Mock
+    private OwnerMapper ownerMapper;
+    @Mock
+    private PageMapper pageMapper;
+    @InjectMocks
+    private OwnerServiceImpl service;
 
     @Test
     void create_shouldRejectDuplicateEmail() {

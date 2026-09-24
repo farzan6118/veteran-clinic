@@ -25,15 +25,20 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PetServiceImplTest {
 
-    @Mock private SpeciesService speciesService;
-    @Mock private PetRepository petRepository;
-    @Mock private PageMapper pageMapper;
-    @Mock private PetMapper petMapper;
-    @Mock private OwnerService ownerService;
-    @InjectMocks private PetServiceImpl service;
-
     private final UUID ownerUuid = UUID.randomUUID();
     private final UUID speciesUuid = UUID.randomUUID();
+    @Mock
+    private SpeciesService speciesService;
+    @Mock
+    private PetRepository petRepository;
+    @Mock
+    private PageMapper pageMapper;
+    @Mock
+    private PetMapper petMapper;
+    @Mock
+    private OwnerService ownerService;
+    @InjectMocks
+    private PetServiceImpl service;
 
     @Test
     void create_shouldResolveReferencesMapAndSave() {

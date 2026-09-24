@@ -46,6 +46,8 @@ public class SpeciesMapper {
     private String toUpper(String string) {
         return string.toUpperCase(Locale.ROOT).trim();
     }
-    private String toLower(String string) { return string.toLowerCase(Locale.ROOT).trim();
+
+    private String toLower(String string) {
+        return string.toLowerCase(Locale.ROOT).trim();
     }
 }

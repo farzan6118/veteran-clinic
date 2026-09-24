@@ -18,17 +18,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DurationTemplateServiceImplTest {
 
-    @Mock private DurationTemplateRepository repository;
-    @Mock private DurationTemplateMapper mapper;
-    @Mock private PageMapper pageMapper;
-    @InjectMocks private DurationTemplateServiceImpl service;
+    @Mock
+    private DurationTemplateRepository repository;
+    @Mock
+    private DurationTemplateMapper mapper;
+    @Mock
+    private PageMapper pageMapper;
+    @InjectMocks
+    private DurationTemplateServiceImpl service;
 
     @Test
     void create_normalizesNameAndSaves() {
