@@ -12,8 +12,9 @@ import com.github.farzan6118.petclinic.clinic.service.RoomService;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.BadRequestException;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.config.ClinicProperties;
 import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
 import com.github.farzan6118.petclinic.pet.model.MedicalRecord;
@@ -92,7 +93,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
         }
 
         vetAvailabilityService.findAvailableByUuidAndTimeRange(vet.getUuid(), visitStart, visitEnd)
-                .orElseThrow(() -> new ValidationException(
+                .orElseThrow(() -> new ConflictException(
                         "the vet is not available in this date time",
                         "the vet is not available in this date time")
                 );
@@ -101,7 +102,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
                 vet.getUuid(), visitStart, visitEnd, visitUuid);
 
         if (existsVetReservation) {
-            throw new ValidationException(
+            throw new ConflictException(
                     "vet is busy in this time",
                     "vet is busy in this time");
         }
@@ -112,7 +113,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
 
         if (clinicProperties.closeDays().contains(visitDate.getDayOfWeek())) {
             String message = String.format("the clinic is closed on %s (%s)", visitDate.getDayOfWeek(), visitDate);
-            throw new ValidationException(message, message);
+            throw new BadRequestException(message, message);
         }
 
         ClinicProperties.WorkingHours workingHours = clinicProperties.workingHours();
@@ -123,7 +124,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
             String message = String.format("the visit must be scheduled between %s and %s on %s",
                     workingHours.start(), workingHours.end(), visitDate);
 
-            throw new ValidationException(message, message);
+            throw new BadRequestException(message, message);
         }
     }
 
@@ -139,7 +140,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
             String message = String.format("the room %s is already booked from %s to %s",
                     room.getName(), visitStart, visitEnd);
 
-            throw new ValidationException(message, message);
+            throw new ConflictException(message, message);
         }
     }
 
@@ -151,19 +152,19 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
             String message = String.format("the pet already has an appointment from %s to %s",
                     visitStart, visitEnd);
 
-            throw new ValidationException(message, message);
+            throw new ConflictException(message, message);
         }
     }
 
     private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
         if (!startTime.isBefore(endTime)) {
-            throw new ValidationException(
+            throw new BadRequestException(
                     "visit visitDateTo time must be after visitDateFrom time",
                     "visit visitDateTo time must be after visitDateFrom time");
         }
 
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
-            throw new ValidationException(
+            throw new BadRequestException(
                     "visit visitDateFrom and visitDateTo time must be on the same day",
                     "visit visitDateFrom and visitDateTo time must be on the same day");
         }
@@ -180,7 +181,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
         }
 
         if (visit.getStatus() == VisitStatus.COMPLETED) {
-            throw new NotFoundException("visit.already.completed", "Completed visit cannot be cancelled");
+            throw new ConflictException("visit.already.completed", "Completed visit cannot be cancelled");
         }
 
         visit.cancel();
@@ -193,7 +194,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
     private void dateTimeValidation(VisitAdvancedSearch request) {
         if (request.createdDateFrom() != null && request.createdDateTo() != null) {
             if (request.createdDateFrom().isAfter(request.createdDateTo())) {
-                throw new ValidationException(
+                throw new BadRequestException(
                         "invalid.created.date.from.created.date.to",
                         "create date from is after create date to"
                 );
@@ -201,7 +202,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
         }
         if (request.visitDateFrom() != null && request.visitDateTo() != null) {
             if (request.visitDateFrom().isAfter(request.visitDateTo())) {
-                throw new ValidationException(
+                throw new BadRequestException(
                         "invalid.visit.date.from.visit.date.to",
                         "visit date from is after visit date to"
                 );
@@ -229,7 +230,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
 
     private Visit getVisitForUpdate(UUID uuid) {
         return visitRepository.findByUuidForUpdate(uuid)
-                .orElseThrow(() -> new NotFoundException("visit.not.found", "Visit not found: " + uuid));
+                .orElseThrow(() -> new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
     }
 
     private void validateCompletion(Visit visit) {
@@ -241,9 +242,9 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
 
         switch (visit.getStatus()) {
 
-            case CANCELLED -> throw new ValidationException("visit.cancelled", "Cancelled visit cannot be completed");
+            case CANCELLED -> throw new ConflictException("visit.cancelled", "Cancelled visit cannot be completed");
 
-            case COMPLETED -> throw new ValidationException("visit.already.completed", "Visit is already completed");
+            case COMPLETED -> throw new ConflictException("visit.already.completed", "Visit is already completed");
 
             default -> {
                 // Valid states can continue.
@@ -259,11 +260,11 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
         LocalDateTime endTime = visit.getEndTime();
 
         if (now.isBefore(startTime)) {
-            throw new ValidationException("visit.not.started", "Visit has not started yet");
+            throw new BadRequestException("visit.not.started", "Visit has not started yet");
         }
 
         if (now.isAfter(endTime)) {
-            throw new ValidationException("visit.already.finished", "Visit has already finished");
+            throw new BadRequestException("visit.already.finished", "Visit has already finished");
         }
     }
 
@@ -274,7 +275,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
     @Transactional
     public void rescheduleVisit(UUID uuid, RescheduleVisitRequestDto request) {
         Visit visit = visitRepository.findByUuidForUpdate(uuid).orElseThrow(
-                () -> new NotFoundException("visit.not.found", "Visit not found: " + uuid));
+                () -> new ResourceNotFoundException("visit.not.found", "Visit not found: " + uuid));
 
         DurationTemplateResponseDto standardDuration = durationTemplateService.findByName("STANDARD");
         LocalDateTime newVisitStart = LocalDateTime.of(request.visitDate(), request.visitTime());
@@ -304,7 +305,7 @@ public class VisitServiceCommandImpl implements VisitServiceCommand {
 
     private Visit getVisitByUuid(UUID uuid) {
         return visitRepository.findByUuid(uuid).orElseThrow(
-                () -> new NotFoundException("Visit not found: " + uuid));
+                () -> new ResourceNotFoundException("Visit not found: " + uuid));
     }
 
     private LocalDateTime getVisitEnd(LocalDateTime visitStart, DurationTemplateResponseDto duration) {

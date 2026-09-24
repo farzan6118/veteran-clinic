@@ -43,7 +43,7 @@ public class SpeciesController {
     @PutMapping("/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@PathVariable UUID uuid,
-                                       @Valid @RequestBody UpdateSpeciesRequestDto request) {
+                       @Valid @RequestBody UpdateSpeciesRequestDto request) {
         speciesService.update(uuid, request);
     }
 

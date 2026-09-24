@@ -9,8 +9,8 @@ import com.github.farzan6118.petclinic.clinic.repository.ClinicRepository;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class ClinicServiceImpl implements ClinicService {
     @Override
     public Clinic getEntityByUuid(UUID uuid) {
         return clinicRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("clinic not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("clinic not found"));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ClinicServiceImpl implements ClinicService {
     public void update(UUID uuid, UpdateClinicRequestDto request) {
         Clinic clinic = getEntityByUuid(uuid);
         if (clinic.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ValidationException("clinic.is.inactive", "clinic is already inactive");
+            throw new ConflictException("clinic.is.inactive", "clinic is already inactive");
         }
         clinicMapper.toEntity(request, clinic);
         log.info("clinic updated: {}", uuid);
@@ -72,7 +72,7 @@ public class ClinicServiceImpl implements ClinicService {
     public void delete(UUID uuid) {
         Clinic clinic = getEntityByUuid(uuid);
         if (clinic.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ValidationException("clinic.is.inactive", "clinic is already inactive");
+            throw new ConflictException("clinic.is.inactive", "clinic is already inactive");
         }
         clinic.setEntityStatus(EntityStatus.DELETED);
         log.info("clinic deleted: {}", uuid);

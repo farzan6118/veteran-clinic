@@ -13,6 +13,9 @@ import com.github.farzan6118.petclinic.clinic.service.RoomService;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
+import com.github.farzan6118.petclinic.common.exception.BadRequestException;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.config.ClinicProperties;
 import com.github.farzan6118.petclinic.infrastructure.email.VisitNotificationService;
 import com.github.farzan6118.petclinic.pet.model.MedicalRecord;
@@ -38,6 +41,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -130,7 +134,7 @@ class VisitServiceImplTest {
      */
     @Test
     void rescheduleVisit_shouldUpdateSlotAndNotifyParticipants() {
-        LocalDateTime oldStart = LocalDateTime.now().minusHours(1);
+        LocalDateTime oldStart = LocalDate.now().plusDays(1).atTime(9, 0);
         Visit visit = new Visit().schedule(
                 vet, pet, room, oldStart, oldStart.plusMinutes(10), VisitType.ONSITE, "Original visit");
         visit.setUuid(visitUuid);
@@ -163,8 +167,8 @@ class VisitServiceImplTest {
     void cancelVisit_shouldCancelVisitAndNotifyParticipants() {
         Visit visit = new Visit().schedule(
                 vet, pet, room,
-                LocalDateTime.now().minusMinutes(20),
-                LocalDateTime.now().plusMinutes(20),
+                LocalDate.now().plusDays(1).atTime(9, 0),
+                LocalDate.now().plusDays(1).atTime(9, 20),
                 VisitType.ONSITE,
                 "Visit");
         visit.setUuid(visitUuid);
@@ -184,12 +188,16 @@ class VisitServiceImplTest {
      */
     @Test
     void completeVisit_shouldCompleteVisitAndCreateMedicalRecord() {
-        Visit visit = new Visit().schedule(
-                vet, pet, room,
-                LocalDateTime.now().minusMinutes(10),
-                LocalDateTime.now().plusMinutes(10),
-                VisitType.ONSITE,
-                "Visit");
+        LocalDateTime now = LocalDateTime.now();
+        Visit visit = new Visit();
+        visit.setVet(vet);
+        visit.setPet(pet);
+        visit.setRoom(room);
+        visit.setVisitType(VisitType.ONSITE);
+        visit.setStartTime(now.minusMinutes(5));
+        visit.setEndTime(now.plusMinutes(5));
+        visit.setStatus(VisitStatus.SCHEDULED);
+        visit.setDescription("Visit");
         visit.setUuid(visitUuid);
 
         CompleteVisitRequestDto request = new CompleteVisitRequestDto(
@@ -205,5 +213,89 @@ class VisitServiceImplTest {
         ArgumentCaptor<MedicalRecord> recordCaptor = ArgumentCaptor.forClass(MedicalRecord.class);
         verify(medicalRecordService).create(recordCaptor.capture(), eq(request), eq(visit));
         assertNotNull(recordCaptor.getValue());
+    }
+
+    @Test
+    void bookVisit_shouldNotSaveWhenVetHasNoAvailability() {
+        LocalDate date = LocalDate.now().plusDays(1);
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
+                petUuid, vetUuid, date, LocalTime.of(10, 0), VisitType.ONSITE, "Checkup");
+        when(vetService.getVetWithUuidLock(vetUuid)).thenReturn(vet);
+        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
+        when(roomService.getAvailableRoomByVisitTypeAndVisitCategory(
+                VisitType.ONSITE, VisitCategory.ROUTINE)).thenReturn(room);
+        when(vetAvailabilityService.findAvailableByUuidAndTimeRange(any(), any(), any()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ConflictException.class, () -> service.bookVisit(request));
+
+        verify(visitRepository, never()).save(any(Visit.class));
+        verifyNoInteractions(visitNotificationService);
+    }
+
+    @Test
+    void bookVisit_shouldNotSaveWhenClinicIsClosed() {
+        LocalDate date = LocalDate.now().plusDays(1);
+        CreateVisitRequestDto request = new CreateVisitRequestDto(
+                petUuid, vetUuid, date, LocalTime.of(7, 0), VisitType.ONSITE, "Checkup");
+        when(vetService.getVetWithUuidLock(vetUuid)).thenReturn(vet);
+        when(petService.getEntityByUuid(petUuid)).thenReturn(pet);
+        when(roomService.getAvailableRoomByVisitTypeAndVisitCategory(
+                VisitType.ONSITE, VisitCategory.ROUTINE)).thenReturn(room);
+
+        assertThrows(BadRequestException.class, () -> service.bookVisit(request));
+
+        verify(visitRepository, never()).save(any(Visit.class));
+    }
+
+    @Test
+    void cancelVisit_shouldBeIdempotentForAlreadyCancelledVisit() {
+        Visit visit = new Visit().schedule(
+                vet, pet, room,
+                LocalDate.now().plusDays(1).atTime(9, 0),
+                LocalDate.now().plusDays(1).atTime(9, 20),
+                VisitType.ONSITE, "Visit");
+        visit.setStatus(VisitStatus.CANCELLED);
+        when(visitRepository.findByUuid(visitUuid)).thenReturn(Optional.of(visit));
+
+        service.cancelVisit(visitUuid, "duplicate request");
+
+        verifyNoInteractions(visitNotificationService);
+    }
+
+    @Test
+    void cancelVisit_shouldRejectCompletedVisitAsConflict() {
+        Visit visit = new Visit().schedule(
+                vet, pet, room,
+                LocalDate.now().plusDays(1).atTime(9, 0),
+                LocalDate.now().plusDays(1).atTime(9, 20),
+                VisitType.ONSITE, "Visit");
+        visit.setStatus(VisitStatus.COMPLETED);
+        when(visitRepository.findByUuid(visitUuid)).thenReturn(Optional.of(visit));
+
+        assertThrows(ConflictException.class, () -> service.cancelVisit(visitUuid, "late cancel"));
+
+        verifyNoInteractions(visitNotificationService);
+    }
+
+    @Test
+    void completeVisit_shouldRejectVisitThatHasNotStarted() {
+        Visit visit = new Visit().schedule(
+                vet, pet, room,
+                LocalDate.now().plusDays(1).atTime(9, 0),
+                LocalDate.now().plusDays(1).atTime(9, 20),
+                VisitType.ONSITE, "Visit");
+        when(visitRepository.findByUuidForUpdate(visitUuid)).thenReturn(Optional.of(visit));
+
+        assertThrows(BadRequestException.class, () -> service.completeVisit(visitUuid, null));
+
+        verifyNoInteractions(medicalRecordService);
+    }
+
+    @Test
+    void cancelVisit_shouldReportMissingVisit() {
+        when(visitRepository.findByUuid(visitUuid)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.cancelVisit(visitUuid, "reason"));
     }
 }

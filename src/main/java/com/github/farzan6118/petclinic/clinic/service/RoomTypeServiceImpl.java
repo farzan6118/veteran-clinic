@@ -10,13 +10,12 @@ import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +40,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Override
     public RoomType getEntityByUuid(UUID uuid) {
         return roomTypeRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("room type not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("room type not found"));
     }
 
     @Override
@@ -75,7 +74,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public void delete(UUID uuid) {
         RoomType roomType = getEntityByUuid(uuid);
         if (roomType.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ValidationException("room.type.is.inactive", "room type is already inactive");
+            throw new ConflictException("room.type.is.inactive", "room type is already inactive");
         }
         roomType.setEntityStatus(EntityStatus.DELETED);
         log.info("room type deleted: {}", uuid);

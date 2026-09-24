@@ -4,8 +4,7 @@ import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.pet.dto.request.CreateSpeciesRequestDto;
 import com.github.farzan6118.petclinic.pet.dto.request.UpdateSpeciesRequestDto;
@@ -41,7 +40,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     @Override
     public Species getEntityByUuid(UUID uuid) {
         return speciesRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("species not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("species not found"));
     }
 
     @Override
@@ -90,7 +89,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     public void delete(UUID uuid) {
         Species species = this.getEntityByUuid(uuid);
         if (species.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ValidationException("species.is.inactive", "species is already inactive");
+            throw new ConflictException("species.is.inactive", "species is already inactive");
         }
         species.setEntityStatus(EntityStatus.DELETED);
         log.info("species deleted: {}", uuid);

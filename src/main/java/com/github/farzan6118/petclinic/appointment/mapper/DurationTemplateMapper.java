@@ -12,13 +12,13 @@ import java.util.Locale;
 public class DurationTemplateMapper {
 
     public void mapToEntity(CreateDurationTemplateRequestDto request, DurationTemplate durationTemplate) {
-        durationTemplate.setName(request.name().toUpperCase(Locale.ROOT));
+        durationTemplate.setName(request.name().trim().toUpperCase(Locale.ROOT));
         durationTemplate.setDurationMinutes(request.durationMinutes());
         durationTemplate.setDescription(request.description());
     }
 
     public void mapToEntity(UpdateDurationTemplateRequestDto request, DurationTemplate durationTemplate) {
-        durationTemplate.setName(request.name().toUpperCase(Locale.ROOT));
+        durationTemplate.setName(request.name().trim().toUpperCase(Locale.ROOT));
         durationTemplate.setDurationMinutes(request.durationMinutes());
         durationTemplate.setDescription(request.description());
     }

@@ -14,8 +14,7 @@ import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Room getEntityByUuid(UUID uuid) {
         return roomRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("room not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("room not found"));
     }
 
     @Override
@@ -104,7 +103,7 @@ public class RoomServiceImpl implements RoomService {
         if (roomType.getEntityStatus() != EntityStatus.ACTIVE
                 || clinic.getEntityStatus() != EntityStatus.ACTIVE
                 || !clinic.isActive()) {
-            throw new ValidationException("room.references.inactive", "room type and clinic must be active");
+            throw new ConflictException("room.references.inactive", "room type and clinic must be active");
         }
     }
 
@@ -113,7 +112,7 @@ public class RoomServiceImpl implements RoomService {
     public void delete(UUID uuid) {
         Room room = this.getEntityByUuid(uuid);
         if (!room.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ValidationException("room.is.inactive", "room is already inactive");
+            throw new ConflictException("room.is.inactive", "room is already inactive");
         }
         room.setEntityStatus(EntityStatus.DELETED);
         log.info("room deleted: {}", uuid);
@@ -139,7 +138,7 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.findActiveRoomsByTypeNames(roomTypeNames)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "visit.room.not.available",
                         "No room is available for the selected visit type and time"));
     }

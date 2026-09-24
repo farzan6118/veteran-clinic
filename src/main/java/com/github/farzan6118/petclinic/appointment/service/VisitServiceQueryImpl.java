@@ -7,8 +7,8 @@ import com.github.farzan6118.petclinic.appointment.model.Visit;
 import com.github.farzan6118.petclinic.appointment.repository.VisitRepository;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.BadRequestException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class VisitServiceQueryImpl implements VisitServiceQuery {
 
     private Visit getVisitByUuid(UUID uuid) {
         return visitRepository.findByUuid(uuid).orElseThrow(
-                () -> new NotFoundException("Visit not found: " + uuid));
+                () -> new ResourceNotFoundException("Visit not found: " + uuid));
     }
 
     @Override
@@ -62,7 +62,7 @@ public class VisitServiceQueryImpl implements VisitServiceQuery {
     private void dateTimeValidation(VisitAdvancedSearch request) {
         if (request.createdDateFrom() != null && request.createdDateTo() != null) {
             if (request.createdDateFrom().isAfter(request.createdDateTo())) {
-                throw new ValidationException(
+                throw new BadRequestException(
                         "invalid.created.date.from.created.date.to",
                         "create date from is after create date to"
                 );
@@ -70,7 +70,7 @@ public class VisitServiceQueryImpl implements VisitServiceQuery {
         }
         if (request.visitDateFrom() != null && request.visitDateTo() != null) {
             if (request.visitDateFrom().isAfter(request.visitDateTo())) {
-                throw new ValidationException(
+                throw new BadRequestException(
                         "invalid.visit.date.from.visit.date.to",
                         "visit date from is after visit date to"
                 );

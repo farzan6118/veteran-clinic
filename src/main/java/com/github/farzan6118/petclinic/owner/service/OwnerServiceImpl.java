@@ -4,8 +4,7 @@ import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.owner.dto.request.OwnerCreateRequestDto;
 import com.github.farzan6118.petclinic.owner.dto.request.OwnerUpdateRequestDto;
@@ -90,7 +89,7 @@ public class OwnerServiceImpl implements OwnerService {
     public void inactivate(UUID uuid) {
         Owner owner = getEntityByUuid(uuid);
         if (owner.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ValidationException(
+            throw new ConflictException(
                     "owner.is.inactive",
                     "owner is already inactive"
             );
@@ -103,9 +102,9 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public void activate(UUID uuid) {
         Owner owner = ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("owner not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("owner not found"));
         if (owner.getEntityStatus() != EntityStatus.INACTIVE) {
-            throw new ValidationException(
+            throw new ConflictException(
                     "owner.cannot.be.activated",
                     "owner cannot be activated"
             );
@@ -119,7 +118,7 @@ public class OwnerServiceImpl implements OwnerService {
     public void delete(UUID uuid) {
         Owner owner = this.getEntityByUuid(uuid);
         if (!owner.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ValidationException(
+            throw new ConflictException(
                     "owner.is.deleted",
                     "owner is already deleted");
         }
@@ -130,7 +129,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Owner getEntityByUuid(UUID uuid) {
         return ownerRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("owner not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("owner not found"));
     }
 
 }

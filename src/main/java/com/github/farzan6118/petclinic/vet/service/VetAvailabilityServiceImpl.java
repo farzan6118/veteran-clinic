@@ -3,9 +3,9 @@ package com.github.farzan6118.petclinic.vet.service;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
+import com.github.farzan6118.petclinic.common.exception.BadRequestException;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityUpdateRequestDto;
@@ -59,7 +59,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     @Transactional
     public void updateAvailability(UUID availabilityUuid, VetAvailabilityUpdateRequestDto request) {
         VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, request.vetUuid())
-                .orElseThrow(() -> new NotFoundException("Vet availability not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vet availability not found"));
         LocalDateTime startDateTime = request.startTime();
         LocalDateTime endDateTime = request.endTime();
         validateTimeRange(startDateTime, endDateTime);
@@ -81,9 +81,9 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     public void deleteAvailability(UUID vetUuid, UUID availabilityUuid) {
 
         VetAvailability availability = availabilityRepository.findByUuidAndVetUuid(availabilityUuid, vetUuid)
-                .orElseThrow(() -> new NotFoundException("Vet availability not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vet availability not found"));
         if (availability.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ValidationException("vet.availability.is.inactive", "vet availability is already inactive");
+            throw new ConflictException("vet.availability.is.inactive", "vet availability is already inactive");
         }
         availability.setEntityStatus(EntityStatus.DELETED);
         availability.setActive(false);
@@ -99,12 +99,12 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     }
 
     private Vet getVet(UUID vetUuid) {
-        return vetRepository.findByUuid(vetUuid).orElseThrow(() -> new NotFoundException("Vet not found"));
+        return vetRepository.findByUuid(vetUuid).orElseThrow(() -> new ResourceNotFoundException("Vet not found"));
     }
 
     private void validateTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         if (!startTime.isBefore(endTime)) {
-            throw new ValidationException("Start time must be before visitDateTo time");
+            throw new BadRequestException("Availability start time must be before its end time");
         }
     }
 

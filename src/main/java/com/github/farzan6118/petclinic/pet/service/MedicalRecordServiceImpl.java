@@ -20,6 +20,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final MedicalRecordMapper medicalRecordMapper;
 
     @Override
+    @Transactional
     public void create(MedicalRecord medicalRecord, CompleteVisitRequestDto request, Visit visit) {
         medicalRecordMapper.toEntity(medicalRecord, request, visit);
         repository.save(medicalRecord);

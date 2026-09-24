@@ -4,8 +4,7 @@ import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
@@ -41,7 +40,7 @@ public class VetServiceImpl implements VetService {
     @Override
     public Vet getEntityByUuid(UUID uuid) {
         return vetRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("vet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("vet not found"));
     }
 
     @Override
@@ -98,7 +97,7 @@ public class VetServiceImpl implements VetService {
     public void delete(UUID uuid) {
         Vet vet = this.getEntityByUuid(uuid);
         if (!vet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ValidationException("vet.is.inactive", "vet is already inactive");
+            throw new ConflictException("vet.is.inactive", "vet is already inactive");
         }
         vet.setStatus(EntityStatus.DELETED);
         log.info("vet deleted: {}", uuid);
@@ -107,7 +106,7 @@ public class VetServiceImpl implements VetService {
     @Override
     public Vet getVetWithUuidLock(UUID vetUuid) {
         return vetRepository.findByUuidWithLock(vetUuid)
-                .orElseThrow(() -> new NotFoundException("Vet not found: " + vetUuid));
+                .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
     }
 }
 

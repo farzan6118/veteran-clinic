@@ -3,7 +3,8 @@ package com.github.farzan6118.petclinic.appointment.model;
 import com.github.farzan6118.petclinic.clinic.model.Room;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
-import com.github.farzan6118.petclinic.common.exception.ForbiddenException;
+import com.github.farzan6118.petclinic.common.exception.BadRequestException;
+import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.persistence.BaseEntity;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.vet.model.Vet;
@@ -89,7 +90,7 @@ public class Visit extends BaseEntity<Long> {
     public void cancel() {
 
         if (status == VisitStatus.COMPLETED) {
-            throw new ForbiddenException("Completed visit cannot be cancelled");
+            throw new ConflictException("Completed visit cannot be cancelled");
         }
 
         if (status == VisitStatus.CANCELLED) {
@@ -102,11 +103,11 @@ public class Visit extends BaseEntity<Long> {
     public void complete(LocalDateTime end) {
 
         if (status == VisitStatus.CANCELLED) {
-            throw new ForbiddenException("Cancelled visit cannot be completed");
+            throw new ConflictException("Cancelled visit cannot be completed");
         }
 
         if (status == VisitStatus.COMPLETED) {
-            throw new ForbiddenException("Visit is already completed");
+            throw new ConflictException("Visit is already completed");
         }
 
         this.endTime = end;
@@ -115,11 +116,11 @@ public class Visit extends BaseEntity<Long> {
 
     public void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
         if (endTime.isBefore(startTime)) {
-            throw new IllegalArgumentException("End time cannot be before visitDateFrom time");
+            throw new BadRequestException("End time must be after start time");
         }
 
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
-            throw new IllegalArgumentException("the visitDateFrom and visitDateTo time must be the same day");
+            throw new BadRequestException("Visit start and end must be on the same day");
         }
     }
 }

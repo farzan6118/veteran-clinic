@@ -1,351 +1,283 @@
-//package com.github.farzan6118.petclinic.common.persistence;
-//
-//import com.github.farzan6118.petclinic.appointment.model.DurationTemplate;
-//import com.github.farzan6118.petclinic.appointment.repository.DurationTemplateRepository;
-//import com.github.farzan6118.petclinic.clinic.model.Room;
-//import com.github.farzan6118.petclinic.clinic.model.RoomType;
-//import com.github.farzan6118.petclinic.clinic.repository.RoomRepository;
-//import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
-//import com.github.farzan6118.petclinic.common.enums.Sex;
-//import com.github.farzan6118.petclinic.owner.model.Owner;
-//import com.github.farzan6118.petclinic.person.model.Profile;
-//import com.github.farzan6118.petclinic.person.repository.PersonRepository;
-//import com.github.farzan6118.petclinic.pet.model.Pet;
-//import com.github.farzan6118.petclinic.pet.model.Species;
-//import com.github.farzan6118.petclinic.pet.repository.PetRepository;
-//import com.github.farzan6118.petclinic.pet.repository.SpeciesRepository;
-//import com.github.farzan6118.petclinic.vet.model.Vet;
-//import com.github.farzan6118.petclinic.vet.model.VetAvailability;
-//import com.github.farzan6118.petclinic.vet.repository.VetAvailabilityRepository;
-//import com.github.farzan6118.petclinic.vet.repository.VetRepository;
-//import org.springframework.boot.CommandLineRunner;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.transaction.annotation.Transactional;
-//
-//import java.time.LocalDate;
-//import java.time.LocalDateTime;
-//import java.util.List;
-//
-//@Configuration
-//public class FillInitialRecords {
-//
-//    @Bean
-//    CommandLineRunner fillInitialRecordsRunner(
-//            PersonRepository personRepository,
-//            SpeciesRepository speciesRepository,
-//            PetRepository petRepository,
-//            RoomRepository roomRepository,
-//            RoomTypeRepository roomTypeRepository,
-//            VetRepository vetRepository,
-//            VetAvailabilityRepository vetAvailabilityRepository,
-//            DurationTemplateRepository durationTemplateRepository
-//
-//    ) {
-//        return args -> fillInitialRecords(
-//                personRepository,
-//                speciesRepository,
-//                petRepository,
-//                roomRepository,
-//                roomTypeRepository,
-//                vetRepository,
-//                vetAvailabilityRepository,
-//                durationTemplateRepository
-//        );
-//    }
-//
-//    @Transactional
-//    void fillInitialRecords(
-//            PersonRepository personRepository,
-//            SpeciesRepository speciesRepository,
-//            PetRepository petRepository,
-//            RoomRepository roomRepository,
-//            RoomTypeRepository roomTypeRepository,
-//            VetRepository vetRepository,
-//            VetAvailabilityRepository vetAvailabilityRepository,
-//            DurationTemplateRepository durationTemplateRepository
-//    ) {
-//        if (personRepository.count() == 0
-//                && speciesRepository.count() == 0
-//                && petRepository.count() == 0
-//                && roomRepository.count() == 0
-//                && roomTypeRepository.count() == 0
-//                && vetRepository.count() == 0
-//                && durationTemplateRepository.count() == 0) {
-//
-//            List<DurationTemplate> durationTemplate = durationTemplateRepository.saveAll(List.of(
-//                    durationTemplate("QUICK", 15, "Quick visit"),
-//                    durationTemplate("SHORT", 20, "Short visit"),
-//                    durationTemplate("STANDARD", 30, "Standard visit"),
-//                    durationTemplate("EXTENDED", 45, "Extended visit"),
-//                    durationTemplate("LONG", 60, "Long visit"),
-//                    durationTemplate("VERY_LONG", 120, "Very long visit")
-//            ));
-//
-//            List<Species> species = speciesRepository.saveAll(List.of(
-//                    species("Dog", "DOG", "Canis lupus familiaris",
-//                            "Common companion animal."),
-//                    species("Cat", "CAT", "Felis catus",
-//                            "Common companion animal."),
-//                    species("Rabbit", "RABBIT", "Oryctolagus cuniculus",
-//                            "Common companion animal."),
-//                    species("Hamster", "HAMSTER", "Cricetinae",
-//                            "Small companion animal."))
-//            );
-//
-//            List<Owner> owners = personRepository.saveAll(List.of(
-//                    owner("Ms.", "Mina", "Rahimi", "200000001", LocalDate.of(1990, 4, 12), "09120000001", "mina.rahimi@example.com", "Tehran", "Valiasr Street"),
-//                    owner("Mr.", "Arman", "Karimi", "200000002", LocalDate.of(1987, 9, 25), "09120000002", "arman.karimi@example.com", "Shiraz", "Zand Street"),
-//                    owner("Ms.", "Niloofar", "Ahmadi", "200000003", LocalDate.of(1995, 1, 8), "09120000003", "niloofar.ahmadi@example.com", "Tabriz", "Shahrivar Street")
-//            ));
-//
-//            petRepository.saveAll(List.of(
-//                    pet("Luna", "White", "Small black mark", Sex.FEMALE, species.get(0), owners.get(0), LocalDate.of(2021, 5, 12)),
-//                    pet("Milo", "Orange", "White paws", Sex.MALE, species.get(1), owners.get(1), LocalDate.of(2022, 2, 8)),
-//                    pet("Coco", "Brown", "Long ears", Sex.FEMALE, species.get(2), owners.get(2), LocalDate.of(2023, 7, 21))
-//            ));
-//
-//            List<RoomType> roomTypes = roomTypeRepository.saveAll(List.of(
-//                    roomType(
-//                            "Examination",
-//                            "General-purpose veterinary examination room used for routine physical examinations, "
-//                                    + "follow-up visits, illness assessment, consultations, vaccinations, injections, "
-//                                    + "basic diagnostic procedures, and other non-surgical patient assessments."
-//                    ),
-//                    roomType(
-//                            "Treatment",
-//                            "Veterinary treatment room used for non-surgical procedures and patient care such as "
-//                                    + "wound care, bandaging, injections, fluid therapy, medication administration, "
-//                                    + "minor procedures, and routine treatments that do not require a surgical suite."
-//                    ),
-//                    roomType(
-//                            "Surgery",
-//                            "Dedicated veterinary surgical room used for surgical procedures and other invasive interventions "
-//                                    + "that require a controlled and appropriately equipped surgical environment."
-//                    ),
-//                    roomType(
-//                            "Dental",
-//                            "Dedicated veterinary dental treatment room used for dental examinations, dental cleaning, "
-//                                    + "oral procedures, dental surgery, and other procedures involving the teeth and oral cavity."
-//                    ),
-//                    roomType(
-//                            "Imaging",
-//                            "Diagnostic imaging room used for veterinary imaging procedures such as X-ray, ultrasound, "
-//                                    + "and other diagnostic imaging examinations requiring dedicated imaging equipment."
-//                    ),
-//                    roomType(
-//                            "Physiotherapy",
-//                            "Veterinary rehabilitation room used for physiotherapy, physical rehabilitation, mobility exercises, "
-//                                    + "post-operative rehabilitation, and other non-surgical rehabilitation treatments."
-//                    ),
-//                    roomType(
-//                            "Isolation",
-//                            "Dedicated isolation room used for patients suspected or confirmed to have contagious or infectious "
-//                                    + "conditions and requiring separation from other patients for infection-control purposes."
-//                    )
-//            ));
-//
-//            roomRepository.saveAll(List.of(
-//                    room("Examination Room 1", "EXAM-01", roomTypes.getFirst()),
-//                    room("Examination Room 2", "EXAM-02", roomTypes.getFirst()),
-//                    room("Examination Room 3", "EXAM-03", roomTypes.getFirst()),
-//
-//                    room("Treatment Room 1", "TREAT-01", roomTypes.get(1)),
-//                    room("Treatment Room 2", "TREAT-02", roomTypes.get(1)),
-//
-//                    room("Surgery Room 1", "SURG-01", roomTypes.get(2)),
-//                    room("Surgery Room 2", "SURG-02", roomTypes.get(2)),
-//
-//                    room("Dental Room 1", "DENT-01", roomTypes.get(3)),
-//
-//                    room("Imaging Room 1", "IMG-01", roomTypes.get(4)),
-//
-//                    room("Physiotherapy Room 1", "PHYSIO-01", roomTypes.get(5)),
-//
-//                    room("Isolation Room 1", "ISO-01", roomTypes.get(6)),
-//                    room("Isolation Room 2", "ISO-02", roomTypes.get(6))
-//            ));
-//
-//            Vet firstVet = vet("Dr.", "Sara", "Moradi", "09210000001", "sara.moradi@example.com", "100000001");
-//            firstVet.updateProfile(profile("Tehran", "Mirdamad Boulevard", "Internal medicine", LocalDate.of(1985, 3, 18)));
-//
-//            Vet secondVet = vet("Vet.", "Reza", "Hosseini", "09210000002", "reza.hosseini@example.com", "100000002");
-//            secondVet.updateProfile(profile("Shiraz", "Maaliabad Street", "Surgery", LocalDate.of(1982, 11, 2)));
-//
-//            Vet thirdVet = vet("Dr.", "Parisa", "Etemadi", "09210000003", "parisa.etemadi@example.com", "100000003");
-//            thirdVet.updateProfile(profile("Tabriz", "Ferdowsi Street", "Dermatology", LocalDate.of(1990, 6, 27)));
-//
-//            vetRepository.saveAll(List.of(firstVet, secondVet, thirdVet));
-//        }
-//        List<Vet> vets = vetRepository.findAll();
-//        if (vetAvailabilityRepository.count() == 0 && vets.size() >= 3) {
-//            LocalDate today = LocalDate.now();
-//
-//            vetAvailabilityRepository.saveAll(List.of(
-//                    availability(
-//                            vets.get(0),
-//                            today.plusDays(1).atTime(9, 0),
-//                            today.plusDays(1).atTime(13, 0)
-//                    ),
-//                    availability(
-//                            vets.get(0),
-//                            today.plusDays(2).atTime(9, 0),
-//                            today.plusDays(2).atTime(12, 20)
-//                    ),
-//                    availability(
-//                            vets.get(1),
-//                            today.plusDays(1).atTime(10, 0),
-//                            today.plusDays(1).atTime(14, 0)
-//                    ),
-//                    availability(
-//                            vets.get(1),
-//                            today.plusDays(2).atTime(9, 30),
-//                            today.plusDays(2).atTime(12, 30)
-//                    ),
-//                    availability(
-//                            vets.get(1),
-//                            today.plusDays(3).atTime(9, 30),
-//                            today.plusDays(3).atTime(12, 30)
-//                    ),
-//                    availability(
-//                            vets.get(2),
-//                            today.plusDays(1).atTime(8, 0),
-//                            today.plusDays(1).atTime(12, 0)
-//                    ),
-//                    availability(
-//                            vets.get(2),
-//                            today.plusDays(2).atTime(9, 30),
-//                            today.plusDays(2).atTime(14, 0)
-//                    ),
-//                    availability(
-//                            vets.get(2),
-//                            today.plusDays(3).atTime(9, 30),
-//                            today.plusDays(3).atTime(14, 0)
-//                    )
-//            ));
-//        }
-//
-//        personRepository.findAll().forEach(owner -> {
-//            if (owner.getBirthDate() == null) {
-//                owner.setBirthDate(switch (owner.getEmail()) {
-//                    case "mina.rahimi@example.com" -> LocalDate.of(1990, 4, 12);
-//                    case "arman.karimi@example.com" -> LocalDate.of(1987, 9, 25);
-//                    case "niloofar.ahmadi@example.com" -> LocalDate.of(1995, 1, 8);
-//                    default -> null;
-//                });
-//            }
-//        });
-//    }
-//
-//    private DurationTemplate durationTemplate(String name, Integer durationMinutes, String description) {
-//        DurationTemplate template = new DurationTemplate();
-//        template.setName(name);
-//        template.setDurationMinutes(durationMinutes);
-//        template.setDescription(description);
-//        return template;
-//    }
-//
-//    private Species species(String name, String code, String origin, String description) {
-//        Species species = new Species();
-//        species.setName(name);
-//        species.setCode(code);
-//        species.setOrigin(origin);
-//        species.setDescription(description);
-//        return species;
-//    }
-//
-//    private Owner owner(
-//            String title,
-//            String firstName,
-//            String lastName,
-//            String nationalId,
-//            LocalDate birthDate,
-//            String mobileNumber,
-//            String email,
-//            String city,
-//            String address
-//    ) {
-//        Owner owner = new Owner();
-//        owner.setTitle(title);
-//        owner.setFirstName(firstName);
-//        owner.setLastName(lastName);
-//        owner.setNationalId(nationalId);
-//        owner.setBirthDate(birthDate);
-//        owner.setMobileNumber(mobileNumber);
-//        owner.setEmail(email);
-//        owner.setCity(city);
-//        owner.setAddress(address);
-//        return owner;
-//    }
-//
-//    private Pet pet(
-//            String name,
-//            String color,
-//            String marks,
-//            Sex sex,
-//            Species species,
-//            Owner owner,
-//            LocalDate birthDate
-//    ) {
-//        Pet pet = new Pet();
-//        pet.setName(name);
-//        pet.setColor(color);
-//        pet.setMarks(marks);
-//        pet.setSex(sex);
-//        pet.setSpecies(species);
-//        pet.setOwner(owner);
-//        pet.setBirthDate(birthDate);
-//        return pet;
-//    }
-//
-//    private RoomType roomType(String name, String description) {
-//        RoomType roomType = new RoomType();
-//        roomType.setName(name);
-//        roomType.setDescription(description);
-//        return roomType;
-//    }
-//
-//    private Room room(String name, String code, RoomType roomType) {
-//        Room room = new Room();
-//        room.setName(name);
-//        room.setCode(code);
-//        room.setRoomType(roomType);
-//        room.setActive(true);
-//        return room;
-//    }
-//
-//    private Vet vet(
-//            String title,
-//            String firstName,
-//            String lastName,
-//            String mobileNumber,
-//            String email,
-//            String nationalId
-//    ) {
-//        Vet vet = new Vet();
-//        vet.setTitle(title);
-//        vet.setFirstName(firstName);
-//        vet.setLastName(lastName);
-//        vet.setMobileNumber(mobileNumber);
-//        vet.setEmail(email);
-//        vet.setNationalId(nationalId);
-//        return vet;
-//    }
-//
-//    private Profile profile(String city, String address, String specialty, LocalDate birthDate) {
-//        Profile profile = new Profile();
-//        profile.setCity(city);
-//        profile.setAddress(address);
-//        profile.setSpecialty(specialty);
-//        profile.setBirthDate(birthDate);
-//        return profile;
-//    }
-//
-//    private VetAvailability availability(
-//            Vet vet,
-//            LocalDateTime startTime,
-//            LocalDateTime endTime
-//    ) {
-//        return new VetAvailability().create(vet, startTime, endTime);
-//    }
-//}
+package com.github.farzan6118.petclinic.common.persistence;
+
+import com.github.farzan6118.petclinic.appointment.model.DurationTemplate;
+import com.github.farzan6118.petclinic.appointment.repository.DurationTemplateRepository;
+import com.github.farzan6118.petclinic.clinic.model.Clinic;
+import com.github.farzan6118.petclinic.clinic.model.Room;
+import com.github.farzan6118.petclinic.clinic.model.RoomType;
+import com.github.farzan6118.petclinic.clinic.repository.ClinicRepository;
+import com.github.farzan6118.petclinic.clinic.repository.RoomRepository;
+import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
+import com.github.farzan6118.petclinic.common.enums.Sex;
+import com.github.farzan6118.petclinic.owner.model.Owner;
+import com.github.farzan6118.petclinic.owner.repository.OwnerRepository;
+import com.github.farzan6118.petclinic.person.model.Address;
+import com.github.farzan6118.petclinic.person.model.Person;
+import com.github.farzan6118.petclinic.person.model.Profile;
+import com.github.farzan6118.petclinic.pet.model.Pet;
+import com.github.farzan6118.petclinic.pet.model.Species;
+import com.github.farzan6118.petclinic.pet.repository.PetRepository;
+import com.github.farzan6118.petclinic.pet.repository.SpeciesRepository;
+import com.github.farzan6118.petclinic.vet.model.Vet;
+import com.github.farzan6118.petclinic.vet.model.VetAvailability;
+import com.github.farzan6118.petclinic.vet.repository.VetAvailabilityRepository;
+import com.github.farzan6118.petclinic.vet.repository.VetRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class FillInitialRecords implements CommandLineRunner {
+
+    private final DurationTemplateRepository durationTemplateRepository;
+    private final SpeciesRepository speciesRepository;
+    private final OwnerRepository ownerRepository;
+    private final PetRepository petRepository;
+    private final ClinicRepository clinicRepository;
+    private final RoomTypeRepository roomTypeRepository;
+    private final RoomRepository roomRepository;
+    private final VetRepository vetRepository;
+    private final VetAvailabilityRepository vetAvailabilityRepository;
+
+    @Override
+    @Transactional
+    public void run(String... args) {
+        seedDurationTemplates();
+        seedSpecies();
+        seedClinic();
+        seedRoomTypes();
+        seedOwners();
+        seedVets();
+        seedPets();
+        seedRooms();
+        seedVetAvailability();
+    }
+
+    private void seedDurationTemplates() {
+        if (durationTemplateRepository.count() != 0) return;
+        durationTemplateRepository.saveAll(List.of(
+                durationTemplate("QUICK", 15, "Quick visit"),
+                durationTemplate("SHORT", 20, "Short visit"),
+                durationTemplate("STANDARD", 30, "Standard visit"),
+                durationTemplate("EXTENDED", 45, "Extended visit"),
+                durationTemplate("LONG", 60, "Long visit"),
+                durationTemplate("VERY_LONG", 120, "Very long visit")
+        ));
+    }
+
+    private void seedSpecies() {
+        if (speciesRepository.count() != 0) return;
+        speciesRepository.saveAll(List.of(
+                species("Dog", "DOG", "Canis lupus familiaris", "Common companion animal."),
+                species("Cat", "CAT", "Felis catus", "Common companion animal."),
+                species("Rabbit", "RABBIT", "Oryctolagus cuniculus", "Common companion animal."),
+                species("Hamster", "HAMSTER", "Cricetinae", "Small companion animal.")
+        ));
+    }
+
+    private void seedClinic() {
+        if (clinicRepository.count() != 0) return;
+        Clinic clinic = new Clinic();
+        clinic.setAddress(address("Main clinic", "Berlin", "Berlin", "Valiasr Street"));
+        clinic.setActive(true);
+        clinicRepository.save(clinic);
+    }
+
+    private void seedRoomTypes() {
+        if (roomTypeRepository.count() != 0) return;
+        roomTypeRepository.saveAll(List.of(
+                roomType("examination", "Routine examinations, consultations, and follow-up visits."),
+                roomType("treatment", "Non-surgical procedures and patient care."),
+                roomType("surgery", "Surgical procedures and invasive interventions."),
+                roomType("dental", "Dental examinations and oral procedures."),
+                roomType("imaging", "X-ray, ultrasound, and diagnostic imaging."),
+                roomType("physiotherapy", "Rehabilitation and mobility exercises."),
+                roomType("isolation", "Infection-control isolation room."),
+                roomType("individual", "Private room for individual consultations.")
+        ));
+    }
+
+    private void seedOwners() {
+        if (ownerRepository.count() != 0) return;
+        ownerRepository.saveAll(List.of(
+                owner("Ms.", "Mina", "Rahimi", "200000001", LocalDate.of(1990, 4, 12),
+                        "09120000001", "mina.rahimi@example.com", "Berlin", "Valiasr Street"),
+                owner("Mr.", "Arman", "Karimi", "200000002", LocalDate.of(1987, 9, 25),
+                        "09120000002", "arman.karimi@example.com", "Hamburg", "Zand Street"),
+                owner("Ms.", "Niloofar", "Ahmadi", "200000003", LocalDate.of(1995, 1, 8),
+                        "09120000003", "niloofar.ahmadi@example.com", "Dusseldorf", "Shahrivar Street")
+        ));
+    }
+
+    private void seedVets() {
+        if (vetRepository.count() != 0) return;
+        vetRepository.saveAll(List.of(
+                vet("Sara", "Moradi", "100000001", LocalDate.of(1985, 3, 18),
+                        "09210000001", "sara.moradi@example.com", "Berlin", "Mirdamad Boulevard"),
+                vet("Reza", "Hosseini", "100000002", LocalDate.of(1982, 11, 2),
+                        "09210000002", "reza.hosseini@example.com", "Hamburg", "Maaliabad Street"),
+                vet("Parisa", "Etemadi", "100000003", LocalDate.of(1990, 6, 27),
+                        "09210000003", "parisa.etemadi@example.com", "Dusseldorf", "Ferdowsi Street")
+        ));
+    }
+
+    private void seedPets() {
+        if (petRepository.count() != 0) return;
+        List<Owner> owners = ownerRepository.findAll();
+        List<Species> species = speciesRepository.findAll();
+        if (owners.size() < 3 || species.size() < 3) return;
+        petRepository.saveAll(List.of(
+                pet("Luna", "White", "Small black mark", Sex.FEMALE, species.get(0), owners.get(0), LocalDate.of(2021, 5, 12)),
+                pet("Milo", "Orange", "White paws", Sex.MALE, species.get(1), owners.get(1), LocalDate.of(2022, 2, 8)),
+                pet("Coco", "Brown", "Long ears", Sex.FEMALE, species.get(2), owners.get(2), LocalDate.of(2023, 7, 21))
+        ));
+    }
+
+    private void seedRooms() {
+        if (roomRepository.count() != 0) return;
+        List<Clinic> clinics = clinicRepository.findAll();
+        List<RoomType> types = roomTypeRepository.findAll();
+        if (clinics.isEmpty() || types.isEmpty()) return;
+        Clinic clinic = clinics.getFirst();
+        RoomType examination = findRoomType(types, "examination");
+        RoomType treatment = findRoomType(types, "treatment");
+        RoomType surgery = findRoomType(types, "surgery");
+        roomRepository.saveAll(List.of(
+                room("Examination Room 1", "EXAM-01", examination, clinic),
+                room("Examination Room 2", "EXAM-02", examination, clinic),
+                room("Treatment Room 1", "TREAT-01", treatment, clinic),
+                room("Surgery Room 1", "SURG-01", surgery, clinic)
+        ));
+    }
+
+    private void seedVetAvailability() {
+        if (vetAvailabilityRepository.count() != 0) return;
+        List<Vet> vets = vetRepository.findAll();
+        if (vets.size() < 3) return;
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDate dayAfter = tomorrow.plusDays(1);
+        vetAvailabilityRepository.saveAll(List.of(
+                availability(vets.get(0), tomorrow.atTime(9, 0), tomorrow.atTime(13, 0)),
+                availability(vets.get(0), dayAfter.atTime(9, 0), dayAfter.atTime(12, 20)),
+                availability(vets.get(1), tomorrow.atTime(10, 0), tomorrow.atTime(14, 0)),
+                availability(vets.get(1), dayAfter.atTime(9, 30), dayAfter.atTime(12, 30)),
+                availability(vets.get(2), tomorrow.atTime(8, 0), tomorrow.atTime(12, 0)),
+                availability(vets.get(2), dayAfter.atTime(9, 30), dayAfter.atTime(14, 0))
+        ));
+    }
+
+    private DurationTemplate durationTemplate(String name, int minutes, String description) {
+        DurationTemplate template = new DurationTemplate();
+        template.setName(name);
+        template.setDurationMinutes(minutes);
+        template.setDescription(description);
+        return template;
+    }
+
+    private Species species(String name, String code, String origin, String description) {
+        Species species = new Species();
+        species.setName(name);
+        species.setCode(code);
+        species.setOrigin(origin);
+        species.setDescription(description);
+        return species;
+    }
+
+    private Owner owner(String title, String firstName, String lastName, String nationalId,
+                        LocalDate birthDate, String mobile, String email, String city, String street) {
+        Person person = person(title, firstName, lastName, nationalId,
+                profile(email, mobile, birthDate), address("Home", city, city, street));
+        Owner owner = new Owner();
+        owner.setPerson(person);
+        return owner;
+    }
+
+    private Vet vet(String firstName, String lastName, String nationalId,
+                    LocalDate birthDate, String mobile, String email, String city, String street) {
+        Vet vet = new Vet();
+        vet.setPerson(person("Dr.", firstName, lastName, nationalId,
+                profile(email, mobile, birthDate), address("Home", city, city, street)));
+        return vet;
+    }
+
+    private Person person(String title, String firstName, String lastName, String nationalId,
+                          Profile profile, Address address) {
+        Person person = new Person();
+        person.setTitle(title);
+        person.setFirstName(firstName);
+        person.setLastName(lastName);
+        person.setNationalId(nationalId);
+        person.setProfile(profile);
+        person.setAddress(address);
+        return person;
+    }
+
+    private Profile profile(String email, String mobile, LocalDate birthDate) {
+        Profile profile = new Profile();
+        profile.setEmail(email);
+        profile.setMobileNumber(mobile);
+        profile.setBirthDate(birthDate);
+        return profile;
+    }
+
+    private Address address(String title, String province, String city,
+                            String street) {
+        Address address = new Address();
+        address.setTitle(title);
+        address.setCountryName("Germany");
+        address.setProvinceName(province);
+        address.setCityName(city);
+        address.setBuildingNumber("1");
+        address.setAddress(street);
+        address.setPostalCode("1234567890");
+        address.setDefaultAddress(true);
+        return address;
+    }
+
+    private Pet pet(String name, String color, String marks, Sex sex, Species species,
+                    Owner owner, LocalDate birthDate) {
+        Pet pet = new Pet();
+        pet.setName(name);
+        pet.setColor(color);
+        pet.setMarks(marks);
+        pet.setSex(sex);
+        pet.setSpecies(species);
+        pet.setOwner(owner);
+        pet.setBirthDate(birthDate);
+        return pet;
+    }
+
+    private RoomType roomType(String name, String description) {
+        RoomType roomType = new RoomType();
+        roomType.setName(name);
+        roomType.setDescription(description);
+        return roomType;
+    }
+
+    private Room room(String name, String number, RoomType roomType, Clinic clinic) {
+        Room room = new Room();
+        room.setName(name);
+        room.setRoomNumber(number);
+        room.setRoomType(roomType);
+        room.setClinic(clinic);
+        room.setActive(true);
+        return room;
+    }
+
+    private RoomType findRoomType(List<RoomType> types, String name) {
+        return types.stream()
+                .filter(type -> type.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Required room type is missing: " + name));
+    }
+
+    private VetAvailability availability(Vet vet, LocalDateTime start, LocalDateTime end) {
+        return new VetAvailability().create(vet, start, end);
+    }
+}

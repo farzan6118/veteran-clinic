@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.vet.model;
 
+import com.github.farzan6118.petclinic.common.exception.BadRequestException;
 import com.github.farzan6118.petclinic.common.persistence.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -47,15 +48,15 @@ public class VetAvailability extends BaseEntity<Long> {
 
     private void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
         if (endTime.isBefore(startTime)) {
-            throw new IllegalArgumentException("End time cannot be before visitDateFrom time");
+            throw new BadRequestException("End time must be after start time");
         }
 
         if (Duration.between(startTime, endTime).toMinutes() < 2) {
-            throw new IllegalArgumentException("duration cannot be less than 5 minutes");
+            throw new BadRequestException("Availability duration must be at least 2 minutes");
         }
 
         if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
-            throw new IllegalArgumentException("the visitDateFrom and visitDateTo time must be the same day");
+            throw new BadRequestException("Availability start and end must be on the same day");
         }
     }
 }

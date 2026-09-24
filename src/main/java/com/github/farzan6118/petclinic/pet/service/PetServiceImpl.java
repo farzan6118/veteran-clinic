@@ -4,8 +4,7 @@ import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
-import com.github.farzan6118.petclinic.common.exception.NotFoundException;
-import com.github.farzan6118.petclinic.common.exception.ValidationException;
+import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.owner.service.OwnerService;
@@ -93,13 +92,13 @@ public class PetServiceImpl implements PetService {
 
     private void validateOwnerActive(Owner owner) {
         if (owner.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ValidationException("owner.is.inactive", "pet owner must be active");
+            throw new ConflictException("owner.is.inactive", "pet owner must be active");
         }
     }
 
     private void validateSpeciesActive(Species species) {
         if (species.getEntityStatus() != EntityStatus.ACTIVE) {
-            throw new ValidationException("species.is.inactive", "pet species must be active");
+            throw new ConflictException("species.is.inactive", "pet species must be active");
         }
     }
 
@@ -108,7 +107,7 @@ public class PetServiceImpl implements PetService {
     public void delete(UUID uuid) {
         Pet pet = this.getEntityByUuid(uuid);
         if (!pet.getEntityStatus().equals(EntityStatus.ACTIVE)) {
-            throw new ValidationException("pet.is.inactive", "pet is already inactive");
+            throw new ConflictException("pet.is.inactive", "pet is already inactive");
         }
         pet.setEntityStatus(EntityStatus.DELETED);
         log.info("pet deleted: {}", uuid);
@@ -117,7 +116,7 @@ public class PetServiceImpl implements PetService {
     @Override
     public Pet getEntityByUuid(UUID uuid) {
         return petRepository.findByUuid(uuid)
-                .orElseThrow(() -> new NotFoundException("pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("pet not found"));
     }
 
     @Override

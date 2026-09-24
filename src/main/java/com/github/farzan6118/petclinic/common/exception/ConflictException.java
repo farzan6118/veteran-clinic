@@ -2,7 +2,7 @@ package com.github.farzan6118.petclinic.common.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class ConflictException extends BaseAppException {
+public class ConflictException extends ApplicationException {
 
     public ConflictException(String message, String logMessage) {
         super(HttpStatus.CONFLICT, message, logMessage);
