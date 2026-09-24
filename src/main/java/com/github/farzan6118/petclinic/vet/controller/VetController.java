@@ -38,7 +38,7 @@ public class VetController {
 
     @GetMapping
     public ResponseEntity<List<UuidAndTitleResponseDto>> findAllIdAndTitle() {
-        return ResponseEntity.ok(vetService.findAllCached());
+        return ResponseEntity.ok(vetService.findAllIdAndTitle());
     }
 
     @PostMapping

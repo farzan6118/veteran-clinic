@@ -19,7 +19,7 @@ public interface RoomTypeService {
 
     PageResponseDto<RoomTypeResponseDto> findAll(PageAndSortRequestDto requestDto);
 
-    List<UuidAndTitleResponseDto> findAllCached();
+    List<UuidAndTitleResponseDto> findAllIdAndTitle();
 
     void create(CreateRoomTypeRequestDto request);
 

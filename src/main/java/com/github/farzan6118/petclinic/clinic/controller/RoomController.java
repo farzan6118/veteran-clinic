@@ -38,7 +38,7 @@ public class RoomController {
 
     @GetMapping
     public ResponseEntity<List<UuidAndTitleResponseDto>> findAllIdAndTitle() {
-        return ResponseEntity.ok(roomService.findAllCached());
+        return ResponseEntity.ok(roomService.findAllIdAndTitle());
     }
 
     @PostMapping

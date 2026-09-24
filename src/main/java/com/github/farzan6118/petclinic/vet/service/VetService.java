@@ -19,7 +19,7 @@ public interface VetService {
 
     PageResponseDto<VetResponseDto> findAllPageable(PageAndSortRequestDto requestDto);
 
-    List<UuidAndTitleResponseDto> findAllCached();
+    List<UuidAndTitleResponseDto> findAllIdAndTitle();
 
     void create(VetCreateRequestDto request);
 

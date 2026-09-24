@@ -54,8 +54,7 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    @Cacheable(value = "vets")
-    public List<UuidAndTitleResponseDto> findAllCached() {
+    public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
         return vetRepository.findAll()
                 .stream()
                 .map(vetMapper::toUuidAndTitle)

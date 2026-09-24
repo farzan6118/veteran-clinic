@@ -18,7 +18,7 @@ public interface ClinicService {
 
     PageResponseDto<ClinicResponseDto> findAll(PageAndSortRequestDto request);
 
-    List<UuidAndTitleResponseDto> findAllCached();
+    List<UuidAndTitleResponseDto> findAllIdAndTitle();
 
     void create(CreateClinicRequestDto request);
 

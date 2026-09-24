@@ -38,7 +38,7 @@ public class SpeciesController {
 
     @GetMapping
     public ResponseEntity<List<UuidAndTitleResponseDto>> findAllIdAndTitle() {
-        return ResponseEntity.ok(speciesService.findAllCached());
+        return ResponseEntity.ok(speciesService.findAllIdAndTitle());
     }
 
     @PostMapping

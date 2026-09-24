@@ -53,8 +53,7 @@ public class ClinicServiceImpl implements ClinicService {
     }
 
     @Override
-    @Cacheable(value = "clinics")
-    public List<UuidAndTitleResponseDto> findAllCached() {
+    public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
         return clinicRepository.findAll()
                 .stream()
                 .map(clinicMapper::toUuidAndTitle)

@@ -38,7 +38,7 @@ public class ClinicController {
 
     @GetMapping
     public ResponseEntity<List<UuidAndTitleResponseDto>> findAllIdAndTitle() {
-        return ResponseEntity.ok(clinicService.findAllCached());
+        return ResponseEntity.ok(clinicService.findAllIdAndTitle());
     }
 
     @PostMapping

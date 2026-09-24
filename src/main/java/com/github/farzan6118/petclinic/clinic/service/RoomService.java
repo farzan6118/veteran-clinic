@@ -19,7 +19,7 @@ public interface RoomService {
 
     Room getEntityByUuid(UUID uuid);
 
-    List<UuidAndTitleResponseDto> findAllCached();
+    List<UuidAndTitleResponseDto> findAllIdAndTitle();
 
     PageResponseDto<RoomResponseDto> findAll(PageAndSortRequestDto requestDto);
 

@@ -35,7 +35,6 @@ public class SpeciesServiceImpl implements SpeciesService {
     private final PageMapper pageMapper;
 
     @Override
-    @Cacheable(value = "speciesResponseDto", key = "#uuid")
     public SpeciesResponseDto getByUuid(UUID uuid) {
         Species species = getEntityByUuid(uuid);
         return speciesMapper.toDto(species);
@@ -55,8 +54,7 @@ public class SpeciesServiceImpl implements SpeciesService {
     }
 
     @Override
-    @Cacheable(value = "species")
-    public List<UuidAndTitleResponseDto> findAllCached() {
+    public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
         return speciesRepository.findAll()
                 .stream()
                 .map(speciesMapper::toUuidAndTitle)

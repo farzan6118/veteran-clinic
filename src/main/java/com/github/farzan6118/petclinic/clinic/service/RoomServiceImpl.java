@@ -122,8 +122,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Cacheable(value = "rooms")
-    public List<UuidAndTitleResponseDto> findAllCached() {
+    public List<UuidAndTitleResponseDto> findAllIdAndTitle() {
         return roomRepository.findAll()
                 .stream()
                 .map(roomMapper::toUuidAndTitle)

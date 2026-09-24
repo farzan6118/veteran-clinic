@@ -18,7 +18,7 @@ public interface SpeciesService {
 
     PageResponseDto<SpeciesResponseDto> findAll(PageAndSortRequestDto requestDto);
 
-    List<UuidAndTitleResponseDto> findAllCached();
+    List<UuidAndTitleResponseDto> findAllIdAndTitle();
 
     void create(CreateSpeciesRequestDto request);
 
