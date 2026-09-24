@@ -1,4 +1,4 @@
-package com.github.farzan6118.petclinic.impl;
+package com.github.farzan6118.petclinic.visit.service;
 
 import com.github.farzan6118.petclinic.appointment.dto.request.CompleteVisitRequestDto;
 import com.github.farzan6118.petclinic.appointment.dto.request.CreateVisitRequestDto;

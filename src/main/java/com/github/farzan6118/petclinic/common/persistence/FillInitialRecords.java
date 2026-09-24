@@ -8,6 +8,7 @@ import com.github.farzan6118.petclinic.clinic.model.RoomType;
 import com.github.farzan6118.petclinic.clinic.repository.ClinicRepository;
 import com.github.farzan6118.petclinic.clinic.repository.RoomRepository;
 import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
+import com.github.farzan6118.petclinic.clinic.service.RoomTypeService;
 import com.github.farzan6118.petclinic.common.enums.Sex;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.owner.repository.OwnerRepository;
@@ -23,6 +24,7 @@ import com.github.farzan6118.petclinic.vet.model.VetAvailability;
 import com.github.farzan6118.petclinic.vet.repository.VetAvailabilityRepository;
 import com.github.farzan6118.petclinic.vet.repository.VetRepository;
 import lombok.RequiredArgsConstructor;
+import net.datafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,14 +38,14 @@ import java.util.List;
 public class FillInitialRecords implements CommandLineRunner {
 
     private final DurationTemplateRepository durationTemplateRepository;
-    private final SpeciesRepository speciesRepository;
-    private final OwnerRepository ownerRepository;
-    private final PetRepository petRepository;
-    private final ClinicRepository clinicRepository;
-    private final RoomTypeRepository roomTypeRepository;
-    private final RoomRepository roomRepository;
-    private final VetRepository vetRepository;
     private final VetAvailabilityRepository vetAvailabilityRepository;
+    private final RoomTypeRepository roomTypeRepository;
+    private final SpeciesRepository speciesRepository;
+    private final ClinicRepository clinicRepository;
+    private final OwnerRepository ownerRepository;
+    private final RoomRepository roomRepository;
+    private final PetRepository petRepository;
+    private final VetRepository vetRepository;
 
     @Override
     @Transactional
@@ -84,7 +86,8 @@ public class FillInitialRecords implements CommandLineRunner {
     private void seedClinic() {
         if (clinicRepository.count() != 0) return;
         Clinic clinic = new Clinic();
-        clinic.setAddress(address("Main clinic", "Berlin", "Berlin", "Valiasr Street"));
+        clinic.setAddress(address("Main clinic", "Berlin", "Berlin", "Afrikanische Str.",
+                1, "12A",  52.52D, 13.4D));
         clinic.setActive(true);
         clinicRepository.save(clinic);
     }
@@ -192,7 +195,8 @@ public class FillInitialRecords implements CommandLineRunner {
     private Owner owner(String title, String firstName, String lastName, String nationalId,
                         LocalDate birthDate, String mobile, String email, String city, String street) {
         Person person = person(title, firstName, lastName, nationalId,
-                profile(email, mobile, birthDate), address("Home", city, city, street));
+                profile(email, mobile, birthDate), address("Home", city, city, street,
+                        2, "13B", 32.54D, 23.45D));
         Owner owner = new Owner();
         owner.setPerson(person);
         return owner;
@@ -202,7 +206,8 @@ public class FillInitialRecords implements CommandLineRunner {
                     LocalDate birthDate, String mobile, String email, String city, String street) {
         Vet vet = new Vet();
         vet.setPerson(person("Dr.", firstName, lastName, nationalId,
-                profile(email, mobile, birthDate), address("Home", city, city, street)));
+                profile(email, mobile, birthDate), address("Home", city, city, street,
+                        3, "13B", 32.54D, 23.45D)));
         return vet;
     }
 
@@ -227,7 +232,8 @@ public class FillInitialRecords implements CommandLineRunner {
     }
 
     private Address address(String title, String province, String city,
-                            String street) {
+                            String street, Integer floor, String unitNumber,
+                            double latitude, double longitude) {
         Address address = new Address();
         address.setTitle(title);
         address.setCountryName("Germany");
@@ -235,7 +241,11 @@ public class FillInitialRecords implements CommandLineRunner {
         address.setCityName(city);
         address.setBuildingNumber("1");
         address.setAddress(street);
-        address.setPostalCode("1234567890");
+        address.setFloor(floor);
+        address.setUnitNumber(unitNumber);
+        address.setLongitude(longitude);
+        address.setLatitude(latitude);
+        address.setPostalCode("2478299468");
         address.setDefaultAddress(true);
         return address;
     }
