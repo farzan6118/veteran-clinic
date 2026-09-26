@@ -9,7 +9,7 @@ import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundExceptio
 import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityUpdateRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.response.AvailabilityResponseDto;
+import com.github.farzan6118.petclinic.vet.dto.response.VetAvailabilityResponseDto;
 import com.github.farzan6118.petclinic.vet.mapper.VetAvailabilityMapper;
 import com.github.farzan6118.petclinic.vet.model.Vet;
 import com.github.farzan6118.petclinic.vet.model.VetAvailability;
@@ -21,7 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +45,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
         Vet vet = getVet(request.vetUuid());
         validateTimeRange(startDateTime, endDateTime);
         checkCreateOverlapping(request.vetUuid(), startDateTime, endDateTime);
-        VetAvailability availability = new VetAvailability().create(vet, startDateTime, endDateTime);
+        VetAvailability availability = VetAvailability.create(vet, startDateTime, endDateTime);
 
         availabilityRepository.save(availability);
     }
@@ -90,7 +92,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     }
 
     @Override
-    public PageResponseDto<AvailabilityResponseDto> getVetAvailabilityPageable(
+    public PageResponseDto<VetAvailabilityResponseDto> getVetAvailabilityPageable(
             UUID vetUuid, PageAndSortRequestDto pageRequest) {
         Pageable pageable = pageMapper.getPageable(pageRequest);
         Page<VetAvailability> vetAvailabilityPage = availabilityRepository.findAllByVetUuid(vetUuid, pageable);
@@ -113,4 +115,14 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
             UUID uuid, LocalDateTime StartTime, LocalDateTime EndTime) {
         return vetRepository.findAvailableByUuidAndTimeRange(uuid, StartTime, EndTime);
     }
+
+    @Override
+    public List<VetAvailabilityResponseDto> getAllVetAvailabilitiesByDate(LocalDate localDate) {
+        LocalDateTime startDateTime = localDate.atStartOfDay();
+        LocalDateTime endDateTime = localDate.atStartOfDay().plusDays(1);
+        List<VetAvailability> vetAvailabilities = availabilityRepository.findAllByTimeRange(
+                startDateTime, endDateTime);
+        return vetAvailabilities.stream().map(vetAvailabilityMapper::mapToDto).toList();
+    }
+
 }

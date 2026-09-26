@@ -49,9 +49,7 @@ public class VetController {
 
     @PutMapping("/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(
-            @PathVariable UUID uuid,
-            @Valid @RequestBody VetUpdateRequestDto request) {
+    public void update(@PathVariable UUID uuid, @Valid @RequestBody VetUpdateRequestDto request) {
         vetService.update(uuid, request);
     }
 

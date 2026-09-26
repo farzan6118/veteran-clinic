@@ -1,10 +1,11 @@
 package com.github.farzan6118.petclinic.vet.controller;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityUpdateRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.response.AvailabilityResponseDto;
+import com.github.farzan6118.petclinic.vet.dto.response.VetAvailabilityResponseDto;
 import com.github.farzan6118.petclinic.vet.service.VetAvailabilityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -39,10 +42,17 @@ public class VetAvailabilityController {
     }
 
     @GetMapping("/page")
-    public ResponseEntity<PageResponseDto<AvailabilityResponseDto>> getVetAvailabilityPageable(
+    public ResponseEntity<PageResponseDto<VetAvailabilityResponseDto>> getVetAvailabilityPageable(
             @PathVariable UUID vetUuid,
             @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
         return ResponseEntity.ok(vetAvailabilityService.getVetAvailabilityPageable(vetUuid, requestDto));
+    }
+
+    @GetMapping("/by-date/{localDate}")
+    public ResponseEntity<List<VetAvailabilityResponseDto>> getAllVetAvailabilitiesByDate(
+            @PathVariable @JsonFormat(pattern = "yyyy-MM-dd") LocalDate localDate,
+            @PathVariable String vetUuid) {
+        return ResponseEntity.ok(vetAvailabilityService.getAllVetAvailabilitiesByDate(localDate));
     }
 
     @DeleteMapping("/{availabilityUuid}")

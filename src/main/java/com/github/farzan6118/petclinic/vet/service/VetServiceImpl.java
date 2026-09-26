@@ -1,7 +1,6 @@
 package com.github.farzan6118.petclinic.vet.service;
 
 import com.github.farzan6118.petclinic.appointment.model.Visit;
-import com.github.farzan6118.petclinic.appointment.service.VisitServiceQuery;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
@@ -12,7 +11,6 @@ import com.github.farzan6118.petclinic.common.mapper.PageMapper;
 import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.response.TimeInterval;
-import com.github.farzan6118.petclinic.vet.dto.response.VetAvailableTimeSlot;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.mapper.VetMapper;
 import com.github.farzan6118.petclinic.vet.model.Vet;
@@ -40,7 +38,6 @@ public class VetServiceImpl implements VetService {
     private final VetRepository vetRepository;
     private final PageMapper pageMapper;
     private final VetMapper vetMapper;
-    private final VisitServiceQuery visitServiceQuery;
 
     @Override
     public VetResponseDto getByUuid(UUID uuid) {

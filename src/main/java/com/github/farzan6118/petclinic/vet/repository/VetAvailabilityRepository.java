@@ -66,4 +66,14 @@ public interface VetAvailabilityRepository extends JpaRepository<VetAvailability
     Page<VetAvailability> findAllByVetUuid(UUID vetUuid, Pageable pageable);
 
     Optional<VetAvailability> findByUuid(UUID uuid);
+
+    @Query("""
+                SELECT va
+                FROM VetAvailability va
+                WHERE va.timeRange.startDateTime >= :startDateTime
+                  AND va.timeRange.endDateTime < :endDateTime
+                  AND va.entityStatus = 'ACTIVE'
+                  AND va.active = true
+            """)
+    List<VetAvailability> findAllByTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

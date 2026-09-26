@@ -6,8 +6,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-public record AvailabilityResponseDto(
+public record VetAvailabilityResponseDto(
         UUID uuid,
+        UUID vetUuid,
+        String name,
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate date,
         @JsonFormat(pattern = "HH:mm")
