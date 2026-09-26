@@ -39,7 +39,7 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
         // Visit visitDateFrom time
         addLocalDateTimeRangePredicate(
                 predicate,
-                visit.startTime,
+                visit.timeRange.startDateTime,
                 request.visitDateFrom(),
                 request.visitDateTo()
         );
@@ -132,19 +132,19 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
                 .orElse(null);
 
         if (sortOrder == null) {
-            return new OrderSpecifier<>(Order.ASC, visit.startTime);
+            return new OrderSpecifier<>(Order.ASC, visit.timeRange.startDateTime);
         }
 
         Order order = sortOrder.isAscending() ? Order.ASC : Order.DESC;
 
         return switch (sortOrder.getProperty()) {
-            case "startTime" -> new OrderSpecifier<>(order, visit.startTime);
-            case "endTime" -> new OrderSpecifier<>(order, visit.endTime);
+            case "startTime" -> new OrderSpecifier<>(order, visit.timeRange.startDateTime);
+            case "endTime" -> new OrderSpecifier<>(order, visit.timeRange.endDateTime);
             case "createdDate" -> new OrderSpecifier<>(order, visit.createdDate);
             case "lastModifiedDate" -> new OrderSpecifier<>(order, visit.lastModifiedDate);
             case "status" -> new OrderSpecifier<>(order, visit.status);
             case "visitType" -> new OrderSpecifier<>(order, visit.visitType);
-            default -> new OrderSpecifier<>(Order.ASC, visit.startTime);
+            default -> new OrderSpecifier<>(Order.ASC, visit.timeRange.startDateTime);
         };
     }
 
@@ -160,10 +160,10 @@ public class VisitQueryRepositoryImpl implements VisitQueryRepository {
                 .selectFrom(visit)
                 .where(
                         visit.vet.uuid.eq(vetUuid),
-                        visit.startTime.lt(end),
-                        visit.endTime.gt(start)
+                        visit.timeRange.startDateTime.lt(end),
+                        visit.timeRange.endDateTime.gt(start)
                 )
-                .orderBy(visit.startTime.asc())
+                .orderBy(visit.timeRange.startDateTime.asc())
                 .fetch();
     }
 }

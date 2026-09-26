@@ -39,8 +39,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long>, VisitQueryR
             where v.pet.uuid = :petUuid
             and v.status not in (VisitStatus.CANCELLED,
                                  VisitStatus.COMPLETED)
-            and v.startTime < :visitEnd
-            and v.endTime > :visitStart
+            and v.timeRange.startDateTime < :visitEnd
+            and v.timeRange.endDateTime > :visitStart
             and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsPetReservation(
@@ -56,8 +56,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long>, VisitQueryR
             where v.vet.uuid = :vetUuid
             and v.status not in (VisitStatus.CANCELLED,
                                  VisitStatus.COMPLETED)
-            and v.startTime < :visitEnd
-            and v.endTime > :visitStart
+            and v.timeRange.startDateTime < :visitEnd
+            and v.timeRange.endDateTime > :visitStart
             and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsVetReservation(
@@ -73,8 +73,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long>, VisitQueryR
             where v.room.uuid = :roomUuid
             and v.status not in (VisitStatus.CANCELLED,
                                  VisitStatus.COMPLETED)
-            and v.startTime <= :visitEnd
-            and v.endTime > :visitStart
+            and v.timeRange.startDateTime <= :visitEnd
+            and v.timeRange.endDateTime > :visitStart
             and (:excludedVisitUuid is null or v.uuid <> :excludedVisitUuid)
             """)
     boolean existsRoomReservation(
@@ -88,8 +88,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long>, VisitQueryR
             select v
             from Visit v
             where v.vet.uuid = :vetUuid
-              and v.startTime >= :startOfDay
-              and v.startTime < :endOfDay
+              and v.timeRange.startDateTime >= :startOfDay
+              and v.timeRange.startDateTime < :endOfDay
             """)
     List<Visit> findAllVisitsByVetUuidAndStartTimeBetween(UUID vetUuid, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
@@ -97,8 +97,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long>, VisitQueryR
             select v
             from Visit v
             where v.pet.uuid = :petUuid
-              and v.startTime >= :startOfDay
-              and v.startTime < :endOfDay
+              and v.timeRange.startDateTime >= :startOfDay
+              and v.timeRange.startDateTime < :endOfDay
             """)
     List<Visit> findAllVisitsByPetUuidAndStartTimeBetween(UUID petUuid, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
@@ -106,8 +106,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long>, VisitQueryR
             select v
             from Visit v
             where v.room.uuid = :roomUuid
-              and v.startTime >= :startOfDay
-              and v.startTime < :endOfDay
+              and v.timeRange.startDateTime >= :startOfDay
+              and v.timeRange.startDateTime < :endOfDay
             """)
     List<Visit> findAllVisitsByRoomUuidAndStartTimeBetween(UUID roomUuid, LocalDateTime startOfDay, LocalDateTime endOfDay);
 }

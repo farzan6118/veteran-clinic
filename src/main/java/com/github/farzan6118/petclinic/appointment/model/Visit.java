@@ -6,6 +6,7 @@ import com.github.farzan6118.petclinic.common.enums.VisitType;
 import com.github.farzan6118.petclinic.common.exception.BadRequestException;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.persistence.BaseEntity;
+import com.github.farzan6118.petclinic.common.valueobject.DateTimeRange;
 import com.github.farzan6118.petclinic.pet.model.Pet;
 import com.github.farzan6118.petclinic.vet.model.Vet;
 import jakarta.persistence.*;
@@ -42,11 +43,8 @@ public class Visit extends BaseEntity<Long> {
     @Column(nullable = false)
     private VisitType visitType;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    @Embedded
+    private DateTimeRange timeRange;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -60,13 +58,12 @@ public class Visit extends BaseEntity<Long> {
 
     public Visit schedule(Vet vet, Pet pet, Room room, LocalDateTime startTime, LocalDateTime endTime,
                           VisitType visitType, String description) {
-        dateAndTimeValidations(startTime, endTime);
+        DateTimeRange timeRange = validatedTimeRange(startTime, endTime);
         Visit visit = new Visit();
         visit.vet = vet;
         visit.pet = pet;
         visit.room = room;
-        visit.startTime = startTime;
-        visit.endTime = endTime;
+        visit.timeRange = timeRange;
         visit.visitType = visitType;
         visit.description = description;
         visit.status = VisitStatus.SCHEDULED;
@@ -76,10 +73,9 @@ public class Visit extends BaseEntity<Long> {
 
     public void reschedule(Room room, LocalDateTime startTime, LocalDateTime endTime,
                            VisitType visitType, String description) {
-        dateAndTimeValidations(startTime, endTime);
+        DateTimeRange timeRange = validatedTimeRange(startTime, endTime);
         this.room = room;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.timeRange = timeRange;
         this.visitType = visitType;
 
         if (description != null) {
@@ -110,17 +106,27 @@ public class Visit extends BaseEntity<Long> {
             throw new ConflictException("Visit is already completed");
         }
 
-        this.endTime = end;
+        this.timeRange = validatedTimeRange(timeRange.getStartDateTime(), end);
         this.status = VisitStatus.COMPLETED;
     }
 
-    public void dateAndTimeValidations(LocalDateTime startTime, LocalDateTime endTime) {
-        if (endTime.isBefore(startTime)) {
+    private DateTimeRange validatedTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        DateTimeRange range = new DateTimeRange(startTime, endTime);
+        if (!range.isValid()) {
             throw new BadRequestException("End time must be after start time");
         }
 
-        if (!startTime.toLocalDate().equals(endTime.toLocalDate())) {
+        if (!range.isSameDay()) {
             throw new BadRequestException("Visit start and end must be on the same day");
         }
+        return range;
+    }
+
+    public LocalDateTime getStartTime() {
+        return timeRange == null ? null : timeRange.getStartDateTime();
+    }
+
+    public LocalDateTime getEndTime() {
+        return timeRange == null ? null : timeRange.getEndDateTime();
     }
 }

@@ -9,6 +9,7 @@ import com.github.farzan6118.petclinic.clinic.repository.ClinicRepository;
 import com.github.farzan6118.petclinic.clinic.repository.RoomRepository;
 import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
 import com.github.farzan6118.petclinic.common.enums.Sex;
+import com.github.farzan6118.petclinic.common.valueobject.DateTimeRange;
 import com.github.farzan6118.petclinic.owner.model.Owner;
 import com.github.farzan6118.petclinic.owner.repository.OwnerRepository;
 import com.github.farzan6118.petclinic.person.model.Address;
@@ -160,17 +161,25 @@ public class FillInitialRecords implements CommandLineRunner {
     private void seedVetAvailability() {
         if (vetAvailabilityRepository.count() != 0) return;
         List<Vet> vets = vetRepository.findAll();
-        if (vets.size() < 3) return;
+        if (vets.isEmpty()) return;
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         LocalDate dayAfter = tomorrow.plusDays(1);
         vetAvailabilityRepository.saveAll(List.of(
                 availability(vets.get(0), tomorrow.atTime(9, 0), tomorrow.atTime(13, 0)),
-                availability(vets.get(0), dayAfter.atTime(9, 0), dayAfter.atTime(12, 20)),
-                availability(vets.get(1), tomorrow.atTime(10, 0), tomorrow.atTime(14, 0)),
-                availability(vets.get(1), dayAfter.atTime(9, 30), dayAfter.atTime(12, 30)),
-                availability(vets.get(2), tomorrow.atTime(8, 0), tomorrow.atTime(12, 0)),
-                availability(vets.get(2), dayAfter.atTime(9, 30), dayAfter.atTime(14, 0))
+                availability(vets.get(0), dayAfter.atTime(9, 0), dayAfter.atTime(12, 20))
         ));
+        if (vets.size() > 1) {
+            vetAvailabilityRepository.saveAll(List.of(
+                    availability(vets.get(1), tomorrow.atTime(10, 0), tomorrow.atTime(14, 0)),
+                    availability(vets.get(1), dayAfter.atTime(9, 30), dayAfter.atTime(12, 30))
+            ));
+        }
+        if (vets.size() > 2) {
+            vetAvailabilityRepository.saveAll(List.of(
+                    availability(vets.get(2), tomorrow.atTime(8, 0), tomorrow.atTime(12, 0)),
+                    availability(vets.get(2), dayAfter.atTime(9, 30), dayAfter.atTime(14, 0))
+            ));
+        }
     }
 
     private DurationTemplate durationTemplate(String name, int minutes, String description) {
@@ -286,6 +295,10 @@ public class FillInitialRecords implements CommandLineRunner {
     }
 
     private VetAvailability availability(Vet vet, LocalDateTime start, LocalDateTime end) {
-        return new VetAvailability().create(vet, start, end);
+        VetAvailability availability = new VetAvailability();
+        availability.setVet(vet);
+        availability.setTimeRange(new DateTimeRange(start, end));
+        availability.setActive(true);
+        return availability;
     }
 }
