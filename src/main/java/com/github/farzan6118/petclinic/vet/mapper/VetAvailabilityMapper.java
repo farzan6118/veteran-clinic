@@ -10,10 +10,9 @@ public class VetAvailabilityMapper {
     public AvailabilityResponseDto mapToDto(VetAvailability vetAvailability) {
         return new AvailabilityResponseDto(
                 vetAvailability.getUuid(),
-                vetAvailability.getStartTime().toLocalDate(),
-                vetAvailability.getStartTime().toLocalTime(),
-                vetAvailability.getEndTime().toLocalTime(),
+                vetAvailability.getTimeRange().getStartDate(),
+                vetAvailability.getTimeRange().getStartTime(),
+                vetAvailability.getTimeRange().getEndTime(),
                 vetAvailability.isActive());
     }
-
 }

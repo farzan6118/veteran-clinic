@@ -75,28 +75,28 @@ public class VetServiceImpl implements VetService {
         return vetRepository.findByUuidWithLock(vetUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Vet not found: " + vetUuid));
     }
-    @Override
-    public List<VetAvailableTimeSlot> findAvailableVets(
-            LocalDateTime start,
-            LocalDateTime end) {
-        List<Vet> vets = vetRepository.findAvailableVets(start, end);
-        return vets.stream()
-                .map(vet -> {
-                    List<Visit> visits = visitServiceQuery
-                            .findOverlappingVisits(vet.getUuid(), start, end);
-
-                    List<TimeInterval> availableIntervals =
-                            calculateAvailableIntervals(start, end, visits);
-
-                    return new VetAvailableTimeSlot(
-                            vet.getUuid(),
-                            vet.getFullName(),
-                            availableIntervals
-                    );
-                })
-                .filter(vet -> !vet.availableIntervals().isEmpty())
-                .toList();
-    }
+//    @Override
+//    public List<VetAvailableTimeSlot> findAvailableVets(
+//            LocalDateTime start,
+//            LocalDateTime end) {
+//        List<Vet> vets = vetRepository.findAvailableVets(start, end);
+//        return vets.stream()
+//                .map(vet -> {
+//                    List<Visit> visits = visitServiceQuery
+//                            .findOverlappingVisits(vet.getUuid(), start, end);
+//
+//                    List<TimeInterval> availableIntervals =
+//                            calculateAvailableIntervals(start, end, visits);
+//
+//                    return new VetAvailableTimeSlot(
+//                            vet.getUuid(),
+//                            vet.getFullName(),
+//                            availableIntervals
+//                    );
+//                })
+//                .filter(vet -> !vet.availableIntervals().isEmpty())
+//                .toList();
+//    }
 
     private List<TimeInterval> calculateAvailableIntervals(
             LocalDateTime start,

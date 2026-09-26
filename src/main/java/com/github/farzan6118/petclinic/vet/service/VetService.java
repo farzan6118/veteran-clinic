@@ -5,11 +5,9 @@ import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetCreateRequestDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetUpdateRequestDto;
-import com.github.farzan6118.petclinic.vet.dto.response.VetAvailableTimeSlot;
 import com.github.farzan6118.petclinic.vet.dto.response.VetResponseDto;
 import com.github.farzan6118.petclinic.vet.model.Vet;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,9 +21,9 @@ public interface VetService {
 
     List<UuidAndTitleResponseDto> findAllIdAndTitle();
 
-    List<VetAvailableTimeSlot> findAvailableVets(
-            LocalDateTime start,
-            LocalDateTime end);
+//    List<VetAvailableTimeSlot> findAvailableVets(
+//            LocalDateTime start,
+//            LocalDateTime end);
 
     void create(VetCreateRequestDto request);
 

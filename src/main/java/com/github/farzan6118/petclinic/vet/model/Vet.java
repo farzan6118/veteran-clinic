@@ -9,9 +9,6 @@ import lombok.Setter;
 import org.hibernate.annotations.Audited;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,25 +25,6 @@ public class Vet extends BaseEntity<Long> {
 
     @OneToMany(mappedBy = "vet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VetAvailability> availabilities = new ArrayList<>();
-
-    public void addAvailability(VetAvailability availability) {
-        availabilities.add(availability);
-        availability.setVet(this);
-    }
-
-    public void removeAvailability(VetAvailability availability) {
-        availabilities.remove(availability);
-        availability.setVet(null);
-    }
-
-    public void addAvailability(LocalDate date, LocalTime startTime, LocalTime endTime) {
-        VetAvailability availability = new VetAvailability();
-        LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
-        LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
-        availability.setStartTime(startDateTime);
-        availability.setEndTime(endDateTime);
-        addAvailability(availability);
-    }
 
     public String getFullName() {
         return this.person.getFullName();

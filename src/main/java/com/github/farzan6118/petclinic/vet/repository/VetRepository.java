@@ -33,8 +33,8 @@ public interface VetRepository extends JpaRepository<Vet, Long>, VetQueryReposit
             select va from VetAvailability va
                 join fetch va.vet v
                 where v.uuid = :uuid
-                and (:startTime >= va.startTime
-                and :endTime <= va.endTime)
+                and (:startTime >= va.timeRange.startDateTime
+                and :endTime <= va.timeRange.endDateTime)
             """
     )
     Optional<Vet> findAvailableByUuidAndTimeRange(
