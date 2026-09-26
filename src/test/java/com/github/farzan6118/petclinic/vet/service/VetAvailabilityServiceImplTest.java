@@ -52,7 +52,8 @@ class VetAvailabilityServiceImplTest {
         service.createAvailability(new VetAvailabilityCreateRequestDto(vetUuid, start, end));
 
         verify(availabilityRepository).save(argThat(a -> a.getVet() == vet
-                && a.getStartTime().equals(start) && a.getEndTime().equals(end)));
+                && a.getTimeRange().getStartDateTime().equals(start)
+                && a.getTimeRange().getEndDateTime().equals(end)));
     }
 
     @Test
@@ -85,8 +86,8 @@ class VetAvailabilityServiceImplTest {
         service.updateAvailability(availabilityUuid, new VetAvailabilityUpdateRequestDto(vetUuid, start, end));
 
         verify(availabilityRepository).existsOverlappingAvailabilityForUpdate(vetUuid, availabilityUuid, start, end);
-        assertEquals(start, availability.getStartTime());
-        assertEquals(end, availability.getEndTime());
+        assertEquals(start, availability.getTimeRange().getStartDateTime());
+        assertEquals(end, availability.getTimeRange().getEndDateTime());
     }
 
     @Test

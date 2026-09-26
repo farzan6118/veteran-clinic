@@ -13,6 +13,7 @@ import com.github.farzan6118.petclinic.clinic.service.RoomService;
 import com.github.farzan6118.petclinic.common.enums.VisitCategory;
 import com.github.farzan6118.petclinic.common.enums.VisitStatus;
 import com.github.farzan6118.petclinic.common.enums.VisitType;
+import com.github.farzan6118.petclinic.common.valueobject.DateTimeRange;
 import com.github.farzan6118.petclinic.common.exception.BadRequestException;
 import com.github.farzan6118.petclinic.common.exception.ConflictException;
 import com.github.farzan6118.petclinic.common.exception.ResourceNotFoundException;
@@ -198,8 +199,7 @@ class VisitServiceImplTest {
         visit.setPet(pet);
         visit.setRoom(room);
         visit.setVisitType(VisitType.ONSITE);
-        visit.setStartTime(now.minusMinutes(5));
-        visit.setEndTime(now.plusMinutes(5));
+        visit.setTimeRange(new DateTimeRange(now.minusMinutes(5), now.plusMinutes(5)));
         visit.setStatus(VisitStatus.SCHEDULED);
         visit.setDescription("Visit");
         visit.setUuid(visitUuid);

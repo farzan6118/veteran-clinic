@@ -1,6 +1,6 @@
 # Veterinary Clinic — Project Context
 
-Last reviewed: September 24, 2026
+Last reviewed: September 26, 2026
 
 This file is the working context for future development sessions. Read it before making project-wide assumptions or starting a new task.
 
@@ -27,11 +27,11 @@ The project has a serious domain-oriented backend foundation and is more than a 
 
 It is still active development and should not yet be considered production-ready.
 
-Important current state observed on September 24, 2026:
+Important current state observed on September 26, 2026:
 
 - Check `git status` before editing because user changes may already be in progress.
-- `./mvnw -q -DskipTests compile` passes after the current entity and CRUD alignment changes.
-- Tests were not run during the September 24, 2026 review. The last recorded test run in this context is from September 21, 2026: 26 tests ran, with 9 failures and 6 errors.
+- `mvn -q -DskipTests compile` passes after converting `Visit` to embed `DateTimeRange` and updating repository queries.
+- `mvn -q test` passes after the test fixtures were updated to access `DateTimeRange` through the embedded `timeRange` property. The Spring context test connects to local PostgreSQL.
 - The previously stale visit-service test has been replaced with a focused four-test suite for `VisitServiceCommandImpl`.
 - Security configuration currently permits all requests and therefore bypasses real endpoint protection.
 - A Keycloak client secret is currently stored directly in `application-home.yaml` and should be externalized.
@@ -86,7 +86,7 @@ owner/          Owner entity, DTOs, mapper, repository, service, controller
 pet/            Pet and species entities, DTOs, mappers, repositories, services, controllers
 clinic/         Clinics, rooms, and room types
 vet/            Veterinarians, profiles, and availability
-visit/          Visits, duration templates, scheduling, searching, and notifications
+appointment/    Visits, duration templates, scheduling, searching, and notifications
 ```
 
 Resources include:
@@ -123,9 +123,10 @@ Important entities include:
 - `Address`: structured address and optional geolocation associated with a person
 - `Clinic`: clinic location with a required address
 - `Room`: clinic room associated with a clinic and room type
-- `VetAvailableTimeSlot`: time periods during which a veterinarian can accept visits
+- `VetAvailability`: a veterinarian's available time interval, embedded as `DateTimeRange`
 - `RoomType`: classification of clinic rooms
-- `Visit`: appointment connecting a pet, veterinarian, time range, visit type, and optionally a room
+- `Visit`: appointment connecting a pet, veterinarian, embedded `DateTimeRange`, visit type, and optionally a room
+- `DateTimeRange`: JPA embeddable storing required start/end timestamps and providing duration, date/time, validity, same-day, and overlap helpers; used by both `Visit` and `VetAvailability`
 - `DurationTemplate`: reusable duration configuration, including the `STANDARD` duration used by visit booking
 - `MedicalRecord`: clinical record authored by a veterinarian for a pet and associated with a visit; currently connected to persistence and visit completion, but not yet exposed through a medical-record read API
 
@@ -252,10 +253,10 @@ Also treat the Keycloak client secret in `application-home.yaml` as sensitive. I
 
 ## 10. Testing status
 
-The main focused test is:
+The focused visit-service unit test is:
 
 ```text
-src/test/java/com/github/farzan6118/petclinic/impl/VisitServiceImplTest.java
+src/test/java/com/github/farzan6118/petclinic/visit/service/VisitServiceImplTest.java
 ```
 
 The test suite covers useful scenarios such as:
@@ -270,7 +271,7 @@ The test suite covers useful scenarios such as:
 - Completion
 - Pagination
 
-The focused test suite currently covers one meaningful success path for each command workflow: booking, rescheduling, cancellation, and completion with medical-record creation. It uses `VisitServiceCommandImpl` and mocks its current dependencies.
+The focused test suite covers success paths for booking, rescheduling, cancellation, and completion with medical-record creation. It uses `VisitServiceCommandImpl` and mocks its current dependencies. The September 26, 2026 full `mvn -q test` run passed after adapting tests to the embedded time ranges. The suite includes a Spring context test, which requires the configured local PostgreSQL service.
 
 When changing visit logic, update the focused unit tests first and add integration tests for database locking and overlapping reservations.
 
