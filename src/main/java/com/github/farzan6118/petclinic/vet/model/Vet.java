@@ -1,5 +1,6 @@
 package com.github.farzan6118.petclinic.vet.model;
 
+import com.github.farzan6118.petclinic.clinic.model.Clinic;
 import com.github.farzan6118.petclinic.common.enums.EntityStatus;
 import com.github.farzan6118.petclinic.common.persistence.BaseEntity;
 import com.github.farzan6118.petclinic.person.model.Person;
@@ -25,6 +26,10 @@ public class Vet extends BaseEntity<Long> {
 
     @OneToMany(mappedBy = "vet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VetAvailability> availabilities = new ArrayList<>();
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "clinic_id", nullable = false)
+    private Clinic clinic;
 
     public String getFullName() {
         return this.person.getFullName();

@@ -1,6 +1,8 @@
 package com.github.farzan6118.petclinic.vet.service;
 
 import com.github.farzan6118.petclinic.appointment.model.Visit;
+import com.github.farzan6118.petclinic.clinic.model.Clinic;
+import com.github.farzan6118.petclinic.clinic.service.ClinicService;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.common.dto.response.UuidAndTitleResponseDto;
@@ -35,6 +37,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class VetServiceImpl implements VetService {
 
+    private final ClinicService clinicService;
     private final VetRepository vetRepository;
     private final PageMapper pageMapper;
     private final VetMapper vetMapper;
@@ -137,7 +140,8 @@ public class VetServiceImpl implements VetService {
     public void create(VetCreateRequestDto request) {
 
         validateUniqueContactInfo(request.profile().mobileNumber(), request.profile().email());
-        Vet vet = vetMapper.toEntity(request);
+        Clinic clinic = clinicService.getEntityByUuid(request.clinicUuid());
+        Vet vet = vetMapper.toEntity(request, clinic);
 
         vetRepository.save(vet);
         log.info("vet created");

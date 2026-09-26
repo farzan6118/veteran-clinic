@@ -10,6 +10,7 @@ public record VetResponseDto(
         UUID uuid,
         PersonResponseDto person,
         ProfileResponseDto profile,
-        AddressResponseDto address
+        AddressResponseDto address,
+        UUID clinicUuid
 ) {
 }

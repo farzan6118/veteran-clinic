@@ -10,4 +10,5 @@ public interface ClinicRepository extends JpaRepository<Clinic, Integer> {
 
     Optional<Clinic> findByUuid(UUID uuid);
 
+    Optional<Clinic> findFirstByActive(boolean active);
 }

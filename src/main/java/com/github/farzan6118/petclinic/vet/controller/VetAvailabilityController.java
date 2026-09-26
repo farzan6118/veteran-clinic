@@ -1,6 +1,5 @@
 package com.github.farzan6118.petclinic.vet.controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.github.farzan6118.petclinic.common.dto.request.PageAndSortRequestDto;
 import com.github.farzan6118.petclinic.common.dto.response.PageResponseDto;
 import com.github.farzan6118.petclinic.vet.dto.request.VetAvailabilityCreateRequestDto;
@@ -14,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -46,13 +43,6 @@ public class VetAvailabilityController {
             @PathVariable UUID vetUuid,
             @ModelAttribute @Valid PageAndSortRequestDto requestDto) {
         return ResponseEntity.ok(vetAvailabilityService.getVetAvailabilityPageable(vetUuid, requestDto));
-    }
-
-    @GetMapping("/by-date/{localDate}")
-    public ResponseEntity<List<VetAvailabilityResponseDto>> getAllVetAvailabilitiesByDate(
-            @PathVariable @JsonFormat(pattern = "yyyy-MM-dd") LocalDate localDate,
-            @PathVariable String vetUuid) {
-        return ResponseEntity.ok(vetAvailabilityService.getAllVetAvailabilitiesByDate(localDate));
     }
 
     @DeleteMapping("/{availabilityUuid}")

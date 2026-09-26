@@ -6,9 +6,12 @@ import com.github.farzan6118.petclinic.person.dto.request.ProfileCreateRequestDt
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.UUID;
+
 public record VetCreateRequestDto(
         @Valid @NotNull PersonCreateRequestDto person,
         @Valid @NotNull ProfileCreateRequestDto profile,
-        @Valid @NotNull AddressCreateRequestDto address
+        @Valid @NotNull AddressCreateRequestDto address,
+        UUID clinicUuid
 ) {
 }

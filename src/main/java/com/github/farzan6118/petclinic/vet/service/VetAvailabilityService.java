@@ -26,5 +26,5 @@ public interface VetAvailabilityService {
 
     Optional<Vet> findAvailableByUuidAndTimeRange(UUID uuid, LocalDateTime StartTime, LocalDateTime EndTime);
 
-    List<VetAvailabilityResponseDto> getAllVetAvailabilitiesByDate(LocalDate localDate);
+    List<VetAvailabilityResponseDto> getByDate(LocalDate localDate);
 }

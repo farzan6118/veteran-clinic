@@ -47,6 +47,12 @@ public class ClinicServiceImpl implements ClinicService {
     }
 
     @Override
+    public Clinic getFirstByActive() {
+        return clinicRepository.findFirstByActive(true)
+                .orElseThrow(() -> new ResourceNotFoundException("clinic not found"));
+    }
+
+    @Override
     public PageResponseDto<ClinicResponseDto> findAll(PageAndSortRequestDto request) {
         Pageable pageable = pageMapper.getPageable(request);
         Page<Clinic> clinics = clinicRepository.findAll(pageable);

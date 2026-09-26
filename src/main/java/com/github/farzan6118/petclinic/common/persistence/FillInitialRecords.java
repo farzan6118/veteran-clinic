@@ -8,6 +8,7 @@ import com.github.farzan6118.petclinic.clinic.model.RoomType;
 import com.github.farzan6118.petclinic.clinic.repository.ClinicRepository;
 import com.github.farzan6118.petclinic.clinic.repository.RoomRepository;
 import com.github.farzan6118.petclinic.clinic.repository.RoomTypeRepository;
+import com.github.farzan6118.petclinic.clinic.service.ClinicService;
 import com.github.farzan6118.petclinic.common.enums.Sex;
 import com.github.farzan6118.petclinic.common.valueobject.DateTimeRange;
 import com.github.farzan6118.petclinic.owner.model.Owner;
@@ -45,6 +46,7 @@ public class FillInitialRecords implements CommandLineRunner {
     private final RoomRepository roomRepository;
     private final PetRepository petRepository;
     private final VetRepository vetRepository;
+    private final ClinicService clinicService;
 
     @Override
     @Transactional
@@ -100,8 +102,8 @@ public class FillInitialRecords implements CommandLineRunner {
                 roomType("dental", "Dental examinations and oral procedures."),
                 roomType("imaging", "X-ray, ultrasound, and diagnostic imaging."),
                 roomType("physiotherapy", "Rehabilitation and mobility exercises."),
-                roomType("isolation", "Infection-control isolation room."),
-                roomType("individual", "Private room for individual consultations.")
+                roomType("individual", "Private room for individual consultations."),
+                roomType("isolation", "Infection-control isolation room.")
         ));
     }
 
@@ -119,13 +121,20 @@ public class FillInitialRecords implements CommandLineRunner {
 
     private void seedVets() {
         if (vetRepository.count() != 0) return;
+        Clinic clinic = clinicService.getFirstByActive();
         vetRepository.saveAll(List.of(
-                vet("Sara", "Moradi", "100000001", LocalDate.of(1985, 3, 18),
-                        "09210000001", "sara.moradi@example.com", "Berlin", "Mirdamad Boulevard"),
-                vet("Reza", "Hosseini", "100000002", LocalDate.of(1982, 11, 2),
-                        "09210000002", "reza.hosseini@example.com", "Hamburg", "Maaliabad Street"),
-                vet("Parisa", "Etemadi", "100000003", LocalDate.of(1990, 6, 27),
-                        "09210000003", "parisa.etemadi@example.com", "Dusseldorf", "Ferdowsi Street")
+                vet("Sara", "Moradi", "100000001",
+                        LocalDate.of(1985, 3, 18),
+                        "09210000001", "sara.moradi@example.com",
+                        "Berlin", "Mirdamad Boulevard", clinic),
+                vet("Reza", "Hosseini", "100000002",
+                        LocalDate.of(1982, 11, 2),
+                        "09210000002", "reza.hosseini@example.com",
+                        "Hamburg", "Maaliabad Street", clinic),
+                vet("Parisa", "Etemadi", "100000003",
+                        LocalDate.of(1990, 6, 27),
+                        "09210000003", "parisa.etemadi@example.com",
+                        "Dusseldorf", "Ferdowsi Street", clinic)
         ));
     }
 
@@ -210,11 +219,12 @@ public class FillInitialRecords implements CommandLineRunner {
     }
 
     private Vet vet(String firstName, String lastName, String nationalId,
-                    LocalDate birthDate, String mobile, String email, String city, String street) {
+                    LocalDate birthDate, String mobile, String email, String city, String street, Clinic clinic) {
         Vet vet = new Vet();
         vet.setPerson(person("Dr.", firstName, lastName, nationalId,
                 profile(email, mobile, birthDate), address("Home", city, city, street,
                         3, "13B", 32.54D, 23.45D)));
+        vet.setClinic(clinic);
         return vet;
     }
 

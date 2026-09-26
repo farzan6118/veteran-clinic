@@ -16,6 +16,8 @@ public interface ClinicService {
 
     Clinic getEntityByUuid(UUID uuid);
 
+    Clinic getFirstByActive();
+
     PageResponseDto<ClinicResponseDto> findAll(PageAndSortRequestDto request);
 
     List<UuidAndTitleResponseDto> findAllIdAndTitle();

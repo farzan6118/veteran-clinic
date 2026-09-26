@@ -117,7 +117,7 @@ public class VetAvailabilityServiceImpl implements VetAvailabilityService {
     }
 
     @Override
-    public List<VetAvailabilityResponseDto> getAllVetAvailabilitiesByDate(LocalDate localDate) {
+    public List<VetAvailabilityResponseDto> getByDate(LocalDate localDate) {
         LocalDateTime startDateTime = localDate.atStartOfDay();
         LocalDateTime endDateTime = localDate.atStartOfDay().plusDays(1);
         List<VetAvailability> vetAvailabilities = availabilityRepository.findAllByTimeRange(
